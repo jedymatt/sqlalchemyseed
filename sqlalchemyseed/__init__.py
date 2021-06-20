@@ -5,7 +5,7 @@ import os
 __version__ = '0.0.1'
 
 
-def load_entities_from_json(json_filepath: str):
+def load_entities_from_json(json_filepath):
     if not os.path.exists(json_filepath):
         raise os.error.filename('File does not exist.')
 
