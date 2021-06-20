@@ -1,11 +1,17 @@
+import re
+
 from setuptools import setup
-from sqlalchemyseed import __version__
+
+# VERSION = ''
+with open('sqlalchemyseed/__init__.py', 'r') as f:
+    pattern = r"^__version__ = ['\"]([^'\"]*)['\"]"
+    VERSION = re.search(pattern, f.read(), re.MULTILINE).group(1)
 
 setup(
     name='sqlalchemyseed',
     author='jedymatt',
     url='https://github.com/jedymatt/sqlalchemyseed',
-    version=__version__,
+    version=VERSION,
     license='MIT',
     packages=['sqlalchemyseed'],
     install_requires=['SQLAlchemy>=1.4.0'],
