@@ -1,0 +1,54 @@
+[
+  {
+    "model": "models.Title",
+    "data": {
+      "name": "My Title"
+    }
+  },
+  {
+    "model": "models.Title",
+    "data": {
+      "name": "My Title2"
+    }
+  },
+  {
+    "model": "models.Player",
+    "data": {
+      "name": "John",
+      "titles": [
+        {
+          "model": "models.Title",
+          "filter": {
+            "name": "My Title"
+          }
+        },
+        {
+          "model": "models.Title",
+          "filter": {
+            "name": "My Title2"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "model": "models.Player",
+    "data": {
+      "name": "Mark",
+      "titles": [
+        {
+          "model": "models.Title",
+          "filter": {
+            "name": "My Title"
+          }
+        },
+        {
+          "model": "models.Title",
+          "filter": {
+            "name": "My Title2"
+          }
+        }
+      ]
+    }
+  }
+]
