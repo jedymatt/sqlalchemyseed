@@ -6,6 +6,7 @@ setup(
     author='jedymatt',
     url='https://github.com/jedymatt/sqlalchemyseed',
     version=__version__,
+    license='MIT',
     packages=['sqlalchemyseed'],
     install_requires=['SQLAlchemy>=1.4.0'],
     python_requires='>=3.6.0'
