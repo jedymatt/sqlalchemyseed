@@ -4,7 +4,7 @@ from sqlalchemyseed import __version__
 setup(
     name='sqlalchemyseed',
     author='jedymatt',
-    url='',
+    url='https://github.com/jedymatt/sqlalchemyseed',
     version=__version__,
     packages=['sqlalchemyseed'],
     install_requires=['SQLAlchemy>=1.4.0'],
