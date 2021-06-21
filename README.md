@@ -23,7 +23,8 @@ from sqlalchemyseed import load_entities_from_json
 entities = load_entities_from_json("data.json")
 
 # create_objects returns the objects created, while automatically added them to the session
-objects = create_objects(session, entities)
+# auto_add, add to session every time an object is created, useful when you have 'filter' field
+objects = create_objects(entities, session, auto_add=True)
 
 # you can check the added objects by printing session.new
 print(session.new)
@@ -41,6 +42,20 @@ print(session.new)
             "name": "You",
             "age": 18
         }
+    },
+    // when you have two or more objects of the same model, you can
+    {
+        "model": "models.Person",
+        "data": [
+            {
+                "name": "You",
+                "age": 18
+            },
+            {
+                "name": "Still You But Older",
+                "age": 40
+            }
+        ]
     }
 ]
 ```
