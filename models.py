@@ -1,6 +1,6 @@
 from sqlalchemy import Integer, Column, String, ForeignKey, Table
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, declared_attr
+from sqlalchemy.orm import relationship
 
 Base = declarative_base()
 
@@ -37,3 +37,15 @@ class Title(Base):
 
     def __repr__(self):
         return f"<Title(name='{self.name}')>"
+
+
+class Location(Base):
+    __tablename__ = 'locations'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(50), unique=True)
+
+    def __repr__(self):
+        return "<Location(name='%s')>" % (
+            self.name
+        )
