@@ -1,8 +1,8 @@
 # sqlalchemyseed
 
-![PyPI](https://img.shields.io/pypi/v/sqlalchemyseed)
-![PyPI - Downloads](https://img.shields.io/pypi/dm/sqlalchemyseed)
-![PyPI - License](https://img.shields.io/pypi/l/sqlalchemyseed)
+![https://pypi.org/project/sqlalchemyseed/](https://img.shields.io/pypi/v/sqlalchemyseed)
+![https://pypi.org/project/sqlalchemyseed/](https://img.shields.io/pypi/dm/sqlalchemyseed)
+![GitHub](https://img.shields.io/github/license/jedymatt/sqlalchemyseed)
 
 SQLAlchemy seeder . One-to-one, one-to-many, many-to-many relationship support.
 
