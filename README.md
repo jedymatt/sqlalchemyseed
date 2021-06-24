@@ -27,6 +27,9 @@ entities = load_entities_from_json("data.json")
 # use seeder if you are limited to using 'data' field or you do not query relationship from database
 seeder = Seeder()
 seeder.seed(entities, session)  # session, optional, automatically add entities to session
+# or
+seeder.seed(entities)
+session.add_all(seeder.object_instances)
 
 # HybridSeeder to use 'filter' field, querying and assigning relationship that exist in the database
 seeder = HybridSeeder(session)
