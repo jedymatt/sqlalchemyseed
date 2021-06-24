@@ -72,6 +72,7 @@ class Seeder:
 
     def seed(self, entities, session=None):
         validate_entities(entities)
+        self.object_instances = []
 
         if isinstance(entities, dict):
             self._entity(entities)
