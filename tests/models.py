@@ -18,7 +18,10 @@ class Parent(Base):
     name = Column(String)
     age = Column(Integer)
 
-    child = relationship('Child', back_populates='parent', uselist=False)
+    children = relationship('Child', back_populates='parent')
+
+    def __repr__(self):
+        return "<Parent(name='{}', age='{}', children='{}')>".format(self.name, self.age, self.children)
 
 
 class Child(Base):
@@ -30,4 +33,7 @@ class Child(Base):
     age = Column(Integer)
     parent_id = Column(Integer, ForeignKey('parents.id'))
 
-    parent = relationship('Parent', back_populates='child', uselist=False)
+    parent = relationship('Parent', back_populates='children', uselist=False)
+
+    def __repr__(self):
+        return "<Child(name='{}', age='{}')>".format(self.name, self.age)

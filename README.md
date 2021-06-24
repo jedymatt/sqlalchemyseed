@@ -12,23 +12,29 @@ pip install sqlalchemyseed
 ### Dependencies
 
 * SQAlchemy>=1.4.0
+* jsonschema>=3.2.0
 
 ## Getting Started
 
 ```python
 # main.py
 from tests.db import session  # import where your session is located.
-from sqlalchemyseed import create_objects
-from sqlalchemyseed import load_entities_from_json
+from sqlalchemyseed import Seeder, load_entities_from_json, HybridSeeder
 
+# load entities
 entities = load_entities_from_json("data.json")
 
-# create_objects returns the objects created, while automatically added them to the session
-# auto_add, add to session every time an object is created, useful when you have 'filter' field
-objects = create_objects(entities, session, auto_add=True)
+# use seeder if you are limited to using 'data' field or you do not query relationship from database
+seeder = Seeder()
+seeder.seed(entities, session)  # session, optional, automatically add entities to session
+# HybridSeeder to use 'filter' field, querying and assigning relationship that exist in the database
+seeder = HybridSeeder(session)
+seeder.seed(entities)
 
-# you can check the added objects by printing session.new
+# for confirmation,
+# you can check the added objects by printing session.new and session.dirty
 print(session.new)
+print(session.dirty)
 
 ```
 
