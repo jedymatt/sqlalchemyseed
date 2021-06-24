@@ -10,12 +10,6 @@ __version__ = '0.1.1'
 _SCHEMA_PATH = 'schema.json'
 
 
-class Label:
-    MODEL = 'model'
-    DATA = 'data'
-    FILTER = 'filter'
-
-
 def validate_entities(entities):
     schema_res = pkg_resources.resource_string('sqlalchemyseed', _SCHEMA_PATH)
     schema = json.loads(schema_res)
