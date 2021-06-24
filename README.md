@@ -1,7 +1,6 @@
 # sqlalchemyseed
 
 [![https://pypi.org/project/sqlalchemyseed/](https://img.shields.io/pypi/v/sqlalchemyseed)](https://pypi.org/project/sqlalchemyseed/)
-[![PyPI - Downloads](https://img.shields.io/pypi/dm/sqlalchemyseed)](https://pypi.org/project/sqlalchemyseed/)
 [![PyPI - License](https://img.shields.io/pypi/l/sqlalchemyseed)](https://github.com/jedymatt/sqlalchemyseed/blob/main/LICENSE)
 
 ## Installation
@@ -18,7 +17,7 @@ pip install sqlalchemyseed
 
 ```python
 # main.py
-from db import session  # import where your session is located.
+from tests.db import session  # import where your session is located.
 from sqlalchemyseed import create_objects
 from sqlalchemyseed import load_entities_from_json
 
