@@ -16,9 +16,10 @@ setup(
     url='https://github.com/jedymatt/sqlalchemyseed',
     long_description=LONG_DESCRIPTION,
     long_description_content_type='text/markdown',
+    description='SQLAlchemy seeder.',
     version=VERSION,
     license='MIT',
     packages=['sqlalchemyseed'],
-    install_requires=['SQLAlchemy>=1.4.0'],
+    install_requires=['SQLAlchemy>=1.4.0', 'jsonschema>=3.2.0'],
     python_requires='>=3.6.0'
 )
