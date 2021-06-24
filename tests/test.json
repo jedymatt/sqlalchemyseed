@@ -1,0 +1,28 @@
+[
+    {
+        "model": "models.Parent",
+        "data": [
+            {
+                "name": "Parent Name",
+                "children": [
+                    {
+                        "model": "models.Child",
+                        "data": {
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "model": "models.Child",
+        "data": [
+            {
+                "name": "Orphan"
+            },
+            {
+                "name": "Orphan 2"
+            }
+        ]
+    }
+]
