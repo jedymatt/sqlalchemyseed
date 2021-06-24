@@ -5,7 +5,7 @@ from inspect import isclass
 import pkg_resources
 from jsonschema import validate
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
 _SCHEMA_PATH = 'schema.json'
 
@@ -71,6 +71,8 @@ class Seeder:
         self.object_instances = []
 
     def seed(self, entities, session=None):
+        validate_entities(entities)
+
         if isinstance(entities, dict):
             self._entity(entities)
         elif isinstance(entities, list):
