@@ -23,5 +23,9 @@ setup(
     package_data={'sqlalchemyseed': ['res/*']},
     install_requires=['SQLAlchemy>=1.4.0', 'jsonschema>=3.2.0'],
     python_requires='>=3.6.0',
-    keywords='sqlalchemy seed seeder json'
+    keywords='sqlalchemy seed seeder json',
+    project_urls={
+        'Source': 'https://github.com/jedymatt/sqlalchemyseed',
+        'Tracker': 'https://github.com/jedymatt/sqlalchemyseed/issues',
+    },
 )
