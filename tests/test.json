@@ -3,11 +3,34 @@
         "model": "models.Parent",
         "data": [
             {
-                "name": "Parent Name",
+                "name": "Parent 1",
+                "age": "29",
                 "children": [
                     {
                         "model": "models.Child",
                         "data": {
+                            "name": "child 1, parent1",
+                            "age": 7
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "Parent 2",
+                "age": "29",
+                "children": [
+                    {
+                        "model": "models.Child",
+                        "data": {
+                            "name": "Child 1, parent 2",
+                            "age": 7
+                        }
+                    },
+                    {
+                        "model": "models.Child",
+                        "data": {
+                            "name": "Child 2, parent 2",
+                            "age": 14
                         }
                     }
                 ]
@@ -15,14 +38,25 @@
         ]
     },
     {
-        "model": "models.Child",
-        "data": [
-            {
-                "name": "Orphan"
-            },
-            {
-                "name": "Orphan 2"
-            }
-        ]
+        "model": "models.Parent",
+        "data": {
+            "children": [
+                {
+                    "model": "models.Child",
+                    "data": {
+                    }
+                }
+            ]
+        }
+    },
+    {
+        "model": "models.Parent",
+        "data": {
+        }
+    },
+    {
+        "data": {
+        },
+        "model": "models.Child"
     }
 ]
