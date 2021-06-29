@@ -7,7 +7,7 @@ from jsonschema import validate
 
 __version__ = '0.1.3'
 
-_SCHEMA_PATH = '/schema.json'
+_SCHEMA_PATH = 'res/schema.json'
 
 
 def validate_entities(entities):
