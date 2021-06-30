@@ -6,7 +6,7 @@ from inspect import isclass
 import pkg_resources
 from jsonschema import validate
 
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 
 _SCHEMA_PATH = 'res/schema.json'
 
@@ -77,7 +77,10 @@ class Seeder:
         return self._instances
 
     def seed(self, entities, session=None):
-        self.session = session
+        validate_entities(entities)
+
+        if self.session is None and session is not None:
+            self.session = session
 
         if len(self._instances) > 0:
             self._instances.clear()
@@ -201,7 +204,7 @@ class HybridSeeder(Seeder):
         self.session = session
 
     def seed(self, entities, **kwargs):
-        super().seed(entities, self.session)
+        super().seed(entities)
 
     def _load_instance(self, class_, kwargs, keys):
         if keys[1] == 'data':

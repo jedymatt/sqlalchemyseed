@@ -1,16 +1,8 @@
 # sqlalchemyseed
 
-<a href="https://pypi.org/project/sqlalchemyseed">
-    <img alt="PyPI" src="https://img.shields.io/pypi/v/sqlalchemyseed">
-</a>
-
-<a href="https://pypi.org/project/sqlalchemyseed">
-    <img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/sqlalchemyseed">
-</a>
-
-<a href="https://github.com/jedymatt/sqlalchemyseed/blob/main/LICENSE">
-    <img alt="PyPI - License" src="https://img.shields.io/pypi/l/sqlalchemyseed">
-</a>
+<a href="https://pypi.org/project/sqlalchemyseed"><img alt="PyPI" src="https://img.shields.io/pypi/v/sqlalchemyseed"></a>
+<a href="https://pypi.org/project/sqlalchemyseed"><img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/sqlalchemyseed"></a>
+<a href="https://github.com/jedymatt/sqlalchemyseed/blob/main/LICENSE"><img alt="PyPI - License" src="https://img.shields.io/pypi/l/sqlalchemyseed"></a>
 
 ## Installation
 
@@ -20,15 +12,15 @@ pip install sqlalchemyseed
 
 ### Dependencies
 
-* SQAlchemy>=1.4.0
-* jsonschema>=3.2.0
+- SQAlchemy>=1.4.0
+- jsonschema>=3.2.0
 
 ## Getting Started
 
 ```python
 # main.py
 from tests.db import session  # import where your session is located.
-from sqlalchemyseed import Seeder, load_entities_from_json, HybridSeeder
+from sqlalchemyseed import load_entities_from_json, Seeder, HybridSeeder
 
 # load entities
 entities = load_entities_from_json("data.json")
@@ -81,7 +73,9 @@ session.commit()
 ]
 ```
 
-## One to One
+## Relationships
+
+### One to One
 
 ```json5
 // data.json
@@ -118,7 +112,7 @@ session.commit()
 ]
 ```
 
-## One to Many
+### One to Many
 
 ```json5
 //data.json
