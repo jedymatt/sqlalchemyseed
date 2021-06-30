@@ -1,5 +1,12 @@
 [
     {
+        "model": "models.Child",
+        "data": {
+            "name": "Hakuna Matata",
+            "age": 100
+        }
+    },
+    {
         "model": "models.Parent",
         "data": [
             {
@@ -8,9 +15,8 @@
                 "children": [
                     {
                         "model": "models.Child",
-                        "data": {
-                            "name": "child 1, parent1",
-                            "age": 7
+                        "filter": {
+                            "age": 100
                         }
                     }
                 ]

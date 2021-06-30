@@ -1,3 +1,4 @@
+import abc
 import importlib
 import json
 from inspect import isclass
@@ -5,7 +6,7 @@ from inspect import isclass
 import pkg_resources
 from jsonschema import validate
 
-__version__ = '0.1.4'
+__version__ = '0.2.0'
 
 _SCHEMA_PATH = 'res/schema.json'
 
@@ -66,314 +67,147 @@ class _ClassRegistry:
 
 class Seeder:
     def __init__(self):
-        self.class_registry = _ClassRegistry()
-        self.object_instances = []
+        self._class_registry = _ClassRegistry()
+        self.session = None
+        self._instances = []
+        self._depth = 0
+
+    @property
+    def instances(self):
+        return self._instances
 
     def seed(self, entities, session=None):
-        validate_entities(entities)
-        self.object_instances.clear()
+        self.session = session
 
-        if isinstance(entities, dict):
-            self._entity(entities)
-        elif isinstance(entities, list):
-            self._entities(entities)
+        if len(self._instances) > 0:
+            self._instances.clear()
 
-        if session:
-            session.add_all(self.object_instances)
+        if len(self._class_registry.registered_classes()) > 0:
+            self._class_registry.clear()
 
-    def _entity(self, entity, parent=None):
-        class_path = entity['model']
-        data, data_key = self._get_data(entity)
+        self._root(entities)
 
-        self.class_registry.register_class(class_path)
+    @abc.abstractmethod
+    def _load_instance(self, class_, kwargs, keys):
+        return class_(**kwargs)
 
-        if isinstance(data, dict):
-            return self._field(data, class_path, parent, data_key)
-        elif isinstance(data, list):
-            self._fields(data, class_path, parent, data_key)
+    @abc.abstractmethod
+    def _add_to_session(self, instance):
+        pass
 
-    @staticmethod
-    def _get_data(entity):
-        key = 'data'
-        return entity[key], key
+    def _create_instance(self, data: dict, class_path: str, keys):
+        kwargs = {k: v for k, v in data.items() if not isinstance(v, dict) and not isinstance(v, list)}
 
-    def _entities(self, entities):
-        for entity in entities:
-            self._entity(entity)
+        class_ = self._class_registry.get_class(class_path)
+        instance = self._load_instance(class_, kwargs, keys)
 
-    def _create_instance(self, field, class_path, data_key):
-        kwargs_ = {k: v for k, v in field.items() if not isinstance(v, dict) and not isinstance(v, list)}
-        class_ = self.class_registry.get_class(class_path)
+        self._depth += 1
+        if self._depth == 1:
+            self._instances.append(instance)
+            self._add_to_session(instance)
 
-        return class_(**kwargs_)
+        # find child or children in its attribute
+        for key, item in data.items():
+            if isinstance(item, dict):
+                child = self._create_instance_child(item)
+                setattr(instance, key, child)
+            elif isinstance(item, list):
+                children = self._create_instance_children(item)
+                setattr(instance, key, children)
 
-    def _field(self, field: dict, class_path: str, parent=None, data_key=None):
-
-        instance = self._create_instance(field, class_path, data_key)
-
-        if parent is None:
-            self.object_instances.append(instance)
-            parent = instance
-
-        for parent_key, value in field.items():
-            if isinstance(value, dict):
-                child = self._entity(value, parent=parent)
-                setattr(parent, parent_key, child)
-            elif isinstance(value, list):
-                children = []
-                for i in value:
-                    children.append(
-                        self._entity(i, parent=parent)
-                    )
-                setattr(parent, parent_key, children)
+        self._depth -= 1
 
         return instance
 
-    def _fields(self, fields, model: str, parent=None, data_key=None):
-        for field in fields:
-            self._field(field, model, parent=parent, data_key=data_key)
+    def _root(self, data):
+        # type object
+        if isinstance(data, dict):
+            self._entity(data)
+        # type array
+        elif isinstance(data, list):
+            self._group_entity(data)
+        else:
+            raise ValueError("Value is neither dict nor list.")
+
+    def _entity(self, data):
+        keys = list(data.keys())
+        # anyOf
+        required = [
+            ('model', 'data'),
+            ('model', 'filter')
+        ]
+        valid_keys = False
+        for require in required:
+            if all(i in require for i in keys):
+                valid_keys = True
+                keys = require
+                break
+
+        if valid_keys is False:
+            # create instance
+            raise KeyError(f"keys: {keys} not complying the required")
+
+        class_path, sub_data = data[keys[0]], data[keys[1]]
+
+        self._class_registry.register_class(class_path)
+
+        if isinstance(sub_data, dict):
+            return self._entity_data(sub_data, class_path, keys)
+
+        elif isinstance(sub_data, list):
+            self._entity_group_data(sub_data, class_path, keys)
+        else:
+            raise TypeError("data is neither 'dict' nor 'list'")
+
+    def _entity_data(self, data, class_path, keys):
+        return self._create_instance(data, class_path, keys)
+
+    def _entity_group_data(self, data, class_path, keys):
+        # for item in data:
+        #     self.entity_data(item, class_path)
+        # [self.entity_data(item, class_path) for item in data]
+        mid = len(data) // 2
+        left = data[:mid]
+        right = data[mid:]
+
+        if len(data) == 1:
+            self._entity_data(data[0], class_path, keys)
+            return
+
+        self._entity_group_data(left, class_path, keys)
+        self._entity_group_data(right, class_path, keys)
+
+    def _create_instance_child(self, data):
+        return self._entity(data)
+
+    def _create_instance_children(self, data):
+        return [self._create_instance_child(item) for item in data]
+
+    def _group_entity(self, data):
+        mid = len(data) // 2
+        left = data[:mid]
+        right = data[mid:]
+
+        if len(data) == 1:
+            return self._entity(data[0])
+
+        self._group_entity(left)
+        self._group_entity(right)
 
 
 class HybridSeeder(Seeder):
-    def __init__(self, session, auto_add=True):
+    def __init__(self, session):
         super().__init__()
-        if session is None:
-            raise ValueError('session not found.')
         self.session = session
-        self.auto_add = auto_add
 
-    def seed(self, entities, session=None):
+    def seed(self, entities, **kwargs):
         super().seed(entities, self.session)
 
-    def _get_data(self, entity):
-        try:
-            return super()._get_data(entity)
-        except KeyError:
-            key = 'filter'
-            return entity[key], key
+    def _load_instance(self, class_, kwargs, keys):
+        if keys[1] == 'data':
+            return class_(**kwargs)
+        else:  # keys[1] == 'filter'
+            return self.session.query(class_).filter_by(**kwargs).one_or_none()
 
-    def _create_instance(self, field, class_path, data_key):
-        if data_key == 'data':
-            instance = super()._create_instance(field, class_path, data_key)
-            if self.auto_add:
-                self.session.add(instance)
-            return instance
-        else:
-            class_ = self.class_registry.get_class(class_path)
-            return self.session.query(class_).filter_by(
-                **{k: v for k, v in field if not isinstance(v, dict) and not isinstance(v, list)}
-            ).one_or_none()
-
-
-# ----------------------------------------------------------------------------------------------------------------------
-def is_dict(data):
-    return isinstance(data, dict)
-
-
-def is_list(data):
-    return isinstance(data, list)
-
-
-# class Schema:
-#
-#     def __init__(self):
-#         self.class_registry = _ClassRegistry()
-#         self.instances = []
-#
-#     def create(self, data):
-#         validate_entities(data)
-#         self.instances.clear()
-#
-#         self.root(data)
-#
-#     def root(self, data):
-#         if is_dict(data):
-#             instance = self._entity(data)
-#             return self.instances.append(instance)
-#         elif is_list(data):
-#             return self.instances.append(self._entities(data, []))
-#
-#     def _entities(self, data: list, array):
-#         mid = len(data) // 2
-#         left = data[:mid]
-#         right = data[mid:]
-#
-#         if len(data) == 1:
-#             instance = self._entity(data[0])
-#             array.append(instance)
-#             return array
-#
-#         self._entities(left, array)
-#         self._entities(right, array)
-#
-#     def _create_instance(self, data: dict, class_path: str):
-#         kwargs = {k: v for k, v in data.items() if not is_dict(v) and not is_list(v)}
-#
-#         class_ = self.class_registry.get_class(class_path)
-#         return class_(**kwargs)
-#
-#     def _entity(self, data: dict):
-#         model_key, data_key = data.keys()
-#
-#         self.class_registry.register_class(data[model_key])
-#         self._current_class_path = data[model_key]
-#
-#         return self._args(data[data_key], data[model_key])
-#
-#     def _args(self, data, class_path):
-#         # traversing the data
-#         if is_dict(data):
-#             return self._field(data, class_path)
-#         elif is_list(data):
-#             return self._fields(data, class_path)
-#
-#     def _fields(self, data: dict, class_path):
-#         # return [self._field(item, class_path) for item in data]
-#
-#         mid = len(data) // 2
-#         left = data[:mid]
-#         right = data[mid:]
-#
-#         if len(data) == 1:
-#             # print('fields recursion ------------------')
-#             return self._field(data[0], class_path)
-#
-#         self._fields(left, class_path)
-#         self._fields(right, class_path)
-#
-#     def _field(self, data: dict, class_path):
-#         # print('next --------------')
-#         # print(data)
-#         instance = self._create_instance(data, class_path)
-#         # print(instance)
-#         # print('end- ----------------')
-#
-#         # check for child or children
-#         for key, item in data.items():
-#             if is_dict(item):
-#                 child_instance = self._entity(item)
-#                 setattr(instance, key, child_instance)
-#
-#             elif is_list(item):
-#                 print(item)
-#                 child_instances = self._entities(item, [])
-#                 print(child_instances)
-#                 setattr(instance, key, child_instances)
-#
-#         return instance
-
-
-# class BasicSeeder:
-#     def __init__(self):
-#         self.class_registry = _ClassRegistry()
-#         self.instances = []
-#         self.depth = 0
-#
-#     def _create_instance(self, data: dict, class_path: str):
-#         kwargs = {k: v for k, v in data.items() if not is_dict(v) and not is_list(v)}
-#
-#         class_ = self.class_registry.get_class(class_path)
-#         instance = class_(**kwargs)
-#
-#         self.instance_attributes(instance, data)
-#
-#         return instance
-#
-#     def root(self, data):
-#         validate_entities(data)
-#         self.instances.clear()
-#         # type object
-#         if isinstance(data, dict):
-#             self.entity(data)
-#         # type array
-#         elif isinstance(data, list):
-#             self.group_entity(data)
-#         else:
-#             raise ValueError("Value is neither dict nor list.")
-#
-#     def entity(self, data):
-#         keys = list(data.keys())
-#         # anyOf
-#         required = [
-#             ('model', 'data'),
-#             ('model', 'filter')
-#         ]
-#         valid_keys = False
-#         for require in required:
-#             if all(i in require for i in keys):
-#                 valid_keys = True
-#                 keys = require
-#                 break
-#
-#         if valid_keys is False:
-#             # create instance
-#             raise KeyError(f"keys: {keys} not complying the required")
-#
-#         class_path, sub_data = data[keys[0]], data[keys[1]]
-#
-#         self.class_registry.register_class(class_path)
-#
-#         if isinstance(sub_data, dict):
-#             return self.entity_data(sub_data, class_path)
-#
-#         elif isinstance(sub_data, list):
-#             self.entity_group_data(sub_data, class_path)
-#         else:
-#             raise TypeError("data is neither 'dict' nor 'list'")
-#
-#     def entity_data(self, data, class_path):
-#         return self._create_instance(data, class_path)
-#
-#     def entity_group_data(self, data, class_path):
-#         # for item in data:
-#         #     self.entity_data(item, class_path)
-#         # [self.entity_data(item, class_path) for item in data]
-#         mid = len(data) // 2
-#         left = data[:mid]
-#         right = data[mid:]
-#
-#         if len(data) == 1:
-#             self.entity_data(data[0], class_path)
-#             return
-#
-#         self.entity_group_data(left, class_path)
-#         self.entity_group_data(right, class_path)
-#
-#     def instance_attributes(self, instance, data):
-#         self.depth += 1
-#         if self.depth == 1:
-#             self.instances.append(instance)
-#
-#         # children
-#         for key, item in data.items():
-#             if isinstance(item, dict):
-#                 child = self.instance_child(item)
-#                 setattr(instance, key, child)
-#             elif isinstance(item, list):
-#                 children = self.instance_children(item)
-#                 setattr(instance, key, children)
-#
-#         self.depth -= 1
-#
-#     def instance_child(self, data):
-#         return self.entity(data)
-#
-#     def instance_children(self, data):
-#         return [self.instance_child(item) for item in data]
-#
-#     def group_entity(self, data):
-#         mid = len(data) // 2
-#         left = data[:mid]
-#         right = data[mid:]
-#
-#         if len(data) == 1:
-#             return self.entity(data[0])
-#
-#         self.group_entity(left)
-#         self.group_entity(right)
-#
-#
-# class SuperSeeder(BasicSeeder):
-#     def __init__(self, session):
-#         super().__init__()
-#         self.session = session
+    def _add_to_session(self, instance):
+        self.session.add(instance)

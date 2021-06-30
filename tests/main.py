@@ -1,12 +1,14 @@
 import functools
 from timeit import default_timer as timer
 
-from sqlalchemyseed import BasicSeeder
+from sqlalchemyseed import Seeder, HybridSeeder
 from sqlalchemyseed import Seeder
 from sqlalchemyseed import load_entities_from_json
-from db import session
+from db import session, create_tables
 
 DATA_PATH = 'test.json'
+
+create_tables()
 
 
 def benchmark(func):
@@ -24,13 +26,7 @@ def benchmark(func):
 
 entities: list = load_entities_from_json(DATA_PATH)
 
-schema = BasicSeeder()
-seeder = Seeder()
-
-
-@benchmark
-def test_schema(entities_):
-    schema.root(entities_)
+seeder = HybridSeeder(session)
 
 
 @benchmark
@@ -60,21 +56,14 @@ def compare(func1, func2, num):
     print(func1.__name__, ':', count1, ',', func2.__name__, ':', count2)
 
 
-arr = []
-
-for _ in range(100):
-    arr.extend(entities)
-
-print(test_seed.__name__, ':', test_seed(arr))
-
-print(test_schema.__name__, ':', test_schema(arr))
+print(test_seed.__name__, ':', test_seed(entities))
 
 # average(test_seed, 1)
 # average(test_schema, 1)
 #
 # compare(test_seed, test_schema, 1)
 
-print(seeder.object_instances)
-print(schema.instances)
-session.add_all(schema.instances)
-print(session.new)
+# print(seeder.object_instances)
+print(len(seeder.instances))
+print(len(session.new))
+print(len(session.dirty))

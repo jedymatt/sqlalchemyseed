@@ -1,7 +1,16 @@
 # sqlalchemyseed
 
-[![https://pypi.org/project/sqlalchemyseed/](https://img.shields.io/pypi/v/sqlalchemyseed)](https://pypi.org/project/sqlalchemyseed/)
-[![PyPI - License](https://img.shields.io/pypi/l/sqlalchemyseed)](https://github.com/jedymatt/sqlalchemyseed/blob/main/LICENSE)
+<a href="https://pypi.org/project/sqlalchemyseed">
+    <img alt="PyPI" src="https://img.shields.io/pypi/v/sqlalchemyseed">
+</a>
+
+<a href="https://pypi.org/project/sqlalchemyseed">
+    <img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/sqlalchemyseed">
+</a>
+
+<a href="https://github.com/jedymatt/sqlalchemyseed/blob/main/LICENSE">
+    <img alt="PyPI - License" src="https://img.shields.io/pypi/l/sqlalchemyseed">
+</a>
 
 ## Installation
 
@@ -29,7 +38,7 @@ seeder = Seeder()
 seeder.seed(entities, session)  # session, optional, automatically add entities to session
 # or
 seeder.seed(entities)
-session.add_all(seeder.object_instances)
+session.add_all(seeder.instances)
 
 # HybridSeeder to use 'filter' field, querying and assigning relationship that exist in the database
 seeder = HybridSeeder(session)
@@ -40,6 +49,7 @@ seeder.seed(entities)
 print(session.new)
 print(session.dirty)
 
+session.commit()
 ```
 
 ## No Relationship
