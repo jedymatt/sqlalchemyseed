@@ -6,7 +6,10 @@ from inspect import isclass
 import pkg_resources
 from jsonschema import validate
 
-__version__ = '0.2.2'
+__version__ = '0.2.3'
+
+from sqlalchemy import inspect
+from sqlalchemy.exc import NoInspectionAvailable
 
 _SCHEMA_PATH = 'res/schema.json'
 
@@ -45,10 +48,13 @@ class _ClassRegistry:
         if class_name not in self._classes:
             class_ = getattr(self._modules[module_name], class_name)
 
-            if isclass(class_):
-                self._classes[class_name] = class_
-            else:
-                raise TypeError("'{}' is not a class".format(class_name))
+            try:
+                if isclass(class_) and inspect(class_):
+                    self._classes[class_name] = class_
+                else:
+                    raise TypeError("'{}' is not a class".format(class_name))
+            except NoInspectionAvailable:
+                raise TypeError("'{}' is an unsupported class".format(class_name))
 
     def get_class(self, class_path: str):
         try:
@@ -63,6 +69,7 @@ class _ClassRegistry:
 
     def clear(self):
         self._classes.clear()
+        self._modules.clear()
 
 
 class Seeder:
