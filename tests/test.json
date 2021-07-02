@@ -1,5 +1,12 @@
 [
     {
+        "model": "models.Parent",
+        "data": {
+            "name": "No Children",
+            "children": []
+        }
+    },
+    {
         "model": "models.Child",
         "data": {
             "name": "Hakuna Matata",

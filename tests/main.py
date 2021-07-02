@@ -2,9 +2,9 @@ import functools
 from timeit import default_timer as timer
 
 from sqlalchemyseed import Seeder, HybridSeeder
-from sqlalchemyseed import Seeder
 from sqlalchemyseed import load_entities_from_json
 from db import session, create_tables
+from sqlalchemy import inspect, Integer, Column
 
 DATA_PATH = 'test.json'
 
@@ -62,8 +62,10 @@ print(test_seed.__name__, ':', test_seed(entities))
 # average(test_schema, 1)
 #
 # compare(test_seed, test_schema, 1)
+from models import Parent, Base
+
+parent = Parent()
 
 # print(seeder.object_instances)
-print(len(seeder.instances))
-print(len(session.new))
-print(len(session.dirty))
+
+print(seeder.instances)
