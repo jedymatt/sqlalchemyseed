@@ -6,7 +6,7 @@ from inspect import isclass
 import pkg_resources
 from jsonschema import validate
 
-__version__ = '0.2.1'
+__version__ = '0.2.2'
 
 _SCHEMA_PATH = 'res/schema.json'
 
