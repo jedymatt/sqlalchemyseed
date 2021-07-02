@@ -19,7 +19,6 @@
                             "type": "array"
                         },
                         "then": {
-                            "minItems": 1,
                             "items": {
                                 "$ref": "#/definitions/entity"
                             }
