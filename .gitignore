@@ -138,3 +138,6 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+# IDE Generated directories
+.idea/
+.vscode/
