@@ -5,17 +5,16 @@ from inspect import isclass
 
 import pkg_resources
 from jsonschema import validate
-
-__version__ = '0.2.3'
-
 from sqlalchemy import inspect
 from sqlalchemy.exc import NoInspectionAvailable
 
-_SCHEMA_PATH = 'res/schema.json'
+__version__ = '0.3.0-dev1'
+
+__SCHEMA_PATH = 'res/schema.json'
 
 
 def validate_entities(entities):
-    schema_res = pkg_resources.resource_string('sqlalchemyseed', _SCHEMA_PATH)
+    schema_res = pkg_resources.resource_string('sqlalchemyseed', __SCHEMA_PATH)
     schema = json.loads(schema_res)
 
     validate(entities, schema)
@@ -28,13 +27,14 @@ def load_entities_from_json(json_filepath):
     except FileNotFoundError as error:
         raise FileNotFoundError(error)
 
+    validate_entities(entities)
+
     return entities
 
 
-class _ClassRegistry:
+class ClassRegistry:
     def __init__(self):
         self._classes = {}
-        self._modules = {}
 
     def register_class(self, class_path: str):
         try:
@@ -42,60 +42,60 @@ class _ClassRegistry:
         except ValueError:
             raise ValueError('Invalid module or class input format.')
 
-        if module_name not in self._modules:
-            self._modules[module_name] = importlib.import_module(module_name)
-
         if class_name not in self._classes:
-            class_ = getattr(self._modules[module_name], class_name)
+            class_ = getattr(importlib.import_module(module_name), class_name)
 
             try:
                 if isclass(class_) and inspect(class_):
-                    self._classes[class_name] = class_
+                    self._classes[class_path] = class_
                 else:
                     raise TypeError("'{}' is not a class".format(class_name))
             except NoInspectionAvailable:
-                raise TypeError("'{}' is an unsupported class".format(class_name))
+                raise TypeError(
+                    "'{}' is an unsupported class".format(class_name))
 
-    def get_class(self, class_path: str):
-        try:
-            class_name = class_path.rsplit('.', 1)[1]
-        except IndexError:
-            class_name = class_path
+    def __getitem__(self, class_path: str):
+        return self._classes[class_path]
 
-        return self._classes[class_name]
-
+    @property
     def registered_classes(self):
         return self._classes.values()
 
     def clear(self):
         self._classes.clear()
-        self._modules.clear()
 
 
 class Seeder:
-    def __init__(self):
-        self._class_registry = _ClassRegistry()
-        self.session = None
+    def __init__(self, session=None):
+        self._class_registry = ClassRegistry()
+        self.session = session
         self._instances = []
         self._depth = 0
+
+        self.required_keys = [
+            ('model', 'data')
+        ]
 
     @property
     def instances(self):
         return self._instances
 
-    def seed(self, entities, session=None):
+    def seed(self, entities, add_to_session=True):
         validate_entities(entities)
-
-        if self.session is None and session is not None:
-            self.session = session
 
         if len(self._instances) > 0:
             self._instances.clear()
 
-        if len(self._class_registry.registered_classes()) > 0:
+        if len(self._class_registry.registered_classes) > 0:
             self._class_registry.clear()
 
         self._root(entities)
+
+        if add_to_session is True:
+            if self.session is None:
+                raise ValueError(
+                    'Session is None: Cannot add instances to session')
+            self.session.add_all(self.instances)
 
     @abc.abstractmethod
     def _load_instance(self, class_, kwargs, keys):
@@ -106,9 +106,10 @@ class Seeder:
         pass
 
     def _create_instance(self, data: dict, class_path: str, keys):
-        kwargs = {k: v for k, v in data.items() if not isinstance(v, dict) and not isinstance(v, list)}
+        kwargs = {k: v for k, v in data.items() if not isinstance(
+            v, dict) and not isinstance(v, list)}
 
-        class_ = self._class_registry.get_class(class_path)
+        class_ = self._class_registry[class_path]
         instance = self._load_instance(class_, kwargs, keys)
 
         self._depth += 1
@@ -142,12 +143,8 @@ class Seeder:
     def _entity(self, data):
         keys = list(data.keys())
         # anyOf
-        required = [
-            ('model', 'data'),
-            ('model', 'filter')
-        ]
         valid_keys = False
-        for require in required:
+        for require in self.required_keys:
             if all(i in require for i in keys):
                 valid_keys = True
                 keys = require
@@ -155,7 +152,7 @@ class Seeder:
 
         if valid_keys is False:
             # create instance
-            raise KeyError(f"keys: {keys} not complying the required")
+            raise KeyError(f"Invalid Keys: {keys} not complying the required")
 
         class_path, sub_data = data[keys[0]], data[keys[1]]
 
@@ -206,12 +203,16 @@ class Seeder:
 
 
 class HybridSeeder(Seeder):
+
     def __init__(self, session):
-        super().__init__()
-        self.session = session
+        super().__init__(session)
+        self.required_keys = [
+            ('model', 'data'),
+            ('model', 'filter')
+        ]
 
     def seed(self, entities, **kwargs):
-        super().seed(entities)
+        super().seed(entities, False)
 
     def _load_instance(self, class_, kwargs, keys):
         if keys[1] == 'data':

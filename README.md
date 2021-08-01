@@ -1,8 +1,10 @@
 # sqlalchemyseed
 
-<a href="https://pypi.org/project/sqlalchemyseed"><img alt="PyPI" src="https://img.shields.io/pypi/v/sqlalchemyseed"></a>
-<a href="https://pypi.org/project/sqlalchemyseed"><img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/sqlalchemyseed"></a>
-<a href="https://github.com/jedymatt/sqlalchemyseed/blob/main/LICENSE"><img alt="PyPI - License" src="https://img.shields.io/pypi/l/sqlalchemyseed"></a>
+[![PyPI](https://img.shields.io/pypi/v/sqlalchemyseed)](https://pypi.org/project/sqlalchemyseed)
+[![PyPI - License](https://img.shields.io/pypi/l/sqlalchemyseed)](https://github.com/jedymatt/sqlalchemyseed/blob/main/LICENSE)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/sqlalchemyseed)](https://pypi.org/project/sqlalchemyseed)
+
+Sqlalchemy seeder. Supports nested relationships.
 
 ## Installation
 
@@ -18,36 +20,65 @@ pip install sqlalchemyseed
 ## Getting Started
 
 ```python
+
 # main.py
-from tests.db import session  # import where your session is located.
-from sqlalchemyseed import load_entities_from_json, Seeder, HybridSeeder
+from sqlalchemyseed import load_entities_from_json, Seeder
+from tests.db import session
 
 # load entities
-entities = load_entities_from_json("data.json")
+entities = load_entities_from_json('tests/test_data.json')
 
-# use seeder if you are limited to using 'data' field or you do not query relationship from database
-seeder = Seeder()
-seeder.seed(entities, session)  # session, optional, automatically add entities to session
-# or
+# Initialize Seeder
+seeder = Seeder()  # or Seeder(session)
+
+# Seeding
+seeder.session = session  # assign session if no session assigned before seeding
 seeder.seed(entities)
-session.add_all(seeder.instances)
 
-# HybridSeeder to use 'filter' field, querying and assigning relationship that exist in the database
+# Committing
+session.commit()  # or seeder.session.commit()
+
+
+```
+
+## Seeder vs. HybridSeeder
+
+- Seeder supports model and data key fields.
+- Seeder does not support model and filter key fields.
+- HybridSeeder supports model and data, and model and filter key fields.
+- HybridSeeder enables to query existing objects from the session and assigns it with the relationship.
+
+## When to use HybridSeeder and 'filter' key field?
+
+```python
+
+from sqlalchemyseed import HybridSeeder
+from tests.db import session
+
+instances = {
+    "model": "models.Parent",
+    "data": {
+        "child": {
+            "model": "models.Child",
+            "filter": {
+                "age": 5
+            }
+        }
+    }
+}
+
+# Assuming that Child(age=5) exists in the database or session,
+#  the we can use 'filter'
+
+# When seeding instances that has 'filter' key, then use HybridSeeder, otherwise use Seeder.
 seeder = HybridSeeder(session)
-seeder.seed(entities)
 
-# for confirmation,
-# you can check the added objects by printing session.new and session.dirty
-print(session.new)
-print(session.dirty)
-
-session.commit()
 ```
 
 ## No Relationship
 
 ```json5
-// data.json
+// test_data.json
 [
     {
         "model": "models.Person",
@@ -78,7 +109,7 @@ session.commit()
 ### One to One
 
 ```json5
-// data.json
+// test_data.json
 [
     {
         "model": "models.Person",
@@ -94,7 +125,7 @@ session.commit()
             }
         }
     },
-    // or this, if you want to add relationship that exist
+    // or this, if you want to add relationship that exists
     // in your database use 'filter' instead of 'data'
     {
         "model": "models.Person",
@@ -115,7 +146,7 @@ session.commit()
 ### One to Many
 
 ```json5
-//data.json
+//test_data.json
 [
     {
         "model": "models.Person",
@@ -139,4 +170,32 @@ session.commit()
         }
     }
 ]
+```
+
+## Example of Nested Relationships
+
+```json
+{
+    "model": "models.Parent",
+    "data": {
+        "name": "John Smith",
+        "children": [
+            {
+                "model": "models.Child",
+                "data": {
+                    "name": "Mark Smith",
+                    "children": [
+                        {
+                            "model": "models.GrandChild",
+                            "data": {
+                                "name": "Alice Smith"
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}
+
 ```

@@ -11,6 +11,20 @@ Base = declarative_base()
 # one to many, done
 #  many to many, done
 
+class Person(Base):
+    __tablename__ = 'people'
+
+    id = Column(Integer, primary_key=True)
+
+    name = Column(String(255))
+
+    child_id = Column(Integer, ForeignKey('people.id'))
+    child = relationship('Person')
+
+    def __repr__(self):
+        return "<Person(child='%s')>" % self.child
+
+
 class Parent(Base):
     __tablename__ = 'parents'
 
