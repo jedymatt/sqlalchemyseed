@@ -8,7 +8,7 @@ from jsonschema import validate
 from sqlalchemy import inspect
 from sqlalchemy.exc import NoInspectionAvailable
 
-__version__ = '0.3.0-dev1'
+__version__ = '0.3.0.dev1'
 
 __SCHEMA_PATH = 'res/schema.json'
 
