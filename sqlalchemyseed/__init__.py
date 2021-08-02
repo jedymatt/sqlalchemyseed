@@ -6,7 +6,7 @@ from inspect import isclass
 import pkg_resources
 from jsonschema import validate
 
-__version__ = '0.2.3'
+__version__ = '0.2.4'
 
 from sqlalchemy import inspect
 from sqlalchemy.exc import NoInspectionAvailable
@@ -73,11 +73,14 @@ class _ClassRegistry:
 
 
 class Seeder:
-    def __init__(self):
+    def __init__(self, session=None):
         self._class_registry = _ClassRegistry()
-        self.session = None
+        self.session = session
         self._instances = []
         self._depth = 0
+        self._required = [
+            ('model', 'data'),
+        ]
 
     @property
     def instances(self):
@@ -142,12 +145,8 @@ class Seeder:
     def _entity(self, data):
         keys = list(data.keys())
         # anyOf
-        required = [
-            ('model', 'data'),
-            ('model', 'filter')
-        ]
         valid_keys = False
-        for require in required:
+        for require in self._required:
             if all(i in require for i in keys):
                 valid_keys = True
                 keys = require
@@ -209,6 +208,10 @@ class HybridSeeder(Seeder):
     def __init__(self, session):
         super().__init__()
         self.session = session
+        self._required = [
+            ('model', 'data'),
+            ('model', 'filter')
+        ]
 
     def seed(self, entities, **kwargs):
         super().seed(entities)
@@ -221,3 +224,7 @@ class HybridSeeder(Seeder):
 
     def _add_to_session(self, instance):
         self.session.add(instance)
+
+
+if __name__ == '__main__':
+    pass
