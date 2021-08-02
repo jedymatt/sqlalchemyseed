@@ -55,7 +55,7 @@ session.commit()  # or seeder.session.commit()
 from sqlalchemyseed import HybridSeeder
 from tests.db import session
 
-instances = {
+data = {
     "model": "models.Parent",
     "data": {
         "child": {
@@ -72,6 +72,7 @@ instances = {
 
 # When seeding instances that has 'filter' key, then use HybridSeeder, otherwise use Seeder.
 seeder = HybridSeeder(session)
+seeder.seed(data)
 
 ```
 
