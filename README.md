@@ -1,8 +1,8 @@
 # sqlalchemyseed
 
 [![PyPI](https://img.shields.io/pypi/v/sqlalchemyseed)](https://pypi.org/project/sqlalchemyseed)
-[![PyPI - License](https://img.shields.io/pypi/l/sqlalchemyseed)](https://github.com/jedymatt/sqlalchemyseed/blob/main/LICENSE)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/sqlalchemyseed)](https://pypi.org/project/sqlalchemyseed)
+[![PyPI - License](https://img.shields.io/pypi/l/sqlalchemyseed)](https://github.com/jedymatt/sqlalchemyseed/blob/main/LICENSE)
 
 Sqlalchemy seeder. Supports nested relationships.
 
@@ -28,7 +28,7 @@ from tests.db import session
 # load entities
 entities = load_entities_from_json('tests/test_data.json')
 
-# Initialize Seeder
+# Initializing Seeder
 seeder = Seeder()  # or Seeder(session)
 
 # Seeding
@@ -68,7 +68,7 @@ instances = {
 }
 
 # Assuming that Child(age=5) exists in the database or session,
-#  the we can use 'filter'
+#  then we should use 'filter' instead of 'data'
 
 # When seeding instances that has 'filter' key, then use HybridSeeder, otherwise use Seeder.
 seeder = HybridSeeder(session)
