@@ -60,7 +60,7 @@ class TestSchemaValidator(unittest.TestCase):
                 'model': 'models.Company',
                 'data': {
                     '!employees': {
-                        'model': 'models.Employees',
+                        'model': 'models.Employee',
                         'data': {
 
                         }
@@ -77,7 +77,7 @@ class TestSchemaValidator(unittest.TestCase):
                 'model': 'models.Company',
                 'data': {
                     '!employees': {
-                        'model': 'models.Employees',
+                        'model': 'models.Employee',
                         'data': {
 
                         }
@@ -95,7 +95,7 @@ class TestSchemaValidator(unittest.TestCase):
                 'data':
                     {
                         '!employees': {
-                            'model': 'models.Employees',
+                            'model': 'models.Employee',
                             'data': [
 
                             ]

@@ -21,10 +21,10 @@ class __Tree:
         if isinstance(obj, dict):
             for key, value in obj.items():
                 self._current_path.append(key)
-                # print(f"\'{path_str(self._current_path)}\'", '=', value)
+                # print(f"\'{path_str(self.path)}\'", '=', value)
 
                 if isinstance(value, list) or isinstance(value, dict):
-                    # print(f"\'{path_str(self._current_path)}\'", '=', value)
+                    # print(f"\'{path_str(self.path)}\'", '=', value)
                     self._walk(value)
                 else:
                     # if leaf
