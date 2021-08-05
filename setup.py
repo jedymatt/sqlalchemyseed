@@ -21,7 +21,7 @@ setup(
     license='MIT',
     packages=['sqlalchemyseed'],
     package_data={'sqlalchemyseed': ['res/*']},
-    install_requires=['SQLAlchemy>=1.4.0', 'jsonschema>=3.2.0'],
+    install_requires=['SQLAlchemy>=1.4.0'],
     python_requires='>=3.6.0',
     keywords='sqlalchemy seed seeder json',
     project_urls={

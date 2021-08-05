@@ -15,7 +15,6 @@ pip install sqlalchemyseed
 ### Dependencies
 
 - SQAlchemy>=1.4.0
-- jsonschema>=3.2.0
 
 ## Getting Started
 
@@ -57,7 +56,7 @@ from tests.db import session
 
 data = {
     "model": "models.Parent",
-    "data": {
+    "obj": {
         "child": {
             "model": "models.Child",
             "filter": {
@@ -68,7 +67,7 @@ data = {
 }
 
 # Assuming that Child(age=5) exists in the database or session,
-#  then we should use 'filter' instead of 'data'
+#  then we should use 'filter' instead of 'obj'
 
 # When seeding instances that has 'filter' key, then use HybridSeeder, otherwise use Seeder.
 seeder = HybridSeeder(session)
@@ -107,6 +106,8 @@ seeder.seed(data)
 
 ## Relationships
 
+In adding a relationship attribute, add prefix '!' to the key in order to identify it.
+
 ### One to One
 
 ```json5
@@ -118,7 +119,7 @@ seeder.seed(data)
             "name": "John",
             "age": 18,
             // creates a job object
-            "job": {
+            "!job": {
                 "model": "models.Job",
                 "data": {
                     "job_name": "Programmer",
@@ -127,13 +128,13 @@ seeder.seed(data)
         }
     },
     // or this, if you want to add relationship that exists
-    // in your database use 'filter' instead of 'data'
+    // in your database use 'filter' instead of 'obj'
     {
         "model": "models.Person",
         "data": {
             "name": "Jeniffer",
             "age": 18,
-            "job": {
+            "!job": {
                 "model": "models.Job",
                 "filter": {
                     "job_name": "Programmer",
@@ -154,7 +155,7 @@ seeder.seed(data)
         "data": {
             "name": "John",
             "age": 18,
-            "items": [
+            "!items": [
                 {
                     "model": "models.Item",
                     "data": {
@@ -180,12 +181,12 @@ seeder.seed(data)
     "model": "models.Parent",
     "data": {
         "name": "John Smith",
-        "children": [
+        "!children": [
             {
                 "model": "models.Child",
                 "data": {
                     "name": "Mark Smith",
-                    "children": [
+                    "!children": [
                         {
                             "model": "models.GrandChild",
                             "data": {

@@ -5,49 +5,28 @@ from sqlalchemy.orm import relationship
 Base = declarative_base()
 
 
-# one-to-one, done
-# nested relationship, done
-# filter and data, done
-# one to many, done
-#  many to many, done
-
-class Person(Base):
-    __tablename__ = 'people'
+class Company(Base):
+    __tablename__ = 'companies'
 
     id = Column(Integer, primary_key=True)
+    name = Column(String(255), unique=True)
 
+    employees = relationship('Employee', back_populates='company')
+
+    def __repr__(self) -> str:
+        return f"<Company(name='{self.name}')>"
+
+
+class Employee(Base):
+    __tablename__ = 'employees'
+
+    id = Column(Integer, primary_key=True)
     name = Column(String(255))
 
-    child_id = Column(Integer, ForeignKey('people.id'))
-    child = relationship('Person')
+    company_id = Column(Integer, ForeignKey('companies.id'))
 
-    def __repr__(self):
-        return "<Person(child='%s')>" % self.child
+    company = relationship(
+        'Company', back_populates='employees', uselist=False)
 
-
-class Parent(Base):
-    __tablename__ = 'parents'
-
-    id = Column(Integer, primary_key=True)
-    name = Column(String)
-    age = Column(Integer)
-
-    children = relationship('Child', back_populates='parent')
-
-    def __repr__(self):
-        return "<Parent(name='{}', age='{}', children='{}')>".format(self.name, self.age, self.children)
-
-
-class Child(Base):
-    __tablename__ = 'children'
-
-    id = Column(Integer, primary_key=True)
-
-    name = Column(String)
-    age = Column(Integer)
-    parent_id = Column(Integer, ForeignKey('parents.id'))
-
-    parent = relationship('Parent', back_populates='children', uselist=False)
-
-    def __repr__(self):
-        return "<Child(name='{}', age='{}')>".format(self.name, self.age)
+    def __repr__(self) -> str:
+        return f"<Employee(name='{self.name}', company='{self.company}')>"
