@@ -1,6 +1,26 @@
 import unittest
 
-from sqlalchemyseed.seeder import Seeder
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+from sqlalchemyseed.seeder import ClassRegistry, HybridSeeder, Seeder
+from tests.models import Base
+
+engine = create_engine('sqlite://')
+Session = sessionmaker(bind=engine)
+Base.metadata.create_all(engine)
+
+
+class TestClassRegistry(unittest.TestCase):
+    def test_get_invalid_item(self):
+        class_registry = ClassRegistry()
+        self.assertRaises(KeyError, lambda: class_registry['InvalidClass'])
+
+    def test_register_class(self):
+        cr = ClassRegistry()
+        cr.register_class('models.Company')
+        from models import Company
+        self.assertEqual(cr['models.Company'], Company)
 
 
 class TestSeeder(unittest.TestCase):
@@ -77,6 +97,40 @@ class TestSeeder(unittest.TestCase):
         seeder = Seeder()
         seeder.seed(instance, False)
         self.assertEqual(len(seeder.instances), 3)
+
+
+class TestHybridSeeder(unittest.TestCase):
+    def test_seed(self):
+        instance = [
+            {
+                'model': 'tests.models.Employee',
+                'data': [
+                    {'name': 'John Smith'},
+                    {'name': 'Juan Dela Cruz'}
+                ]
+            },
+            {
+                'model': 'tests.models.Company',
+                'data': {
+                    'name': 'MyCompany',
+                    '!employees': {
+                        'model': 'tests.models.Employee',
+                        'filter': [
+                            {
+                                'name': 'John Smith'
+                            },
+                            {
+                                'name': 'Juan Dela Cruz'
+                            }
+                        ]
+                    }
+                }
+            }]
+
+        with Session() as session:
+            seeder = HybridSeeder(session)
+            seeder.seed(instance)
+            self.assertEqual(len(seeder.instances), 3)
 
 
 if __name__ == '__main__':
