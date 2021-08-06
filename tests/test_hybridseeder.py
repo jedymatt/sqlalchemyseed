@@ -42,7 +42,6 @@ class TestHybridSeeder(unittest.TestCase):
         with Session() as session:
             seeder = HybridSeeder(session)
             seeder.seed(instance)
-            print(seeder.instances)
             self.assertEqual(len(seeder.instances), 3)
 
 
