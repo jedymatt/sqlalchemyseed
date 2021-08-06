@@ -1,8 +1,10 @@
 # sqlalchemyseed
 
-<a href="https://pypi.org/project/sqlalchemyseed"><img alt="PyPI" src="https://img.shields.io/pypi/v/sqlalchemyseed"></a>
-<a href="https://pypi.org/project/sqlalchemyseed"><img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/sqlalchemyseed"></a>
-<a href="https://github.com/jedymatt/sqlalchemyseed/blob/main/LICENSE"><img alt="PyPI - License" src="https://img.shields.io/pypi/l/sqlalchemyseed"></a>
+[![PyPI](https://img.shields.io/pypi/v/sqlalchemyseed)](https://pypi.org/project/sqlalchemyseed)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/sqlalchemyseed)](https://pypi.org/project/sqlalchemyseed)
+[![PyPI - License](https://img.shields.io/pypi/l/sqlalchemyseed)](https://github.com/jedymatt/sqlalchemyseed/blob/main/LICENSE)
+
+Sqlalchemy seeder. Supports nested relationships.
 
 ## Installation
 
@@ -13,41 +15,73 @@ pip install sqlalchemyseed
 ### Dependencies
 
 - SQAlchemy>=1.4.0
-- jsonschema>=3.2.0
 
 ## Getting Started
 
 ```python
+
 # main.py
-from tests.db import session  # import where your session is located.
-from sqlalchemyseed import load_entities_from_json, Seeder, HybridSeeder
+from sqlalchemyseed import load_entities_from_json, Seeder
+from tests.db import session
 
 # load entities
-entities = load_entities_from_json("data.json")
+entities = load_entities_from_json('tests/test_data.json')
 
-# use seeder if you are limited to using 'data' field or you do not query relationship from database
-seeder = Seeder()
-seeder.seed(entities, session)  # session, optional, automatically add entities to session
-# or
+# Initializing Seeder
+seeder = Seeder()  # or Seeder(session)
+
+# Seeding
+seeder.session = session  # assign session if no session assigned before seeding
 seeder.seed(entities)
-session.add_all(seeder.instances)
 
-# HybridSeeder to use 'filter' field, querying and assigning relationship that exist in the database
+# Committing
+session.commit()  # or seeder.session.commit()
+
+
+```
+
+## Seeder vs. HybridSeeder
+
+- Seeder supports model and data key fields.
+- Seeder does not support model and filter key fields.
+- Seeder when seeding, can specify to not add all entities to session by passing this argument `add_to_session=False` in the `Seeder.seed` method.
+- HybridSeeder supports 'model' and 'data', and 'model' and 'filter' key fields.
+- HybridSeeder enables to query existing objects from the session and assigns it with the relationship.
+- HybridSeeder when seeding, automatically adds all entities to session.
+
+## When to use HybridSeeder and 'filter' key field?
+
+```python
+
+from sqlalchemyseed import HybridSeeder
+from tests.db import session
+
+# Assuming that Child(age=5) exists in the database or session,
+#  then we should use 'filter' instead of 'obj'
+#  the the values of 'filter' will query from the database or session, and assign it to the Parent.child 
+data = {
+    "model": "models.Parent",
+    "data": {
+        "!child": {
+            "model": "models.Child",
+            "filter": {
+                "age": 5
+            }
+        }
+    }
+}
+
+
+# When seeding instances that has 'filter' key, then use HybridSeeder, otherwise use Seeder.
 seeder = HybridSeeder(session)
-seeder.seed(entities)
+seeder.seed(data)
 
-# for confirmation,
-# you can check the added objects by printing session.new and session.dirty
-print(session.new)
-print(session.dirty)
-
-session.commit()
 ```
 
 ## No Relationship
 
 ```json5
-// data.json
+// test_data.json
 [
     {
         "model": "models.Person",
@@ -75,10 +109,12 @@ session.commit()
 
 ## Relationships
 
+In adding a relationship attribute, add prefix '!' to the key in order to identify it.
+
 ### One to One
 
 ```json5
-// data.json
+// test_data.json
 [
     {
         "model": "models.Person",
@@ -86,7 +122,7 @@ session.commit()
             "name": "John",
             "age": 18,
             // creates a job object
-            "job": {
+            "!job": {
                 "model": "models.Job",
                 "data": {
                     "job_name": "Programmer",
@@ -94,14 +130,14 @@ session.commit()
             }
         }
     },
-    // or this, if you want to add relationship that exist
-    // in your database use 'filter' instead of 'data'
+    // or this, if you want to add relationship that exists
+    // in your database use 'filter' instead of 'obj'
     {
         "model": "models.Person",
         "data": {
             "name": "Jeniffer",
             "age": 18,
-            "job": {
+            "!job": {
                 "model": "models.Job",
                 "filter": {
                     "job_name": "Programmer",
@@ -115,14 +151,14 @@ session.commit()
 ### One to Many
 
 ```json5
-//data.json
+//test_data.json
 [
     {
         "model": "models.Person",
         "data": {
             "name": "John",
             "age": 18,
-            "items": [
+            "!items": [
                 {
                     "model": "models.Item",
                     "data": {
@@ -139,4 +175,32 @@ session.commit()
         }
     }
 ]
+```
+
+## Example of Nested Relationships
+
+```json
+{
+    "model": "models.Parent",
+    "data": {
+        "name": "John Smith",
+        "!children": [
+            {
+                "model": "models.Child",
+                "data": {
+                    "name": "Mark Smith",
+                    "!children": [
+                        {
+                            "model": "models.GrandChild",
+                            "data": {
+                                "name": "Alice Smith"
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}
+
 ```
