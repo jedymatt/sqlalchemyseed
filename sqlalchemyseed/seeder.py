@@ -287,13 +287,17 @@ class Seeder:
                 keys = r_keys
                 break
 
+        if keys is None:
+            raise KeyError("'filter' key is not allowed. Use HybridSeeder instead.")
+
+        key_is_data = keys[1] == 'data'
+
         class_path = instance[keys[0]]
         self._class_registry.register_class(class_path)
 
         if isinstance(instance[keys[1]], list):
-            # do something
             for value in instance[keys[1]]:
-                obj = self.instantiate_obj(class_path, value)
+                obj = self.instantiate_obj(class_path, value, key_is_data)
                 # print(obj, parent, parent_attr)
                 if parent is not None and parent_attr is not None:
                     attr_ = getattr(parent.__class__, parent_attr)
@@ -312,8 +316,7 @@ class Seeder:
                         self._pre_seed(v, obj, k[1:])
 
         elif isinstance(instance[keys[1]], dict):
-            obj = self.instantiate_obj(class_path, instance[keys[1]])
-            # do something
+            obj = self.instantiate_obj(class_path, instance[keys[1]], key_is_data)
             # print(parent, parent_attr)
             if parent is not None and parent_attr is not None:
                 attr_ = getattr(parent.__class__, parent_attr)
@@ -335,16 +338,16 @@ class Seeder:
 
         return instance
 
-    def instantiate_obj(self, class_path, kwargs):
+    def instantiate_obj(self, class_path, kwargs, key_is_data):
         class_ = self._class_registry[class_path]
 
-        kwargs = {k: v for k, v in kwargs.items() if
-                  not k.startswith('!') and not isinstance(getattr(class_, k), RelationshipProperty)}
+        filtered_kwargs = {k: v for k, v in kwargs.items() if
+                           not k.startswith('!') and not isinstance(getattr(class_, k), RelationshipProperty)}
 
-        obj = class_(**kwargs)
-
-        # print(obj)
-        return obj
+        if key_is_data is True:
+            return class_(**filtered_kwargs)
+        else:
+            raise KeyError("key is invalid")
 
 
 class HybridSeeder(Seeder):
@@ -355,5 +358,18 @@ class HybridSeeder(Seeder):
             ('model', 'filter')
         ]
 
-    def instantiate_obj(self, class_path, kwargs):
-        return super().instantiate_obj(class_path, kwargs)
+    def seed(self, instance, **kwargs):
+        super().seed(instance, False)
+
+    def instantiate_obj(self, class_path, kwargs, key_is_data=True):
+        class_ = self._class_registry[class_path]
+
+        filtered_kwargs = {k: v for k, v in kwargs.items() if
+                           not k.startswith('!') and not isinstance(getattr(class_, k), RelationshipProperty)}
+
+        if key_is_data is True:
+            obj = class_(**filtered_kwargs)
+            self.session.add(obj)
+            return obj
+        else:
+            return self.session.query(class_).filter_by(**filtered_kwargs).one()
