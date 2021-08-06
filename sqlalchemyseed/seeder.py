@@ -55,206 +55,26 @@ class ClassRegistry:
         self._classes.clear()
 
 
-# class Seeder:
-#     def __init__(self, session=None):
-#         self._class_registry = ClassRegistry()
-#         self.session = session
-#         self._instances = []
-#         self._depth = 0
-
-#         self.required_keys = [
-#             ('model', 'obj')
-#         ]
-
-#     @property
-#     def instances(self):
-#         return self._instances
-
-#     def seed(self, entities, add_to_session=True):
-#         validate_entities(entities)
-
-#         if len(self._instances) > 0:
-#             self._instances.clear()
-
-#         if len(self._class_registry.registered_classes) > 0:
-#             self._class_registry.clear()
-
-#         self._root(entities)
-
-#         if add_to_session is True:
-#             if self.session is None:
-#                 raise ValueError(
-#                     'Session is None: Cannot add instances to session')
-#             self.session.add_all(self.instances)
-
-#     @abc.abstractmethod
-#     def _load_instance(self, class_, kwargs, keys):
-#         return class_(**kwargs)
-
-#     @abc.abstractmethod
-#     def _add_to_session(self, instance):
-#         pass
-
-#     def _create_instance(self, obj: dict, class_path: str, keys):
-#         kwargs = {k: v for k, v in obj.items() if not isinstance(
-#             v, dict) and not isinstance(v, list)}
-
-#         class_ = self._class_registry[class_path]
-#         instance = self._load_instance(class_, kwargs, keys)
-
-#         self._depth += 1
-#         if self._depth == 1:
-#             self._instances.append(instance)
-#             self._add_to_session(instance)
-
-#         # find child or children in its attribute
-#         for key, item in obj.items():
-#             if isinstance(item, dict):
-#                 child = self._create_instance_child(item)
-#                 setattr(instance, key, child)
-#             elif isinstance(item, list):
-#                 children = self._create_instance_children(item)
-#                 setattr(instance, key, children)
-
-#         self._depth -= 1
-
-#         return instance
-
-#     def _root(self, obj):
-#         # type object
-#         if isinstance(obj, dict):
-#             self._entity(obj)
-#         # type array
-#         elif isinstance(obj, list):
-#             self._group_entity(obj)
-#         else:
-#             raise ValueError("Value is neither dict nor list.")
-
-#     def _entity(self, obj):
-#         keys = list(obj.keys())
-#         # anyOf
-#         valid_keys = False
-#         for require in self.required_keys:
-#             if all(i in require for i in keys):
-#                 valid_keys = True
-#                 keys = require
-#                 break
-
-#         if valid_keys is False:
-#             # create instance
-#             raise KeyError(f"Invalid Keys: {keys} not complying the required")
-
-#         class_path, sub_data = obj[keys[0]], obj[keys[1]]
-
-#         self._class_registry.register_class(class_path)
-
-#         if isinstance(sub_data, dict):
-#             return self._entity_data(sub_data, class_path, keys)
-
-#         elif isinstance(sub_data, list):
-#             self._entity_group_data(sub_data, class_path, keys)
-#         else:
-#             raise TypeError("obj is neither 'dict' nor 'list'")
-
-#     def _entity_data(self, obj, class_path, keys):
-#         return self._create_instance(obj, class_path, keys)
-
-#     def _entity_group_data(self, obj, class_path, keys):
-#         # for item in obj:
-#         #     self.entity_data(item, class_path)
-#         # [self.entity_data(item, class_path) for item in obj]
-#         mid = len(obj) // 2
-#         left = obj[:mid]
-#         right = obj[mid:]
-
-#         if len(obj) == 1:
-#             self._entity_data(obj[0], class_path, keys)
-#             return
-
-#         self._entity_group_data(left, class_path, keys)
-#         self._entity_group_data(right, class_path, keys)
-
-#     def _create_instance_child(self, obj):
-#         return self._entity(obj)
-
-#     def _create_instance_children(self, obj):
-#         return [self._create_instance_child(item) for item in obj]
-
-#     def _group_entity(self, obj):
-#         mid = len(obj) // 2
-#         left = obj[:mid]
-#         right = obj[mid:]
-
-#         if len(obj) == 1:
-#             return self._entity(obj[0])
-
-#         self._group_entity(left)
-#         self._group_entity(right)
-
-
-# class HybridSeeder(Seeder):
-
-#     def __init__(self, session):
-#         super().__init__(session)
-#         self.required_keys = [
-#             ('model', 'obj'),
-#             ('model', 'filter')
-#         ]
-
-#     def seed(self, entities, **kwargs):
-#         super().seed(entities, False)
-
-#     def _load_instance(self, class_, kwargs, keys):
-#         if keys[1] == 'obj':
-#             return class_(**kwargs)
-#         else:  # keys[1] == 'filter'
-#             return self.session.query(class_).filter_by(**kwargs).one_or_none()
-
-#     def _add_to_session(self, instance):
-#         self.session.add(instance)
-
-
-# class DataSeek:
-#     def __init__(self):
-#         self.root = '/'
-#         self.current_path = self.root
-#
-#     @staticmethod
-#     def parse_address(path: str):
-#         return list(
-#             [int(x) if x.isdecimal() else x for x in path.split('/') if x != '' and x is not None]
-#         )
-#
-#     def get_data(self, data, path: str):
-#         if path.startswith('/'):
-#             path = path[1:]
-#
-#         # parse
-#         address = self.parse_address(path)
-#
-#         current_data = data
-#         for idx in address:
-#             if isinstance(current_data, str):
-#                 raise TypeError("'str' object is restricted in indexing and slicing")
-#             current_data = current_data[idx]
-#         return current_data
-#
-#     def traverse(self, data):
-#         if isinstance(data, dict):
-#             pass
-#         elif isinstance(data, list):
-#             pass
-
-
 class Seeder:
     def __init__(self, session: sqlalchemy.orm.Session = None):
-        self.session = session
+        self._session = session
         self._class_registry = ClassRegistry()
         self._instances = []
 
         self._required_keys = [
             ('model', 'data')
         ]
+
+    @property
+    def session(self):
+        return self._session
+
+    @session.setter
+    def session(self, value):
+        if not isinstance(value, sqlalchemy.orm.Session):
+            raise TypeError("obj type is not 'Session'.")
+
+        self._session = value
 
     @property
     def instances(self):
@@ -271,7 +91,7 @@ class Seeder:
         self._pre_seed(instance)
 
         if add_to_session is True:
-            self.session.add_all(self.instances)
+            self._session.add_all(self.instances)
 
     def _pre_seed(self, instance, parent=None, parent_attr=None):
         if isinstance(instance, list):
@@ -288,7 +108,8 @@ class Seeder:
                 break
 
         if keys is None:
-            raise KeyError("'filter' key is not allowed. Use HybridSeeder instead.")
+            raise KeyError(
+                "'filter' key is not allowed. Use HybridSeeder instead.")
 
         key_is_data = keys[1] == 'data'
 
@@ -316,7 +137,8 @@ class Seeder:
                         self._pre_seed(v, obj, k[1:])
 
         elif isinstance(instance[keys[1]], dict):
-            obj = self.instantiate_obj(class_path, instance[keys[1]], key_is_data)
+            obj = self.instantiate_obj(
+                class_path, instance[keys[1]], key_is_data)
             # print(parent, parent_attr)
             if parent is not None and parent_attr is not None:
                 attr_ = getattr(parent.__class__, parent_attr)
@@ -369,7 +191,7 @@ class HybridSeeder(Seeder):
 
         if key_is_data is True:
             obj = class_(**filtered_kwargs)
-            self.session.add(obj)
+            self._session.add(obj)
             return obj
         else:
-            return self.session.query(class_).filter_by(**filtered_kwargs).one()
+            return self._session.query(class_).filter_by(**filtered_kwargs).one()
