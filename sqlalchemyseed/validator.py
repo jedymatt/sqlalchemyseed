@@ -40,12 +40,12 @@ class __Tree:
 #         self.root_type = dict
 #         self.root_length = 2
 #
-#         self.required_keys = (
+#         self._required_keys = (
 #             ('model', 'data'),
 #             ('model', 'filter')
 #         )
-#         self.model_type = str
-#         self.entity_types = [dict, list]
+#         self._model_type = str
+#         self._entity_types = [dict, list]
 #
 #     def validate(self, obj):
 #         if isinstance(obj, list):
@@ -66,7 +66,7 @@ class __Tree:
 #             return
 #
 #         obj_keys = None
-#         for keys in self.required_keys:
+#         for keys in self._required_keys:
 #             if all(key in obj.keys() for key in keys):
 #                 obj_keys = keys
 #                 break
@@ -74,9 +74,9 @@ class __Tree:
 #         if obj_keys is None:
 #             raise KeyError('keys not accepted')
 #
-#         if not isinstance(obj[obj_keys[0]], self.model_type):
+#         if not isinstance(obj[obj_keys[0]], self._model_type):
 #             raise TypeError(f'obj[{obj_keys[0]}] is not type \'str\'')
-#         if type(obj[obj_keys[1]]) not in self.entity_types:
+#         if type(obj[obj_keys[1]]) not in self._entity_types:
 #             raise KeyError(f'obj[{obj_keys[1]}] is not type \'dict\' or \'list\'')
 #         # print(obj_keys[1], '=', obj[obj_keys[1]])
 #         if isinstance(obj[obj_keys[1]], list):
@@ -100,12 +100,12 @@ class __Tree:
 class SchemaValidator:
     # root_type = dict
     # root_length = 2
-    required_keys = (
+    _required_keys = (
         ('model', 'data'),
         ('model', 'filter')
     )
-    model_type = str
-    entity_types = [dict, list]
+    _model_type = str
+    _entity_types = [dict, list]
 
     @classmethod
     def validate(cls, obj):
@@ -128,7 +128,7 @@ class SchemaValidator:
             return
 
         obj_keys = None
-        for keys in cls.required_keys:
+        for keys in cls._required_keys:
             if all(key in obj.keys() for key in keys):
                 obj_keys = keys
                 break
@@ -136,9 +136,9 @@ class SchemaValidator:
         if obj_keys is None:
             raise KeyError('keys not accepted')
 
-        if not isinstance(obj[obj_keys[0]], cls.model_type):
+        if not isinstance(obj[obj_keys[0]], cls._model_type):
             raise TypeError(f'obj[{obj_keys[0]}] is not type \'str\'')
-        if type(obj[obj_keys[1]]) not in cls.entity_types:
+        if type(obj[obj_keys[1]]) not in cls._entity_types:
             raise KeyError(f'obj[{obj_keys[1]}] is not type \'dict\' or \'list\'')
         # print(obj_keys[1], '=', obj[obj_keys[1]])
         if isinstance(obj[obj_keys[1]], list):

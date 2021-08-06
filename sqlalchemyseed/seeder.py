@@ -252,7 +252,7 @@ class Seeder:
         self._class_registry = ClassRegistry()
         self._instances = []
 
-        self.required_keys = [
+        self._required_keys = [
             ('model', 'data')
         ]
 
@@ -282,7 +282,7 @@ class Seeder:
 
     def _seed(self, instance: dict, parent=None, parent_attr=None):
         keys = None
-        for r_keys in self.required_keys:
+        for r_keys in self._required_keys:
             if all(key in instance.keys() for key in r_keys):
                 keys = r_keys
                 break
@@ -353,7 +353,7 @@ class Seeder:
 class HybridSeeder(Seeder):
     def __init__(self, session: sqlalchemy.orm.Session):
         super().__init__(session=session)
-        self.required_keys = [
+        self._required_keys = [
             ('model', 'data'),
             ('model', 'filter')
         ]
