@@ -7,7 +7,7 @@ from sqlalchemy import inspect
 from sqlalchemy.exc import NoInspectionAvailable
 from sqlalchemy.orm import RelationshipProperty
 
-from validator import SchemaValidator
+from . import validator
 
 
 def load_entities_from_json(json_filepath):
@@ -17,7 +17,7 @@ def load_entities_from_json(json_filepath):
     except FileNotFoundError as error:
         raise FileNotFoundError(error)
 
-    SchemaValidator.validate(entities)
+    validator.SchemaValidator.validate(entities)
 
     return entities
 
@@ -262,7 +262,7 @@ class Seeder:
 
     def seed(self, instance, add_to_session=True):
         # validate
-        SchemaValidator.validate(instance)
+        validator.SchemaValidator.validate(instance)
 
         # clear previously generated objects
         self._instances.clear()
@@ -345,3 +345,15 @@ class Seeder:
 
         # print(obj)
         return obj
+
+
+class HybridSeeder(Seeder):
+    def __init__(self, session: sqlalchemy.orm.Session):
+        super().__init__(session=session)
+        self.required_keys = [
+            ('model', 'data'),
+            ('model', 'filter')
+        ]
+
+    def instantiate_obj(self, class_path, kwargs):
+        return super().instantiate_obj(class_path, kwargs)

@@ -44,8 +44,10 @@ session.commit()  # or seeder.session.commit()
 
 - Seeder supports model and data key fields.
 - Seeder does not support model and filter key fields.
-- HybridSeeder supports model and data, and model and filter key fields.
+- Seeder when seeding, can specify to not add all entities to session by passing this argument `add_to_session=False` in the `Seeder.seed` method.
+- HybridSeeder supports 'model' and 'data', and 'model' and 'filter' key fields.
 - HybridSeeder enables to query existing objects from the session and assigns it with the relationship.
+- HybridSeeder when seeding, automatically adds all entities to session.
 
 ## When to use HybridSeeder and 'filter' key field?
 
@@ -54,10 +56,13 @@ session.commit()  # or seeder.session.commit()
 from sqlalchemyseed import HybridSeeder
 from tests.db import session
 
+# Assuming that Child(age=5) exists in the database or session,
+#  then we should use 'filter' instead of 'obj'
+#  the the values of 'filter' will query from the database or session, and assign it to the Parent.child 
 data = {
     "model": "models.Parent",
-    "obj": {
-        "child": {
+    "data": {
+        "!child": {
             "model": "models.Child",
             "filter": {
                 "age": 5
@@ -66,8 +71,6 @@ data = {
     }
 }
 
-# Assuming that Child(age=5) exists in the database or session,
-#  then we should use 'filter' instead of 'obj'
 
 # When seeding instances that has 'filter' key, then use HybridSeeder, otherwise use Seeder.
 seeder = HybridSeeder(session)

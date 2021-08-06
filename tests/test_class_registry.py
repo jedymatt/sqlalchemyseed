@@ -1,10 +1,6 @@
 import unittest
 
-from db import session
-from sqlalchemy.orm import sessionmaker
-
-from sqlalchemyseed import ClassRegistry, Seeder
-
+from sqlalchemyseed.seeder import ClassRegistry
 
 class TestClassRegistry(unittest.TestCase):
     def test_get_invalid_item(self):
@@ -13,6 +9,6 @@ class TestClassRegistry(unittest.TestCase):
 
     def test_register_class(self):
         cr = ClassRegistry()
-        cr.register_class('tests.models.Parent')
-        from tests.models import Parent
-        self.assertEqual(cr['tests.models.Parent'], Parent)
+        cr.register_class('models.Company')
+        from models import Company
+        self.assertEqual(cr['models.Company'], Company)
