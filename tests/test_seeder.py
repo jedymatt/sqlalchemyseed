@@ -18,9 +18,9 @@ class TestClassRegistry(unittest.TestCase):
 
     def test_register_class(self):
         cr = ClassRegistry()
-        cr.register_class('models.Company')
-        from models import Company
-        self.assertEqual(cr['models.Company'], Company)
+        cr.register_class('tests.models.Company')
+        from tests.models import Company
+        self.assertIs(cr['tests.models.Company'], Company)
 
 
 class TestSeeder(unittest.TestCase):
@@ -68,18 +68,18 @@ class TestSeeder(unittest.TestCase):
     def test_seed_multiple_entities(self):
         instance = [
             {
-                "model": "models.Company",
+                "model": "tests.models.Company",
                 "data": {
                     "name": "Mike Corporation",
                     "!employees": {
-                        "model": "models.Employee",
+                        "model": "tests.models.Employee",
                         "data": {
                         }
                     }
                 }
             },
             {
-                "model": "models.Company",
+                "model": "tests.models.Company",
                 "data": [
                     {
 
@@ -87,7 +87,7 @@ class TestSeeder(unittest.TestCase):
                 ]
             },
             {
-                "model": "models.Company",
+                "model": "tests.models.Company",
                 "data": {
 
                 }
