@@ -3,8 +3,8 @@ import unittest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from sqlalchemyseed.seeder import ClassRegistry, HybridSeeder, Seeder
-from tests.models import Base
+from sqlalchemyseed import ClassRegistry, HybridSeeder, Seeder
+from tests.models import Base, Company
 
 engine = create_engine('sqlite://')
 Session = sessionmaker(bind=engine)
@@ -43,9 +43,10 @@ class TestSeeder(unittest.TestCase):
             }
         }
 
-        seeder = Seeder()
-        seeder.seed(instance, False)
-        self.assertEqual(len(seeder.instances), 1)
+        with Session() as session:
+            seeder = Seeder(session=session)
+            seeder.seed(instance)
+            self.assertEqual(len(seeder.instances), 1)
 
     def test_seed_no_relationship(self):
         instance = {
@@ -94,13 +95,14 @@ class TestSeeder(unittest.TestCase):
             }
         ]
 
-        seeder = Seeder()
-        seeder.seed(instance, False)
-        self.assertEqual(len(seeder.instances), 3)
+        with Session() as session:
+            seeder = Seeder(session)
+            seeder.seed(instance, False)
+            self.assertEqual(len(seeder.instances), 3)
 
 
 class TestHybridSeeder(unittest.TestCase):
-    def test_seed(self):
+    def test_hybrid_seed_with_relationship(self):
         instance = [
             {
                 'model': 'tests.models.Employee',
@@ -131,6 +133,113 @@ class TestHybridSeeder(unittest.TestCase):
             seeder = HybridSeeder(session)
             seeder.seed(instance)
             self.assertEqual(len(seeder.instances), 3)
+            # session.expire_all()
+
+    def test_filter_with_foreign_key(self):
+        instance = [
+            {
+                'model': 'tests.models.Company',
+                'data': {
+                    'name': 'MyCompany'
+                }
+            },
+            {
+                'model': 'tests.models.Employee',
+                'data': [
+                    {
+                        'name': 'John Smith',
+                        '!company_id': {
+                            'model': 'tests.models.Company',
+                            'filter': {
+                                'name': 'MyCompany'
+                            }
+                        }
+                    },
+                    {
+                        'name': 'Juan Dela Cruz',
+                        '!company_id': {
+                            'model': 'tests.models.Company',
+                            'filter': {
+                                'name': 'MyCompany'
+                            }
+                        }
+                    }
+                ]
+            },
+        ]
+
+        with Session() as session:
+            seeder = HybridSeeder(session)
+            seeder.seed(instance)
+            self.assertEqual(len(seeder.instances), 3)
+            # session.expire_all()
+
+    def test_no_data_key_field(self):
+        instance = [
+            {
+                'model': 'tests.models.Company',
+                'filter': {'name': 'MyCompany'}
+            }
+        ]
+
+        with Session() as session:
+            session.add(
+                Company(name='MyCompany')
+            )
+
+            seeder = HybridSeeder(session)
+            seeder.seed(instance)
+            self.assertEqual(len(seeder.instances), 0)
+
+    def test_seed_nested_relationships(self):
+        instance = {
+            "model": "tests.models.Parent",
+            "data": {
+                "name": "John Smith",
+                "!children": [
+                    {
+                        "model": "tests.models.Child",
+                        "data": {
+                            "name": "Mark Smith",
+                            "!children": [
+                                {
+                                    "model": "tests.models.GrandChild",
+                                    "data": {
+                                        "name": "Alice Smith"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        }
+
+        with Session() as session:
+            seeder = HybridSeeder(session)
+            seeder.seed(instance)
+            print(seeder.instances[0].children[0].children)
+            self.assertEqual(
+                seeder.instances[0].children[0].children[0].name, "Alice Smith")
+
+    def test_foreign_key_data_instead_of_filter(self):
+        instance = {
+            'model': 'tests.models.Employee',
+            'data': {
+                'name': 'John Smith',
+                '!company_id': {
+                        'model': 'tests.models.Company',
+                    'data': {
+                        'name': 'MyCompany'
+                    }
+                }
+            },
+
+        }
+
+        with Session() as session:
+            seeder = HybridSeeder(session)
+            self.assertRaises(TypeError, lambda: seeder.seed(instance))
 
 
 if __name__ == '__main__':
