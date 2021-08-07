@@ -5,7 +5,7 @@
 [![PyPI - License](https://img.shields.io/pypi/l/sqlalchemyseed)](https://github.com/jedymatt/sqlalchemyseed/blob/main/LICENSE)
 [![Python package](https://github.com/jedymatt/sqlalchemyseed/actions/workflows/python-package.yml/badge.svg)](https://github.com/jedymatt/sqlalchemyseed/actions/workflows/python-package.yml)
 
-Sqlalchemy seeder. Supports nested relationships.
+Sqlalchemy seeder that supports nested relationships.
 
 ## Installation
 
@@ -20,10 +20,9 @@ pip install sqlalchemyseed
 ## Getting Started
 
 ```python
-
 # main.py
 from sqlalchemyseed import load_entities_from_json, Seeder
-from tests.db import session
+from db import session
 
 # load entities
 entities = load_entities_from_json('tests/test_data.json')
@@ -37,29 +36,28 @@ seeder.seed(entities)
 
 # Committing
 session.commit()  # or seeder.session.commit()
-
-
 ```
 
 ## Seeder vs. HybridSeeder
 
-- Seeder supports model and data key fields.
-- Seeder does not support model and filter key fields.
-- Seeder when seeding, can specify to not add all entities to session by passing this argument `add_to_session=False` in the `Seeder.seed` method.
-- HybridSeeder supports 'model' and 'data', and 'model' and 'filter' key fields.
-- HybridSeeder enables to query existing objects from the session and assigns it with the relationship.
-- HybridSeeder when seeding, automatically adds all entities to session.
+| Features & Options                                                     | Seeder             | HybridSeeder       |
+| :--------------------------------------------------------------------- | :----------------- | :----------------- |
+| Support `model` and `data` keys                                        | :heavy_check_mark: | :heavy_check_mark: |
+| Support `model` and `filter` keys                                      | :x:                | :heavy_check_mark: |
+| Optional argument `add_to_session=False` in the `seed` method          | :heavy_check_mark: | :x:                |
+| Assign existing objects from session or db to a relationship attribute | :x:                | :heavy_check_mark: |
 
 ## When to use HybridSeeder and 'filter' key field?
 
+Assuming that `Child(age=5)` exists in the database or session,
+then we should use *filter* instead of *data*,
+the values of *filter* will query from the database or session,
+and assign it to the `Parent.child`
+
 ```python
-
 from sqlalchemyseed import HybridSeeder
-from tests.db import session
+from db import session
 
-# Assuming that Child(age=5) exists in the database or session,
-#  then we should use 'filter' instead of 'obj'
-#  the the values of 'filter' will query from the database or session, and assign it to the Parent.child 
 data = {
     "model": "models.Parent",
     "data": {
@@ -77,9 +75,57 @@ data = {
 seeder = HybridSeeder(session)
 seeder.seed(data)
 
+session.commit() # or seeder.sesssion.commit()
 ```
 
-## No Relationship
+## Relationships
+
+In adding a relationship attribute, add prefix **!** to the key in order to identify it.
+
+### Referencing relationship object or a foreign key
+
+If your class don't have a relationship attribute but instead a foreign key attribute you can use it the same as how you did it on a relationship attribute
+
+```python
+from sqlalchemyseed import HybridSeeder
+from db import session
+
+instance = [
+    {
+        'model': 'tests.models.Company',
+        'data': {'name': 'MyCompany'}
+    },
+    {
+        'model': 'tests.models.Employee',
+        'data':[  
+            {
+                'name': 'John Smith',
+                # foreign key attribute
+                '!company_id': {
+                    'model': 'tests.models.Company',
+                    'filter': {
+                        'name': 'MyCompany'
+                    }
+                }
+            },
+            {
+                'name': 'Juan Dela Cruz',
+                # relationship attribute
+                '!company': {
+                    'model': 'tests.models.Company',
+                    'filter': {
+                        'name': 'MyCompany'
+                    }
+            }
+        ]
+    }
+]
+
+seeder = HybridSeeder(session)
+seeder.seed(instance)
+```
+
+### No Relationship
 
 ```json5
 // test_data.json
@@ -107,10 +153,6 @@ seeder.seed(data)
     }
 ]
 ```
-
-## Relationships
-
-In adding a relationship attribute, add prefix '!' to the key in order to identify it.
 
 ### One to One
 
@@ -178,7 +220,7 @@ In adding a relationship attribute, add prefix '!' to the key in order to identi
 ]
 ```
 
-## Example of Nested Relationships
+### Example of Nested Relationships
 
 ```json
 {
@@ -203,5 +245,4 @@ In adding a relationship attribute, add prefix '!' to the key in order to identi
         ]
     }
 }
-
 ```

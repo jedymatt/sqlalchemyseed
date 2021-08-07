@@ -30,3 +30,32 @@ class Employee(Base):
 
     def __repr__(self) -> str:
         return f"<Employee(name='{self.name}', company='{self.company}')>"
+
+
+class Parent(Base):
+    __tablename__ = 'parents'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(255))
+    children = relationship('Child')
+
+    def __repr__(self) -> str:
+        return f"<Parent(name='{self.name}', children='{[child.name if child.name is not None else child for child in self.children]}')>"
+
+
+class Child(Base):
+    __tablename__ = 'children'
+    
+    id = Column(Integer, primary_key=True)
+    name = Column(String(255))
+    parent_id = Column(Integer, ForeignKey('parents.id'))
+    
+    children = relationship('GrandChild')
+    
+    
+class GrandChild(Base):
+    __tablename__ = 'grand_children'
+    
+    id = Column(Integer, primary_key=True)
+    name = Column(String(255))
+    parent_id = Column(Integer, ForeignKey('children.id'))
