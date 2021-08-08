@@ -4,12 +4,12 @@ python:
     - "3.7"
     - "3.8"
     - "3.9"
-os:
-    - linux
-    - osx
-    - windows
+# os:
+#     - linux
+#     - osx
+#     - windows
 before_install:
-    - python -m pip install --upgrade pip
+    - pip3 install --upgrade pip
 
 install:
     - pip install -r requirements.txt
