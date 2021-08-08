@@ -1,2 +1,1 @@
 sqlalchemy>=1.4.0
-jsonschema>=3.2.0

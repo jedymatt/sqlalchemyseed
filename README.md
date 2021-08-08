@@ -9,13 +9,28 @@ Sqlalchemy seeder that supports nested relationships.
 
 ## Installation
 
+Default installation
+
 ```commandline
 pip install sqlalchemyseed
 ```
 
-### Dependencies
+When using yaml to loading entities from yaml files.
+Execute this command to install necessary dependencies
+
+```commandline
+pip install sqlalchemyseed[yaml]
+```
+
+## Dependencies
+
+Required
 
 - SQAlchemy>=1.4.0
+
+Optional
+
+- PyYAML>=5.4.0
 
 ## Getting Started
 
