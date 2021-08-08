@@ -1,26 +1,16 @@
 import importlib
-import json
 from inspect import isclass
 
 import sqlalchemy.orm
-from sqlalchemy import Table, column, inspect, select, table, text
+from sqlalchemy import inspect
 from sqlalchemy.exc import NoInspectionAvailable
 from sqlalchemy.orm import ColumnProperty, RelationshipProperty
-from sqlalchemy.orm.relationships import foreign
 
-from . import validator
-
-
-def load_entities_from_json(json_filepath):
-    try:
-        with open(json_filepath, 'r') as f:
-            entities = json.loads(f.read())
-    except FileNotFoundError as error:
-        raise FileNotFoundError(error)
-
-    validator.SchemaValidator.validate(entities)
-
-    return entities
+try:
+    # relative import
+    from . import validator
+except ImportError:
+    import validator
 
 
 class ClassRegistry:
@@ -218,7 +208,7 @@ class HybridSeeder(Seeder):
                 class_attr = getattr(parent.__class__, parent_attr_name)
                 if isinstance(class_attr.property, ColumnProperty):
                     raise TypeError('invalid class attribute type')
-            
+
             obj = class_(**filtered_kwargs)
             self._session.add(obj)
             # self._session.flush()
@@ -229,7 +219,7 @@ class HybridSeeder(Seeder):
                 if isinstance(class_attr.property, ColumnProperty):
                     foreign_key = str(
                         list(getattr(parent.__class__, parent_attr_name).foreign_keys)[0].column)
-                    foreign_key_id=self._query_instance_id(
+                    foreign_key_id = self._query_instance_id(
                         class_, filtered_kwargs, foreign_key)
                     return foreign_key_id
 
@@ -237,9 +227,9 @@ class HybridSeeder(Seeder):
 
     def _query_instance_id(self, class_, filtered_kwargs, foreign_key):
         # .id should be the foreign key
-        arr=foreign_key.rsplit('.')
-        column_name=arr[len(arr)-1]
+        arr = foreign_key.rsplit('.')
+        column_name = arr[len(arr)-1]
 
-        result=self.session.query(
+        result = self.session.query(
             getattr(class_, column_name)).filter_by(**filtered_kwargs).one()
         return getattr(result, column_name)
