@@ -1,6 +1,0 @@
-- model: tests.models.Employee
-  data:
-      name: Juan Dela Cruz
-- model: tests.models.Company
-  data:
-      name: Carte
