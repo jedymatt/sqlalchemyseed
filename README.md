@@ -25,11 +25,11 @@ pip install sqlalchemyseed[yaml]
 
 ## Dependencies
 
-Required
+Required dependencies
 
 - SQAlchemy>=1.4.0
 
-Optional
+Optional dependencies
 
 - PyYAML>=5.4.0
 
