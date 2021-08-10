@@ -63,12 +63,12 @@ class __Tree:
 class SchemaValidator:
     # root_type = dict
     # root_length = 2
-    _required_keys = (
+    __required_keys = (
         ('model', 'data'),
         ('model', 'filter')
     )
-    _model_type = str
-    _entity_types = [dict, list]
+    __model_type = str
+    __entity_types = [dict, list]
 
     @classmethod
     def validate(cls, obj):
@@ -91,7 +91,7 @@ class SchemaValidator:
             return
 
         obj_keys = None
-        for keys in cls._required_keys:
+        for keys in cls.__required_keys:
             if all(key in obj.keys() for key in keys):
                 obj_keys = keys
                 break
@@ -99,9 +99,9 @@ class SchemaValidator:
         if obj_keys is None:
             raise KeyError('keys not accepted')
 
-        if not isinstance(obj[obj_keys[0]], cls._model_type):
+        if not isinstance(obj[obj_keys[0]], cls.__model_type):
             raise TypeError(f'obj[{obj_keys[0]}] is not type \'str\'')
-        if type(obj[obj_keys[1]]) not in cls._entity_types:
+        if type(obj[obj_keys[1]]) not in cls.__entity_types:
             raise KeyError(
                 f'obj[{obj_keys[1]}] is not type \'dict\' or \'list\'')
         # print(obj_keys[1], '=', obj[obj_keys[1]])
@@ -122,3 +122,30 @@ class SchemaValidator:
                 # print(f'{k}, {v}')
                 if str(k).startswith('!'):
                     cls.validate(v)
+
+
+_MODEL_TYPE = str
+
+
+class KeyType:
+
+    __model = str
+    __data = [list, dict]
+    __filter = [list, dict]
+
+    @property
+    def model(self):
+        return self.__model
+
+
+class FutureSchemaValidator:
+
+    @staticmethod
+    def validate(entities):
+        print(getattr(KeyType, '__model'))
+
+
+if __name__ == '__main__':
+    KeyType.__model = int
+    # FutureSchemaValidator.validate({})
+    print(KeyType().model)

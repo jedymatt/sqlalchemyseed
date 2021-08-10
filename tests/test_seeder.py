@@ -3,27 +3,19 @@ import unittest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from sqlalchemyseed import ClassRegistry, HybridSeeder, Seeder
+from sqlalchemyseed import HybridSeeder, Seeder
 from tests.models import Base, Company
-
-engine = create_engine('sqlite://')
-Session = sessionmaker(bind=engine)
-Base.metadata.create_all(engine)
-
-
-class TestClassRegistry(unittest.TestCase):
-    def test_get_invalid_item(self):
-        class_registry = ClassRegistry()
-        self.assertRaises(KeyError, lambda: class_registry['InvalidClass'])
-
-    def test_register_class(self):
-        cr = ClassRegistry()
-        cr.register_class('tests.models.Company')
-        from tests.models import Company
-        self.assertIs(cr['tests.models.Company'], Company)
 
 
 class TestSeeder(unittest.TestCase):
+    def setUp(self) -> None:
+        self.engine = create_engine('sqlite://')
+        self.Session = sessionmaker(bind=self.engine)
+        Base.metadata.create_all(self.engine)
+
+    def tearDown(self) -> None:
+        Base.metadata.drop_all(self.engine)
+
     def test_seed(self):
         instance = {
             'model': 'tests.models.Company',
@@ -43,7 +35,7 @@ class TestSeeder(unittest.TestCase):
             }
         }
 
-        with Session() as session:
+        with self.Session() as session:
             seeder = Seeder(session=session)
             seeder.seed(instance)
             self.assertEqual(len(seeder.instances), 1)
@@ -61,10 +53,11 @@ class TestSeeder(unittest.TestCase):
             ]
         }
 
-        seeder = Seeder()
-        # self.assertIsNone(seeder.seed(instance))
-        seeder.seed(instance, False)
-        self.assertEqual(len(seeder.instances), 2)
+        with self.Session() as session:
+            seeder = Seeder(session)
+            # self.assertIsNone(seeder.seed(instance))
+            seeder.seed(instance)
+            self.assertEqual(len(seeder.instances), 2)
 
     def test_seed_multiple_entities(self):
         instance = [
@@ -95,13 +88,21 @@ class TestSeeder(unittest.TestCase):
             }
         ]
 
-        with Session() as session:
+        with self.Session() as session:
             seeder = Seeder(session)
-            seeder.seed(instance, False)
+            seeder.seed(instance)
             self.assertEqual(len(seeder.instances), 3)
 
 
 class TestHybridSeeder(unittest.TestCase):
+    def setUp(self) -> None:
+        self.engine = create_engine('sqlite://')
+        self.Session = sessionmaker(bind=self.engine)
+        Base.metadata.create_all(self.engine)
+
+    def tearDown(self) -> None:
+        Base.metadata.drop_all(self.engine)
+
     def test_hybrid_seed_with_relationship(self):
         instance = [
             {
@@ -129,7 +130,7 @@ class TestHybridSeeder(unittest.TestCase):
                 }
             }]
 
-        with Session() as session:
+        with self.Session() as session:
             seeder = HybridSeeder(session)
             seeder.seed(instance)
             self.assertEqual(len(seeder.instances), 3)
@@ -168,7 +169,7 @@ class TestHybridSeeder(unittest.TestCase):
             },
         ]
 
-        with Session() as session:
+        with self.Session() as session:
             seeder = HybridSeeder(session)
             seeder.seed(instance)
             self.assertEqual(len(seeder.instances), 3)
@@ -182,7 +183,7 @@ class TestHybridSeeder(unittest.TestCase):
             }
         ]
 
-        with Session() as session:
+        with self.Session() as session:
             session.add(
                 Company(name='MyCompany')
             )
@@ -215,7 +216,7 @@ class TestHybridSeeder(unittest.TestCase):
             }
         }
 
-        with Session() as session:
+        with self.Session() as session:
             seeder = HybridSeeder(session)
             seeder.seed(instance)
             print(seeder.instances[0].children[0].children)
@@ -228,7 +229,7 @@ class TestHybridSeeder(unittest.TestCase):
             'data': {
                 'name': 'John Smith',
                 '!company_id': {
-                        'model': 'tests.models.Company',
+                    'model': 'tests.models.Company',
                     'data': {
                         'name': 'MyCompany'
                     }
@@ -237,7 +238,7 @@ class TestHybridSeeder(unittest.TestCase):
 
         }
 
-        with Session() as session:
+        with self.Session() as session:
             seeder = HybridSeeder(session)
             self.assertRaises(TypeError, lambda: seeder.seed(instance))
 
