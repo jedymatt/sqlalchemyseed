@@ -22,7 +22,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from .seeder import ClassRegistry
 from .seeder import HybridSeeder
 from .seeder import Seeder
 from .loader import load_entities_from_json

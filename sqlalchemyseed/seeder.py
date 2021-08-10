@@ -20,61 +20,25 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
 """
-
-import importlib
-from inspect import isclass
 
 import sqlalchemy.orm
 from sqlalchemy import inspect
 from sqlalchemy.exc import NoInspectionAvailable
 from sqlalchemy.orm import ColumnProperty, RelationshipProperty
 
-try:
-    # relative import
+try:  # relative import
     from . import validator
+    from .class_cluster import ClassCluster
 except ImportError:
     import validator
-
-
-class ClassRegistry:
-    def __init__(self):
-        self._classes = {}
-
-    def register_class(self, class_path: str):
-        try:
-            module_name, class_name = class_path.rsplit('.', 1)
-        except ValueError:
-            raise ValueError('Invalid module or class input format.')
-
-        if class_name not in self._classes:
-            class_ = getattr(importlib.import_module(module_name), class_name)
-
-            try:
-                if isclass(class_) and inspect(class_):
-                    self._classes[class_path] = class_
-                else:
-                    raise TypeError("'{}' is not a class".format(class_name))
-            except NoInspectionAvailable:
-                raise TypeError(
-                    "'{}' is an unsupported class".format(class_name))
-
-    def __getitem__(self, class_path: str):
-        return self._classes[class_path]
-
-    @property
-    def registered_classes(self):
-        return self._classes.values()
-
-    def clear(self):
-        self._classes.clear()
+    from class_cluster import ClassCluster
 
 
 class Seeder:
     def __init__(self, session: sqlalchemy.orm.Session = None):
         self._session = session
-        self._class_registry = ClassRegistry()
+        self._class_registry = ClassCluster()
         self._instances = []
 
         self._required_keys = [
@@ -130,7 +94,7 @@ class Seeder:
         key_is_data = keys[1] == 'data'
 
         class_path = instance[keys[0]]
-        self._class_registry.register_class(class_path)
+        self._class_registry.add_class(class_path)
 
         if isinstance(instance[keys[1]], list):
             for value in instance[keys[1]]:
@@ -209,7 +173,7 @@ class HybridSeeder(Seeder):
     def seed(self, instance):
         super().seed(instance, False)
 
-    def instantiate_obj(self, class_path, kwargs, key_is_data, parent, parent_attr_name):
+    def instantiate_obj(self, class_path, kwargs, key_is_data, parent=None, parent_attr_name=None):
         """Instantiates or queries object, or queries ForeignKey
 
         Args:
@@ -251,9 +215,8 @@ class HybridSeeder(Seeder):
             return self._session.query(class_).filter_by(**filtered_kwargs).one()
 
     def _query_instance_id(self, class_, filtered_kwargs, foreign_key):
-        # .id should be the foreign key
         arr = foreign_key.rsplit('.')
-        column_name = arr[len(arr)-1]
+        column_name = arr[len(arr) - 1]
 
         result = self.session.query(
             getattr(class_, column_name)).filter_by(**filtered_kwargs).one()

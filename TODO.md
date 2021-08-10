@@ -14,3 +14,6 @@
 
 - reference foreign key attribute no longer need `model` key
   - affected by change: validator and seeder
+
+- seed entities from csv file
+  - limitations: does not support reference relationships
