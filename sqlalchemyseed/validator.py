@@ -22,6 +22,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+try:
+    from .class_cluster import ClassCluster
+except ImportError:
+    from class_cluster import ClassCluster
+
 
 def __path_str(path: list):
     return '.'.join(path)
@@ -124,28 +129,47 @@ class SchemaValidator:
                     cls.validate(v)
 
 
-_MODEL_TYPE = str
+class KeyValidator:
+    __keys = {'model': [str], 'data': [list, dict], 'filter': [list, dict]}
 
+    @classmethod
+    def is_valid(cls, key: str, instance):
+        if key not in cls.__keys.keys():
+            raise KeyError('Invalid Key')
+        
+        key_types = cls.__keys[key]
 
-class KeyType:
+        for key_type in key_types:
+            if isinstance(instance, key_type):
+                return True
 
-    __model = str
-    __data = [list, dict]
-    __filter = [list, dict]
+        return False
 
-    @property
-    def model(self):
-        return self.__model
+    @classmethod
+    def is_valid_model(cls,  instance):
+        return cls.is_valid('model', instance)
+
+    @classmethod
+    def is_valid_data(cls,  instance):
+        return cls.is_valid('data', instance)
+
+    @classmethod
+    def is_valid_filter(cls,  instance):
+        return cls.is_valid('filter', instance)
 
 
 class FutureSchemaValidator:
+    _ccluster = ClassCluster()
+    __parent_keys = [('model', str), ('data', list, dict),
+                     ('filter', list, dict)]
 
-    @staticmethod
-    def validate(entities):
-        print(getattr(KeyType, '__model'))
+    @classmethod
+    def validate(cls, entities, prefix='!'):
+        cls._ccluster.clear()
 
 
 if __name__ == '__main__':
-    KeyType.__model = int
-    # FutureSchemaValidator.validate({})
-    print(KeyType().model)
+    FutureSchemaValidator.__model_type = int
+    FutureSchemaValidator.validate({})
+    # print(KeyValidator.is_valid_model(''))
+    # print(KeyType().model)
