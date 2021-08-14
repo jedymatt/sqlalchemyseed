@@ -133,29 +133,29 @@ class KeyValidator:
     __keys = {'model': [str], 'data': [list, dict], 'filter': [list, dict]}
 
     @classmethod
-    def is_valid(cls, key: str, instance):
+    def is_valid(cls, key: str, obj):
         if key not in cls.__keys.keys():
             raise KeyError('Invalid Key')
         
         key_types = cls.__keys[key]
 
         for key_type in key_types:
-            if isinstance(instance, key_type):
+            if isinstance(obj, key_type):
                 return True
 
         return False
 
     @classmethod
-    def is_valid_model(cls,  instance):
-        return cls.is_valid('model', instance)
+    def is_valid_model(cls,  obj):
+        return cls.is_valid('model', obj)
 
     @classmethod
-    def is_valid_data(cls,  instance):
-        return cls.is_valid('data', instance)
+    def is_valid_data(cls,  obj):
+        return cls.is_valid('data', obj)
 
     @classmethod
-    def is_valid_filter(cls,  instance):
-        return cls.is_valid('filter', instance)
+    def is_valid_filter(cls,  obj):
+        return cls.is_valid('filter', obj)
 
 
 class FutureSchemaValidator:
