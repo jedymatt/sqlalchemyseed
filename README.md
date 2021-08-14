@@ -3,8 +3,8 @@
 [![PyPI](https://img.shields.io/pypi/v/sqlalchemyseed)](https://pypi.org/project/sqlalchemyseed)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/sqlalchemyseed)](https://pypi.org/project/sqlalchemyseed)
 [![PyPI - License](https://img.shields.io/pypi/l/sqlalchemyseed)](https://github.com/jedymatt/sqlalchemyseed/blob/main/LICENSE)
-[![Python package](https://github.com/jedymatt/sqlalchemyseed/actions/workflows/python-package.yml/badge.svg)](https://github.com/jedymatt/sqlalchemyseed/actions/workflows/python-package.yml)
 [![Build Status](https://app.travis-ci.com/jedymatt/sqlalchemyseed.svg?branch=main)](https://app.travis-ci.com/jedymatt/sqlalchemyseed)
+[![Python package](https://github.com/jedymatt/sqlalchemyseed/actions/workflows/python-package.yml/badge.svg)](https://github.com/jedymatt/sqlalchemyseed/actions/workflows/python-package.yml)
 
 Sqlalchemy seeder that supports nested relationships.
 
@@ -16,8 +16,7 @@ Default installation
 pip install sqlalchemyseed
 ```
 
-When using yaml to loading entities from yaml files.
-Execute this command to install necessary dependencies
+When using yaml to loading entities from yaml files. Execute this command to install necessary dependencies
 
 ```commandline
 pip install sqlalchemyseed[yaml]
@@ -65,10 +64,8 @@ session.commit()  # or seeder.session.commit()
 
 ## When to use HybridSeeder and 'filter' key field?
 
-Assuming that `Child(age=5)` exists in the database or session,
-then we should use *filter* instead of *data*,
-the values of *filter* will query from the database or session,
-and assign it to the `Parent.child`
+Assuming that `Child(age=5)` exists in the database or session, then we should use *filter* instead of *data*, the
+values of *filter* will query from the database or session, and assign it to the `Parent.child`
 
 ```python
 from sqlalchemyseed import HybridSeeder
@@ -86,12 +83,11 @@ data = {
     }
 }
 
-
 # When seeding instances that has 'filter' key, then use HybridSeeder, otherwise use Seeder.
 seeder = HybridSeeder(session)
 seeder.seed(data)
 
-session.commit() # or seeder.sesssion.commit()
+session.commit()  # or seeder.sesssion.commit()
 ```
 
 ## Relationships
@@ -100,7 +96,8 @@ In adding a relationship attribute, add prefix **!** to the key in order to iden
 
 ### Referencing relationship object or a foreign key
 
-If your class don't have a relationship attribute but instead a foreign key attribute you can use it the same as how you did it on a relationship attribute
+If your class don't have a relationship attribute but instead a foreign key attribute you can use it the same as how you
+did it on a relationship attribute
 
 ```python
 from sqlalchemyseed import HybridSeeder
@@ -113,7 +110,7 @@ instance = [
     },
     {
         'model': 'tests.models.Employee',
-        'data':[  
+        'data': [
             {
                 'name': 'John Smith',
                 # foreign key attribute
@@ -132,7 +129,7 @@ instance = [
                     'filter': {
                         'name': 'MyCompany'
                     }
-            }
+                }
         ]
     }
 ]
