@@ -47,11 +47,11 @@ def parse_class_path(class_path: str):
             "'{}' is an unsupported class".format(class_name))
 
 
-class ClassCluster:
+class ClassRegistry:
     def __init__(self):
         self._classes = {}
 
-    def add_class(self, class_path: str):
+    def register_class(self, class_path: str):
         if class_path in self._classes.keys():
             return
 

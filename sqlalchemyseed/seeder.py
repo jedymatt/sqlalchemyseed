@@ -29,16 +29,16 @@ from sqlalchemy.orm import ColumnProperty, RelationshipProperty
 
 try:  # relative import
     from . import validator
-    from .class_cluster import ClassCluster
+    from .class_registry import ClassRegistry
 except ImportError:
     import validator
-    from class_cluster import ClassCluster
+    from class_registry import ClassRegistry
 
 
 class Seeder:
     def __init__(self, session: sqlalchemy.orm.Session = None):
         self._session = session
-        self._class_registry = ClassCluster()
+        self._class_registry = ClassRegistry()
         self._instances = []
 
         self._required_keys = [
@@ -94,7 +94,7 @@ class Seeder:
         key_is_data = keys[1] == 'data'
 
         class_path = instance[keys[0]]
-        self._class_registry.add_class(class_path)
+        self._class_registry.register_class(class_path)
 
         if isinstance(instance[keys[1]], list):
             for value in instance[keys[1]]:
@@ -184,7 +184,7 @@ class HybridSeeder(Seeder):
             parent_attr_name (str): parent attribute name
 
         Returns:
-            Any: instantiated object or queried oject, or foreign key id
+            Any: instantiated object or queried object, or foreign key id
         """
 
         class_ = self._class_registry[class_path]

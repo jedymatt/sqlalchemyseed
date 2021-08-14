@@ -219,7 +219,7 @@ class TestHybridSeeder(unittest.TestCase):
         with self.Session() as session:
             seeder = HybridSeeder(session)
             seeder.seed(instance)
-            print(seeder.instances[0].children[0].children)
+            # print(seeder.instances[0].children[0].children)
             self.assertEqual(
                 seeder.instances[0].children[0].children[0].name, "Alice Smith")
 
