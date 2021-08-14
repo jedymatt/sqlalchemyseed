@@ -22,6 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+from typing import NamedTuple
+from collections import namedtuple
+
+
 try:
     from .class_cluster import ClassCluster
 except ImportError:
@@ -129,47 +133,134 @@ class SchemaValidator:
                     cls.validate(v)
 
 
-class KeyValidator:
-    __keys = {'model': [str], 'data': [list, dict], 'filter': [list, dict]}
+class FutureKey:
+    def __init__(self, label: str, type_: list):
+        self.label = label
+        self.type = type_
+
+    def unpack(self):
+        return self.label, self.type
 
     @classmethod
-    def is_valid(cls, key: str, obj):
-        if key not in cls.__keys.keys():
-            raise KeyError('Invalid Key')
-        
-        key_types = cls.__keys[key]
-
-        for key_type in key_types:
-            if isinstance(obj, key_type):
-                return True
-
-        return False
+    def model(cls):
+        return cls('model', str)
 
     @classmethod
-    def is_valid_model(cls,  obj):
-        return cls.is_valid('model', obj)
+    def filter(cls):
+        return cls('filter', dict)
 
     @classmethod
-    def is_valid_data(cls,  obj):
-        return cls.is_valid('data', obj)
+    def data(cls):
+        return cls('filter', dict)
+
+    def is_valid_type(self, entity):
+        return isinstance(entity, self.type)
 
     @classmethod
-    def is_valid_filter(cls,  obj):
-        return cls.is_valid('filter', obj)
+    def source_keys(cls):
+        """The possible pairs of model key [data, filter]
+
+        Returns:
+            list: list of keys object
+        """
+        return [cls.data(), cls.filter()]
+
+    # @classmethod
+    # def iter_source_keys(cls):
+    #     for source_key in cls.source_keys():
+    #         yield source_key.unpack()
+
+    @classmethod
+    def source_keys_labels(cls) -> list:
+        return [source_key.label for source_key in cls.source_keys()]
+
+    def __repr__(self):
+        return "<{}(label='{}', type='{}')>".format(self.__class__.__name__, self.label, self.type)
+
+
+Parent = namedtuple('Parent', ['label', 'instance'])
 
 
 class FutureSchemaValidator:
     _ccluster = ClassCluster()
-    __parent_keys = [('model', str), ('data', list, dict),
-                     ('filter', list, dict)]
+    __model_key = FutureKey.model()
+    __source_keys = FutureKey.source_keys()
 
     @classmethod
     def validate(cls, entities, prefix='!'):
         cls._ccluster.clear()
 
+        cls._pre_validate(entities, prefix)
+
+    @classmethod
+    def _pre_validate(cls, entities, prefix, parent: Parent = None):
+        if isinstance(entities, dict):
+            cls._validate(entities, prefix, parent)
+        elif isinstance(entities, list):
+            for item in entities:
+                cls._validate(item, prefix, parent)
+        else:
+            raise TypeError("invalid type, should be list or dict")
+
+    @classmethod
+    def _validate(cls, entity: dict, prefix, parent):
+        if not isinstance(entity, dict):
+            raise TypeError("invalid type, should be dict")
+
+        if len(entity) > 2:
+            raise ValueError("should not have items for than 2.")
+
+        if len(entity) == 0:
+            return
+
+        if parent is None:
+            model_key = cls.__model_key
+            # check if the current keys has model key
+            if model_key.label not in entity.keys():
+                raise ValueError("Missing required 'model' key.")
+
+            model_data = entity[model_key.label]
+            # check if key model is valid
+            if not model_key.is_valid_type(model_data):
+                raise TypeError(
+                    f"Invalid type, '{model_key.label}' should be '{model_key.type}'")
+
+        # get source key, either data or filter key
+        source_key = next(
+            (sk for sk in cls.__source_keys if sk.label in entity.keys()),
+            None)
+
+        # check if current keys has at least, data or filter key
+        if source_key is None:
+            raise KeyError("Missing 'data' or 'filter' key.")
+
+        source_data = entity[source_key.label]
+
+        if isinstance(source_data, list):
+            for item in source_data:
+                if not source_key.is_valid_type(item):
+                    raise TypeError(
+                        f"Invalid type, '{source_key.label}' should be '{source_key.type}'")
+
+                # check if item is a relationship attribute
+        elif source_key.is_valid_type(source_data):
+            # check if item is a relationship attribute
+            return
+
+        # else
+        raise TypeError(
+            f"Invalid type, '{source_key.label}' should be '{source_key.type}'")
+
+    @classmethod
+    def _check_children(cls, source_data: dict, prefix):
+        for key, value in source_data.items():
+            if str(key).startswith(prefix):
+                # TODO: parent unfilled
+                parent = Parent(label=str(key), )
+                cls._pre_validate(value, prefix, parent=parent)
 
 if __name__ == '__main__':
-    FutureSchemaValidator.__model_type = int
+    FutureSchemaValidator.validate({
+    })
     FutureSchemaValidator.validate({})
-    # print(KeyValidator.is_valid_model(''))
-    # print(KeyType().model)
+    pass
