@@ -45,17 +45,17 @@ class Parent(Base):
 
 class Child(Base):
     __tablename__ = 'children'
-    
+
     id = Column(Integer, primary_key=True)
     name = Column(String(255))
     parent_id = Column(Integer, ForeignKey('parents.id'))
-    
+
     children = relationship('GrandChild')
-    
-    
+
+
 class GrandChild(Base):
     __tablename__ = 'grand_children'
-    
+
     id = Column(Integer, primary_key=True)
     name = Column(String(255))
     parent_id = Column(Integer, ForeignKey('children.id'))
