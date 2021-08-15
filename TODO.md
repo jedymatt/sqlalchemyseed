@@ -27,8 +27,8 @@
         - none found yet
         - alternative, by getting the mappers, we can check its classes by searching
           in `list(models.Employee.registry.mappers)`, first, get the table name of the attribute with foreign
-          key `str(list(Employee.company_id.foreign_keys)[0].column.table)`, then use it to iterate through the mappers by
-          looking for its match table name `table_name == str(mapper.class_.__table__)`
+          key `str(list(Employee.company_id.foreign_keys)[0].column.table.name)`, then use it to iterate through the mappers by
+          looking for its match table name `table_name == str(mapper.class_.__tablename__)`
 
 - seed entities from csv file
     - limitations: does not support reference relationships

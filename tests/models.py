@@ -59,3 +59,27 @@ class GrandChild(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(255))
     parent_id = Column(Integer, ForeignKey('children.id'))
+
+
+class Character(Base):
+    __tablename__ = 'characters'
+
+    id = Column(Integer, primary_key=True)
+    type = Column(String(50))
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'character',
+        'polymorphic_on': type
+    }
+
+
+class Player(Character):
+    # __tablename__ = 'players'
+    #
+    # id = Column(Integer, ForeignKey('characters.id'), primary_key=True)
+    #
+    # player_id = Column(Integer, ForeignKey('players.id'))
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'player'
+    }
