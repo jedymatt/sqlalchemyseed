@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+import csv
 import json
 import sys
 
@@ -30,7 +31,6 @@ try:
     from . import validator
 except ImportError:
     import validator
-
 
 try:
     import yaml
@@ -62,6 +62,27 @@ def load_entities_from_yaml(yaml_filepath):
             entities = yaml.load(f.read(), Loader=yaml.SafeLoader)
     except FileNotFoundError as error:
         raise FileNotFoundError(error)
+
+    validator.SchemaValidator.validate(entities)
+
+    return entities
+
+
+def load_entities_from_csv(csv_filepath: str, model) -> dict:
+    """
+
+    :param csv_filepath: string csv file path
+    :param model: either str or class
+    :return: dict of entities
+    """
+    with open(csv_filepath, 'r') as f:
+        source_data = list(map(dict, csv.DictReader(f, skipinitialspace=True)))
+        if isinstance(model, str):
+            model_name = model
+        else:
+            model_name = '.'.join([model.__module__, model.__name__])
+
+        entities = {'model': model_name, 'data': source_data}
 
     validator.SchemaValidator.validate(entities)
 

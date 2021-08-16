@@ -24,8 +24,8 @@ SOFTWARE.
 
 import sqlalchemy.orm
 from sqlalchemy import inspect
-from sqlalchemy.exc import NoInspectionAvailable
-from sqlalchemy.orm import ColumnProperty, RelationshipProperty
+from sqlalchemy.orm import ColumnProperty
+from sqlalchemy.orm import RelationshipProperty
 
 try:  # relative import
     from . import validator
