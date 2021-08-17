@@ -69,7 +69,7 @@ def load_entities_from_yaml(yaml_filepath):
 
 
 def load_entities_from_csv(csv_filepath: str, model) -> dict:
-    """
+    """Load entities from csv file
 
     :param csv_filepath: string csv file path
     :param model: either str or class

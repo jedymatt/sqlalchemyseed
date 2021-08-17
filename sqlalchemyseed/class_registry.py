@@ -52,10 +52,13 @@ class ClassRegistry:
         self._classes = {}
 
     def register_class(self, class_path: str):
-        if class_path in self._classes.keys():
-            return
+        if class_path in self._classes:
+            return self._classes[class_path]
 
-        self._classes[class_path] = parse_class_path(class_path)
+        class_ = parse_class_path(class_path)
+        self._classes[class_path] = class_
+
+        return class_
 
     def __getitem__(self, class_path: str):
         return self._classes[class_path]

@@ -22,6 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+from collections import namedtuple
+from typing import NamedTuple
+
 import sqlalchemy.orm
 from sqlalchemy import inspect
 from sqlalchemy.orm import ColumnProperty
@@ -221,3 +224,63 @@ class HybridSeeder(Seeder):
         result = self.session.query(
             getattr(class_, column_name)).filter_by(**filtered_kwargs).one()
         return getattr(result, column_name)
+
+
+# TODO: Name this class
+Instance = namedtuple('', ['instance', 'attribute'])
+
+
+# TODO: Seeder
+class FutureSeeder:
+    __model_key = validator.FutureKey.model()
+    __source_keys = validator.FutureKey.source_keys()
+
+    def __init__(self, session: sqlalchemy.orm.Session = None, ref_prefix='!'):
+        self._session = session
+        self._class_registry = ClassRegistry()
+        self._instances = []
+        self._ref_prefix = ref_prefix
+
+    @property
+    def session(self):
+        return self._session
+
+    @session.setter
+    def session(self, value):
+        if not isinstance(value, sqlalchemy.orm.Session):
+            raise TypeError("value type is not 'Session'.")
+
+        self._session = value
+
+    @property
+    def instances(self):
+        return tuple(self._instances)
+
+    def seed(self, entities):
+        validator.FutureSchemaValidator.validate(entities, ref_prefix=self._ref_prefix)
+
+        self._pre_seed(entities)
+
+    def _pre_seed(self, entity):
+        if isinstance(entity, dict):
+            self._seed(entity)
+        else:
+            for item in entity:
+                self._seed(item)
+
+    def _seed(self, entity, parent: Parent = None):
+        if self.__model_key in entity:
+            class_ = self._class_registry.register_class(entity[self.__model_key])
+
+        else:  # parent is not none
+            if isinstance(parent.attribute.property, RelationshipProperty):
+                pass
+
+
+if __name__ == '__main__':
+    from tests.models import Company
+
+    seeder = FutureSeeder()
+    print(seeder.instances)
+    parent = Parent(Company(), 'name')
+    print(parent.instance.__class__, parent.attribute)
