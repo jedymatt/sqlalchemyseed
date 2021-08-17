@@ -226,8 +226,7 @@ class HybridSeeder(Seeder):
         return getattr(result, column_name)
 
 
-# TODO: Name this class
-Instance = namedtuple('', ['instance', 'attribute'])
+Entity = namedtuple('Entity', ['instance', 'attribute'])
 
 
 # TODO: Seeder
@@ -268,7 +267,7 @@ class FutureSeeder:
             for item in entity:
                 self._seed(item)
 
-    def _seed(self, entity, parent: Parent = None):
+    def _seed(self, entity, parent: Entity = None):
         if self.__model_key in entity:
             class_ = self._class_registry.register_class(entity[self.__model_key])
 
@@ -282,5 +281,3 @@ if __name__ == '__main__':
 
     seeder = FutureSeeder()
     print(seeder.instances)
-    parent = Parent(Company(), 'name')
-    print(parent.instance.__class__, parent.attribute)
