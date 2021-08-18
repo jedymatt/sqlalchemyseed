@@ -63,6 +63,13 @@ class Key:
         return "<{}(label='{}', type='{}')>".format(self.__class__.__name__, self.label, self.type)
 
 
+def validate_key(key: Key, entity: dict):
+    if key.label not in entity:
+        raise KeyError("Key {} not found".format(key.label))
+    if not isinstance(entity[key.label], key.type):
+        raise TypeError("Invalid type, entity['{}'] type is not '{}'".format(key.label, key.type))
+
+
 class SchemaValidator:
     __model_key = Key.model()
     __source_keys = Key.source_keys()
@@ -74,33 +81,31 @@ class SchemaValidator:
     @classmethod
     def _pre_validate(cls, entities, is_parent=True, ref_prefix='!'):
         if isinstance(entities, dict):
+            if len(entities) == 0:
+                return
             cls._validate(entities, is_parent, ref_prefix)
         elif isinstance(entities, list):
             for item in entities:
+                if not isinstance(item, dict):
+                    raise TypeError("Invalid type, should be dict")
+
+                if len(item) == 0:
+                    return
+
                 cls._validate(item, is_parent, ref_prefix)
         else:
             raise TypeError("Invalid type, should be list or dict")
 
     @classmethod
     def _validate(cls, entity: dict, is_parent=True, ref_prefix='!'):
-
         if len(entity) > 2:
             raise ValueError("Should not have items for than 2.")
 
-        if len(entity) == 0:
-            return
-
-        # check if the current keys has model key
-        if cls.__model_key.label not in entity.keys():
+        try:
+            validate_key(cls.__model_key, entity)
+        except KeyError as error:
             if is_parent:
-                raise KeyError(
-                    "Missing 'model' key. 'model' key is required when entity is not a parent.")
-        else:
-            model_data = entity[cls.__model_key.label]
-            # check if key model is valid
-            if not cls.__model_key.is_valid_type(model_data):
-                raise TypeError(
-                    f"Invalid type, '{cls.__model_key.label}' should be '{cls.__model_key.type}'")
+                raise error
 
         # get source key, either data or filter key
         source_key = next(
