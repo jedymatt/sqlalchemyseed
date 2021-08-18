@@ -231,8 +231,8 @@ Entity = namedtuple('Entity', ['instance', 'attribute'])
 
 # TODO: Seeder
 class FutureSeeder:
-    __model_key = validator.FutureKey.model()
-    __source_keys = validator.FutureKey.source_keys()
+    __model_key = validator.Key.model()
+    __source_keys = validator.Key.source_keys()
 
     def __init__(self, session: sqlalchemy.orm.Session = None, ref_prefix='!'):
         self._session = session
@@ -256,7 +256,7 @@ class FutureSeeder:
         return tuple(self._instances)
 
     def seed(self, entities):
-        validator.FutureSchemaValidator.validate(entities, ref_prefix=self._ref_prefix)
+        validator.SchemaValidator.validate(entities, ref_prefix=self._ref_prefix)
 
         self._pre_seed(entities)
 

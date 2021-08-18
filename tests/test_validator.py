@@ -1,7 +1,6 @@
 import unittest
 
 from sqlalchemyseed.validator import SchemaValidator
-from sqlalchemyseed.validator import FutureSchemaValidator
 
 
 class TestSchemaValidator(unittest.TestCase):
@@ -140,13 +139,13 @@ class TestFutureSchemaValidator(unittest.TestCase):
         instance = [
 
         ]
-        self.assertIsNone(FutureSchemaValidator.validate(instance))
+        self.assertIsNone(SchemaValidator.validate(instance))
 
     def test_valid_empty_entities(self):
         instance = [
             {}
         ]
-        self.assertIsNone(FutureSchemaValidator.validate(instance))
+        self.assertIsNone(SchemaValidator.validate(instance))
 
     def test_valid_entity_with_empty_args(self):
         instance = {
@@ -155,7 +154,7 @@ class TestFutureSchemaValidator(unittest.TestCase):
 
             }
         }
-        self.assertIsNone(FutureSchemaValidator.validate(instance))
+        self.assertIsNone(SchemaValidator.validate(instance))
 
     def test_valid_entity_with_args(self):
         instance = {
@@ -165,7 +164,7 @@ class TestFutureSchemaValidator(unittest.TestCase):
             }
         }
 
-        self.assertIsNone(FutureSchemaValidator.validate(instance))
+        self.assertIsNone(SchemaValidator.validate(instance))
 
     def test_valid_entities_with_empty_args(self):
         instance = [
@@ -183,7 +182,7 @@ class TestFutureSchemaValidator(unittest.TestCase):
             }
         ]
 
-        self.assertIsNone(FutureSchemaValidator.validate(instance))
+        self.assertIsNone(SchemaValidator.validate(instance))
 
     def test_entity_with_relationship(self):
         instance = [
@@ -200,7 +199,7 @@ class TestFutureSchemaValidator(unittest.TestCase):
             }
         ]
 
-        self.assertIsNone(FutureSchemaValidator.validate(instance))
+        self.assertIsNone(SchemaValidator.validate(instance))
 
     def test_valid_entity_relationships(self):
         instance = [
@@ -217,7 +216,7 @@ class TestFutureSchemaValidator(unittest.TestCase):
             },
         ]
 
-        self.assertIsNone(FutureSchemaValidator.validate(instance))
+        self.assertIsNone(SchemaValidator.validate(instance))
 
     def test_invalid_entity_with_empty_relationships(self):
         instance = [
@@ -236,7 +235,7 @@ class TestFutureSchemaValidator(unittest.TestCase):
             },
         ]
         self.assertRaises(
-            ValueError, lambda: FutureSchemaValidator.validate(instance))
+            ValueError, lambda: SchemaValidator.validate(instance))
 
     def test_valid_empty_relationships_list(self):
         instance = [
@@ -249,7 +248,7 @@ class TestFutureSchemaValidator(unittest.TestCase):
             },
         ]
 
-        self.assertIsNone(FutureSchemaValidator.validate(instance))
+        self.assertIsNone(SchemaValidator.validate(instance))
 
     def test_valid_empty_relationships_dict(self):
         instance = [
@@ -262,7 +261,7 @@ class TestFutureSchemaValidator(unittest.TestCase):
             },
         ]
 
-        self.assertIsNone(FutureSchemaValidator.validate(instance))
+        self.assertIsNone(SchemaValidator.validate(instance))
 
     def test_invalid_parent_no_model(self):
         instance = [
@@ -273,7 +272,7 @@ class TestFutureSchemaValidator(unittest.TestCase):
             }
         ]
 
-        self.assertRaises(KeyError, lambda: FutureSchemaValidator.validate(instance))
+        self.assertRaises(KeyError, lambda: SchemaValidator.validate(instance))
 
     def test_valid_child_no_model(self):
         instance = [
@@ -289,7 +288,7 @@ class TestFutureSchemaValidator(unittest.TestCase):
             }
         ]
 
-        self.assertIsNone(FutureSchemaValidator.validate(instance))
+        self.assertIsNone(SchemaValidator.validate(instance))
 
 
 if __name__ == '__main__':
