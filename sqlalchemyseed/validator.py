@@ -83,11 +83,11 @@ class SchemaValidator:
 
     @classmethod
     def _validate(cls, entity: dict, is_parent=True, ref_prefix='!'):
-        if not isinstance(entity, dict):
-            raise TypeError("Invalid type, should be dict")
-        elif len(entity) > 2:
+
+        if len(entity) > 2:
             raise ValueError("Should not have items for than 2.")
-        elif len(entity) == 0:
+
+        if len(entity) == 0:
             return
 
         # check if the current keys has model key
