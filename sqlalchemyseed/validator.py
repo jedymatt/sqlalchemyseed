@@ -69,27 +69,26 @@ class SchemaValidator:
 
     @classmethod
     def validate(cls, entities, ref_prefix='!'):
-        cls._pre_validate(entities, prefix=ref_prefix)
+        cls._pre_validate(entities, is_parent=True, ref_prefix=ref_prefix)
 
     @classmethod
-    def _pre_validate(cls, entities, is_parent=True, prefix='!'):
+    def _pre_validate(cls, entities, is_parent=True, ref_prefix='!'):
         if isinstance(entities, dict):
-            cls._validate(entities, is_parent, prefix)
+            cls._validate(entities, is_parent, ref_prefix)
         elif isinstance(entities, list):
             for item in entities:
-                cls._validate(item, is_parent, prefix)
+                cls._validate(item, is_parent, ref_prefix)
         else:
             raise TypeError("Invalid type, should be list or dict")
 
     @classmethod
-    def _validate(cls, entity: dict, is_parent, ref_prefix):
+    def _validate(cls, entity: dict, is_parent=True, ref_prefix='!'):
         if not isinstance(entity, dict):
             raise TypeError("Invalid type, should be dict")
 
         if len(entity) > 2:
             raise ValueError("Should not have items for than 2.")
-
-        if len(entity) == 0:
+        elif len(entity) == 0:
             return
 
         # check if the current keys has model key
@@ -137,7 +136,7 @@ class SchemaValidator:
     def _scan_attributes(cls, source_data: dict, ref_prefix):
         for key, value in source_data.items():
             if str(key).startswith(ref_prefix):
-                cls._pre_validate(value, is_parent=False, prefix=ref_prefix)
+                cls._pre_validate(value, is_parent=False, ref_prefix=ref_prefix)
 
 
 if __name__ == '__main__':
