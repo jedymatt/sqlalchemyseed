@@ -84,7 +84,6 @@ class SchemaValidator:
             if len(entities) == 0:
                 return
             cls._validate(entities, is_parent, ref_prefix)
-            return
         elif isinstance(entities, list):
             for item in entities:
                 cls._pre_validate(item, is_parent, ref_prefix)
