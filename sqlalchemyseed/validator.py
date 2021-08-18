@@ -79,20 +79,15 @@ class SchemaValidator:
         cls._pre_validate(entities, is_parent=True, ref_prefix=ref_prefix)
 
     @classmethod
-    def _pre_validate(cls, entities, is_parent=True, ref_prefix='!'):
+    def _pre_validate(cls, entities: dict, is_parent=True, ref_prefix='!'):
         if isinstance(entities, dict):
             if len(entities) == 0:
                 return
             cls._validate(entities, is_parent, ref_prefix)
+            return
         elif isinstance(entities, list):
             for item in entities:
-                if not isinstance(item, dict):
-                    raise TypeError("Invalid type, should be dict")
-
-                if len(item) == 0:
-                    return
-
-                cls._validate(item, is_parent, ref_prefix)
+                cls._pre_validate(item, is_parent, ref_prefix)
         else:
             raise TypeError("Invalid type, should be list or dict")
 
