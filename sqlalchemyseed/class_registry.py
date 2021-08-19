@@ -61,17 +61,15 @@ class ClassRegistry:
         :param class_: class or module.class (str)
         :return: registered class
         """
-
-        if isinstance(class_, str):  # if class is class_path
-            if class_ in self._classes:
-                return self._classes[class_]
-            self._classes[class_] = parse_class_path(class_)
-            return self._classes[class_]
-        else:  # is class
+        if isclass(class_):
             class_path = get_class_path(class_)
-            if class_path in self._classes:
-                return self._classes[class_path]
+        else:  # else class_ is string
+            class_path = class_
+            class_ = parse_class_path(class_path)
+        if class_path not in self._classes:
             self._classes[class_path] = class_
+
+        return class_
 
     def __getitem__(self, class_path: str):
         return self._classes[class_path]
