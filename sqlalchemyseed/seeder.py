@@ -29,13 +29,16 @@ import sqlalchemy.orm
 from sqlalchemy import inspect
 from sqlalchemy.orm import ColumnProperty
 from sqlalchemy.orm import RelationshipProperty
+from sqlalchemy.orm import object_mapper
 
 try:  # relative import
     from . import validator
-    from .class_registry import ClassRegistry
+    from .class_registry import ClassRegistry, parse_class_path
+    from . import errors
 except ImportError:
     import validator
-    from class_registry import ClassRegistry
+    from class_registry import ClassRegistry, parse_class_path
+    import errors
 
 
 class Seeder:
@@ -229,6 +232,14 @@ class HybridSeeder(Seeder):
 Entity = namedtuple('Entity', ['instance', 'attribute'])
 
 
+def instantiate_entity(instance, attribute_name: str):
+    return Entity(instance=instance, attribute=getattr(instance.__class__, attribute_name))
+
+
+def get_class_path(class_):
+    return '{}.{}'.format(class_.__module__, class_.__name__)
+
+
 # TODO: Seeder
 class FutureSeeder:
     __model_key = validator.Key.model()
@@ -255,6 +266,25 @@ class FutureSeeder:
     def instances(self):
         return tuple(self._instances)
 
+    def get_model_class(self, entity, parent: Entity):
+        model_label = self.__model_key.label
+        if model_label in entity:
+            class_path = entity[model_label]
+            return self._class_registry.register_class(class_path)
+        # parent is not None
+        if isinstance(parent.attribute.property, RelationshipProperty):
+            return self._class_registry.register_class(parent.attribute.mapper.class_)
+        else:  # parent.attribute is instance of ColumnProperty
+            table_name = parent.attribute.foreign_keys[0].table.name
+            class_ = next(
+                (mapper.class_ for mapper in parent.instance.__class__.registry.mappers if
+                 mapper.class_.__tablename__ == table_name),
+                errors.ClassNotFoundError(
+                    "A class with table name '{}' is not found in the mappers".format(table_name)
+                )
+            )
+            return self._class_registry.register_class(class_)
+
     def seed(self, entities):
         validator.SchemaValidator.validate(entities, ref_prefix=self._ref_prefix)
 
@@ -268,12 +298,10 @@ class FutureSeeder:
                 self._seed(item)
 
     def _seed(self, entity, parent: Entity = None):
-        if self.__model_key in entity:
-            class_ = self._class_registry.register_class(entity[self.__model_key])
-
-        else:  # parent is not none
-            if isinstance(parent.attribute.property, RelationshipProperty):
-                pass
+        class_ = self.get_model_class(entity, parent)
+        source_key: validator.Key = next((sk for sk in self.__source_keys if sk.label in entity), None)
+        source_data = entity[source_key.label]
+        # TODO: continue
 
 
 if __name__ == '__main__':

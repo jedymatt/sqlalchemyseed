@@ -84,7 +84,8 @@ class SchemaValidator:
             if len(entities) > 0:
                 return cls._validate(entities, is_parent, ref_prefix)
         elif isinstance(entities, list):
-            [cls._pre_validate(entity, is_parent, ref_prefix) for entity in entities]
+            for entity in entities:
+                cls._pre_validate(entity, is_parent, ref_prefix)
         else:
             raise TypeError("Invalid type, should be list or dict")
 
@@ -136,4 +137,5 @@ class SchemaValidator:
 
 
 if __name__ == '__main__':
-    pass
+    instance = [[]]
+    SchemaValidator.validate(instance)
