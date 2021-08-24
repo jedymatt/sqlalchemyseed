@@ -11,5 +11,5 @@ class TestClassRegistry(unittest.TestCase):
     def test_register_class(self):
         class_registry = ClassRegistry()
         class_registry.register_class('tests.models.Company')
-        from .models import Company
+        from tests.models import Company
         self.assertIs(class_registry['tests.models.Company'], Company)

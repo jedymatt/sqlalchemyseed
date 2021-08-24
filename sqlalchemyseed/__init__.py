@@ -23,7 +23,7 @@ SOFTWARE.
 """
 
 from .seeder import HybridSeeder
-from .seeder import Seeder
+from ._future.seeder import Seeder
 from .loader import load_entities_from_json
 from .loader import load_entities_from_yaml
 from .loader import load_entities_from_csv

@@ -46,11 +46,6 @@ def parse_class_path(class_path: str):
         raise TypeError(
             "'{}' is an unsupported class".format(class_name))
 
-
-def get_class_path(class_) -> str:
-    return '{}.{}'.format(class_.__module__, class_.__name__)
-
-
 class ClassRegistry:
     def __init__(self):
         self._classes = {}
