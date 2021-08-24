@@ -52,7 +52,8 @@ def set_parent_attr_value(instance, parent: Entity):
 def iter_ref_attr(attrs, ref_prefix):
     for attr_name, value in attrs.items():
         if str(attr_name).startswith(ref_prefix):
-            yield str(attr_name).removeprefix(ref_prefix), value
+            # remove prefix of attr_name
+            yield str(attr_name)[len(ref_prefix):], value
 
 
 class Seeder:
