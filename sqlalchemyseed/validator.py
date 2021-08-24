@@ -62,6 +62,18 @@ class Key:
     def __repr__(self):
         return "<{}(label='{}', type='{}')>".format(self.__class__.__name__, self.label, self.type)
 
+    def __eq__(self, o: object) -> bool:
+        if isinstance(o, self.__class__):
+            return self.label == o.label and self.type == o.type
+
+        if isinstance(o, str):
+            return self.label == o
+
+        return False
+
+    def __hash__(self):
+        return hash(self.label)
+
 
 def validate_key(key: Key, entity: dict):
     if key.label not in entity:

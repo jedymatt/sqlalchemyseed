@@ -46,30 +46,21 @@ def parse_class_path(class_path: str):
         raise TypeError(
             "'{}' is an unsupported class".format(class_name))
 
-
-def get_class_path(class_) -> str:
-    return '{}.{}'.format(class_.__module__, class_.__name__)
-
-
 class ClassRegistry:
     def __init__(self):
         self._classes = {}
 
-    def register_class(self, class_):
+    def register_class(self, class_path: str):
         """
 
-        :param class_: class or module.class (str)
+        :param class_path: module.class (str)
         :return: registered class
         """
-        if isclass(class_):
-            class_path = get_class_path(class_)
-        else:  # else class_ is string
-            class_path = class_
-            class_ = parse_class_path(class_path)
-        if class_path not in self._classes:
-            self._classes[class_path] = class_
 
-        return class_
+        if class_path not in self._classes:
+            self._classes[class_path] = parse_class_path(class_path)
+
+        return self._classes[class_path]
 
     def __getitem__(self, class_path: str):
         return self._classes[class_path]

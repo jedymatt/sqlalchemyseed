@@ -8,17 +8,23 @@
 
 Sqlalchemy seeder that supports nested relationships.
 
+Supported file types
+
+- json
+- yaml
+- [csv](#csv)
+
 ## Installation
 
 Default installation
 
-```commandline
+```shell
 pip install sqlalchemyseed
 ```
 
 When using yaml to loading entities from yaml files. Execute this command to install necessary dependencies
 
-```commandline
+```shell
 pip install sqlalchemyseed[yaml]
 ```
 
@@ -258,4 +264,18 @@ seeder.seed(instance)
         ]
     }
 }
+```
+
+## Examples
+
+### CSV
+
+data.csv
+
+`Note: Does not support relationships`
+
+```
+name, age
+John March, 23
+Juan Dela Cruz, 21
 ```

@@ -3,7 +3,8 @@ import unittest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from sqlalchemyseed import HybridSeeder, Seeder
+from sqlalchemyseed import HybridSeeder
+from sqlalchemyseed import Seeder
 from tests.models import Base, Company
 
 

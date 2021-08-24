@@ -26,11 +26,9 @@ import csv
 import json
 import sys
 
-try:
-    # relative import
-    from . import validator
-except ImportError:
-    import validator
+
+from . import validator
+
 
 try:
     import yaml
