@@ -12,15 +12,15 @@ class Entity(NamedTuple):
     attr_name: str
 
     @property
-    def cls_attr(self):
+    def cls_attribute(self):
         return getattr(self.instance.__class__, self.attr_name)
 
     @property
-    def ins_attr(self):
+    def ins_attribute(self):
         return getattr(self.instance, self.attr_name)
 
-    @ins_attr.setter
-    def ins_attr(self, value):
+    @ins_attribute.setter
+    def ins_attribute(self, value):
         setattr(self.instance, self.attr_name, value)
 
 
@@ -40,15 +40,13 @@ def filter_kwargs(kwargs: dict, class_, ref_prefix):
 
 
 def set_parent_attr_value(instance, parent: Entity):
-    if isinstance(parent.cls_attr.property, RelationshipProperty):
-        parent_instance_attr = parent.ins_attr
-        parent_class_attr = parent.cls_attr
-        if parent_class_attr.property.uselist is True:
-            if parent_instance_attr is None:
+    if isinstance(parent.cls_attribute.property, RelationshipProperty):
+        if parent.cls_attribute.property.uselist is True:
+            if parent.ins_attribute is None:
                 parent_instance_attr = []
-            parent_instance_attr.append(instance)
+            parent.ins_attribute.append(instance)
         else:
-            parent.ins_attr = instance
+            parent.ins_attribute = instance
 
 
 def iter_ref_attr(attrs, ref_prefix):
@@ -106,8 +104,8 @@ class Seeder:
         if self.__model_key in entity:
             return self._class_registry.register_class(entity[self.__model_key])
         # parent is not None
-        if isinstance(parent.cls_attr.property, RelationshipProperty):
-            return parent.cls_attr.mapper.class_
+        if isinstance(parent.cls_attribute.property, RelationshipProperty):
+            return parent.cls_attribute.mapper.class_
 
     def seed(self, entities, add_to_session=True):
         validator.SchemaValidator.validate(
