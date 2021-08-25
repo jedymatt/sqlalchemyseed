@@ -42,7 +42,7 @@ def filter_kwargs(kwargs: dict, class_, ref_prefix):
 def set_parent_attr_value(instance, parent: Entity):
     if isinstance(parent.cls_attr.property, RelationshipProperty):
         if parent.cls_attr.property.uselist is True:
-            if parent.ins_attr is not None:
+            if parent.ins_attr is None:
                 parent.ins_attr = []
             parent.ins_attr.append(instance)
         else:
@@ -107,11 +107,14 @@ class Seeder:
         if isinstance(parent.cls_attr.property, RelationshipProperty):
             return parent.cls_attr.mapper.class_
 
-    def seed(self, entities):
+    def seed(self, entities, add_to_session=True):
         validator.SchemaValidator.validate(
             entities, ref_prefix=self.ref_prefix)
 
         self._pre_seed(entities)
+
+        if add_to_session:
+            self._session.add_all(self.instances)
 
     def _pre_seed(self, entity, parent: Entity = None):
         if isinstance(entity, dict):
@@ -132,8 +135,7 @@ class Seeder:
             # instantiate object
             instance = self._setup_instance(class_, kwargs, parent)
             for attr_name, value in iter_ref_attr(kwargs, self.ref_prefix):
-                self._pre_seed(
-                    entity=value, parent=Entity(instance, attr_name))
+                self._pre_seed(entity=value, parent=Entity(instance, attr_name))
 
         else:  # source_data is list
             for kwargs_ in kwargs:
@@ -162,3 +164,7 @@ class Seeder:
     #
     #     if key is validator.Key.filter() and self.session is not None:
     #         return self.session.query(class_).filter_by(**filtered_kwargs).one()
+
+
+class HybridSeeder:
+    pass
