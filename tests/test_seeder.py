@@ -39,7 +39,7 @@ class TestSeeder(unittest.TestCase):
         with self.Session() as session:
             seeder = Seeder(session=session)
             seeder.seed(instance)
-            self.assertEqual(len(seeder.instances), 1)
+            self.assertEqual(len(session.new), 3)
 
     def test_seed_no_relationship(self):
         instance = {
@@ -58,7 +58,7 @@ class TestSeeder(unittest.TestCase):
             seeder = Seeder(session)
             # self.assertIsNone(seeder.seed(instance))
             seeder.seed(instance)
-            self.assertEqual(len(seeder.instances), 2)
+            self.assertEqual(len(session.new), 2)
 
     def test_seed_multiple_entities(self):
         instance = [
@@ -92,7 +92,7 @@ class TestSeeder(unittest.TestCase):
         with self.Session() as session:
             seeder = Seeder(session)
             seeder.seed(instance)
-            self.assertEqual(len(seeder.instances), 3)
+            self.assertEqual(len(session.new), 4)
 
 
 class TestHybridSeeder(unittest.TestCase):
