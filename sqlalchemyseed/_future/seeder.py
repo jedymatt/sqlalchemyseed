@@ -41,10 +41,12 @@ def filter_kwargs(kwargs: dict, class_, ref_prefix):
 
 def set_parent_attr_value(instance, parent: Entity):
     if isinstance(parent.cls_attr.property, RelationshipProperty):
-        if parent.cls_attr.property.uselist is True:
-            if parent.ins_attr is None:
-                parent.ins_attr = []
-            parent.ins_attr.append(instance)
+        parent_instance_attr = parent.ins_attr
+        parent_class_attr = parent.cls_attr
+        if parent_class_attr.property.uselist is True:
+            if parent_instance_attr is None:
+                parent_instance_attr = []
+            parent_instance_attr.append(instance)
         else:
             parent.ins_attr = instance
 
