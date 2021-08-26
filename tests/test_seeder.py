@@ -6,6 +6,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemyseed import HybridSeeder
 from sqlalchemyseed import Seeder
 from tests.models import Base, Company
+from tests import instances
 
 
 class TestSeeder(unittest.TestCase):
@@ -16,6 +17,20 @@ class TestSeeder(unittest.TestCase):
 
     def tearDown(self) -> None:
         Base.metadata.drop_all(self.engine)
+
+    def test_parent(self):
+        with self.Session() as session:
+            seeder = Seeder(session=session)
+            seeder.seed(instances.PARENT)
+            self.assertEqual(len(session.new), 1)
+            self.assertEqual(len(seeder.instances), 1)
+
+    def test_parent_without_data(self):
+        with self.Session() as session:
+            seeder = Seeder(session=session)
+            seeder.seed(instances.PARENT_WOUT_DATA)
+            self.assertEqual(len(session.new), 1)
+            self.assertEqual(len(seeder.instances), 1)
 
     def test_seed(self):
         instance = {
@@ -41,7 +56,7 @@ class TestSeeder(unittest.TestCase):
             seeder.seed(instance)
             self.assertEqual(len(session.new), 3)
 
-    def test_seed_no_model(self):
+    def test_seed_child_no_model(self):
         instance = {
             'model': 'tests.models.Company',
             'data': {
@@ -102,6 +117,25 @@ class TestSeeder(unittest.TestCase):
             ]
         }
 
+        with self.Session() as session:
+            seeder = Seeder(session)
+            # self.assertIsNone(seeder.seed(instance))
+            seeder.seed(instance)
+            self.assertEqual(len(session.new), 2)
+
+    def test_seed_one_to_one_relationship(self):
+        instance = {
+            'model': 'tests.models.Employee',
+            'data': {
+                'name': 'Juan',
+                '!company': {
+                    'model': 'tests.models.Company',
+                    'data': {
+                        'name': 'Juan\'s Company'
+                    }
+                }
+            }
+        }
         with self.Session() as session:
             seeder = Seeder(session)
             # self.assertIsNone(seeder.seed(instance))
@@ -290,7 +324,3 @@ class TestHybridSeeder(unittest.TestCase):
         with self.Session() as session:
             seeder = HybridSeeder(session)
             self.assertRaises(TypeError, lambda: seeder.seed(instance))
-
-
-if __name__ == '__main__':
-    unittest.main()

@@ -155,7 +155,7 @@ class Seeder:
 
 class HybridSeeder:
     __model_key = validator.Key.model()
-    __source_keys = validator.Key.source_keys()
+    __source_keys = [validator.Key.data(), validator.Key.filter()]
 
     def __init__(self, session: sqlalchemy.orm.Session, ref_prefix):
         self.session = session

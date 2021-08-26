@@ -1,295 +1,40 @@
 import unittest
 
+from sqlalchemyseed import errors
 from sqlalchemyseed.validator import SchemaValidator
+from tests import instances as ins
 
 
 class TestSchemaValidator(unittest.TestCase):
 
-    def test_valid_empty_entity(self):
-        instance = [
+    def test_parent(self):
+        self.assertIsNone(SchemaValidator.validate(ins.PARENT))
 
-        ]
-        self.assertIsNone(SchemaValidator.validate(instance))
+    def test_parent_with_extra_length_invalid(self):
+        self.assertRaises(errors.MaxLengthExceededError,
+                          lambda: SchemaValidator.validate(ins.PARENT_WITH_EXTRA_LENGTH_INVALID))
 
-    def test_valid_empty_entities(self):
-        instance = [
-            {}
-        ]
-        self.assertIsNone(SchemaValidator.validate(instance))
+    def test_parent_with_empty_data(self):
+        self.assertIsNone(SchemaValidator.validate(ins.PARENT_WITH_EMPTY_DATA))
 
-    def test_valid_entity_with_empty_args(self):
-        instance = {
-            'model': 'models.Company',
-            'data': {
+    def test_parent_with_multi_data(self):
+        self.assertIsNone(SchemaValidator.validate(ins.PARENT_WITH_MULTI_DATA))
 
-            }
-        }
-        self.assertIsNone(SchemaValidator.validate(instance))
+    def test_parent_without_data_invalid(self):
+        self.assertRaises(errors.MissingRequiredKeyError,
+                          lambda: SchemaValidator.validate(ins.PARENT_WITHOUT_DATA_INVALID))
 
-    def test_valid_entity_with_args(self):
-        instance = {
-            'model': 'models.Company',
-            'data': {
-                'name': 'Company Name'
-            }
-        }
+    def test_parent_to_child(self):
+        self.assertIsNone(SchemaValidator.validate(ins.PARENT_TO_CHILD))
 
-        self.assertIsNone(SchemaValidator.validate(instance))
+    def test_parent_to_children(self):
+        self.assertIsNone(SchemaValidator.validate(ins.PARENT_TO_CHILDREN))
 
-    def test_valid_entities_with_empty_args(self):
-        instance = [
-            {
-                'model': 'models.Company',
-                'data': {
+    def test_parent_to_children_without_model(self):
+        self.assertIsNone(SchemaValidator.validate(ins.PARENT_TO_CHILDREN_WITHOUT_MODEL))
 
-                }
-            },
-            {
-                'model': 'models.Company',
-                'data': {
+    def test_parent_to_children_with_multi_data(self):
+        self.assertIsNone(SchemaValidator.validate(ins.PARENT_TO_CHILDREN_WITH_MULTI_DATA))
 
-                }
-            }
-        ]
-
-        self.assertIsNone(SchemaValidator.validate(instance))
-
-    def test_entity_with_relationship(self):
-        instance = [
-            {
-                'model': 'models.Company',
-                'data': {
-                    '!employees': {
-                        'model': 'models.Employee',
-                        'data': {
-
-                        }
-                    }
-                }
-            },
-        ]
-
-        self.assertIsNone(SchemaValidator.validate(instance))
-
-    def test_valid_entity_relationships(self):
-        instance = [
-            {
-                'model': 'models.Company',
-                'data': {
-                    '!employees': {
-                        'model': 'models.Employee',
-                        'data': {
-
-                        }
-                    }
-                }
-            },
-        ]
-
-        self.assertIsNone(SchemaValidator.validate(instance))
-
-    def test_invalid_entity_with_empty_relationships(self):
-        instance = [
-            {
-                'model': 'models.Company',
-                'data':
-                    {
-                        '!employees': {
-                            'model': 'models.Employee',
-                            'data': [
-
-                            ]
-                        }
-                    }
-
-            },
-        ]
-        self.assertRaises(
-            ValueError, lambda: SchemaValidator.validate(instance))
-
-    def test_valid_empty_relationships_list(self):
-        instance = [
-            {
-                'model': 'models.Company',
-                'data':
-                    {
-                        '!employees': []
-                    }
-            },
-        ]
-
-        self.assertIsNone(SchemaValidator.validate(instance))
-
-    def test_valid_empty_relationships_dict(self):
-        instance = [
-            {
-                'model': 'models.Company',
-                'data':
-                    {
-                        '!employees': {}
-                    }
-            },
-        ]
-
-        self.assertIsNone(SchemaValidator.validate(instance))
-
-
-class TestFutureSchemaValidator(unittest.TestCase):
-    def test_valid_empty_entity(self):
-        instance = [
-
-        ]
-        self.assertIsNone(SchemaValidator.validate(instance))
-
-    def test_valid_empty_entities(self):
-        instance = [
-            {}
-        ]
-        self.assertIsNone(SchemaValidator.validate(instance))
-
-    def test_valid_entity_with_empty_args(self):
-        instance = {
-            'model': 'models.Company',
-            'data': {
-
-            }
-        }
-        self.assertIsNone(SchemaValidator.validate(instance))
-
-    def test_valid_entity_with_args(self):
-        instance = {
-            'model': 'models.Company',
-            'data': {
-                'name': 'Company Name'
-            }
-        }
-
-        self.assertIsNone(SchemaValidator.validate(instance))
-
-    def test_valid_entities_with_empty_args(self):
-        instance = [
-            {
-                'model': 'models.Company',
-                'data': {
-
-                }
-            },
-            {
-                'model': 'models.Company',
-                'data': {
-
-                }
-            }
-        ]
-
-        self.assertIsNone(SchemaValidator.validate(instance))
-
-    def test_entity_with_relationship(self):
-        instance = [
-            {
-                'model': 'models.Company',
-                'data': {
-                    '!employees': {
-                        'model': 'models.Employee',
-                        'data': {
-
-                        }
-                    }
-                }
-            }
-        ]
-
-        self.assertIsNone(SchemaValidator.validate(instance))
-
-    def test_valid_entity_relationships(self):
-        instance = [
-            {
-                'model': 'models.Company',
-                'data': {
-                    '!employees': {
-                        'model': 'models.Employee',
-                        'data': {
-
-                        }
-                    }
-                }
-            },
-        ]
-
-        self.assertIsNone(SchemaValidator.validate(instance))
-
-    def test_invalid_entity_with_empty_relationships(self):
-        instance = [
-            {
-                'model': 'models.Company',
-                'data':
-                    {
-                        '!employees': {
-                            'model': 'models.Employee',
-                            'data': [
-
-                            ]
-                        }
-                    }
-
-            },
-        ]
-        self.assertRaises(
-            ValueError, lambda: SchemaValidator.validate(instance))
-
-    def test_valid_empty_relationships_list(self):
-        instance = [
-            {
-                'model': 'models.Company',
-                'data':
-                    {
-                        '!employees': []
-                    }
-            },
-        ]
-
-        self.assertIsNone(SchemaValidator.validate(instance))
-
-    def test_valid_empty_relationships_dict(self):
-        instance = [
-            {
-                'model': 'models.Company',
-                'data':
-                    {
-                        '!employees': {}
-                    }
-            },
-        ]
-
-        self.assertIsNone(SchemaValidator.validate(instance))
-
-    def test_invalid_parent_no_model(self):
-        instance = [
-            {
-                'data': {
-
-                }
-            }
-        ]
-
-        self.assertRaises(KeyError, lambda: SchemaValidator.validate(instance))
-
-    def test_valid_child_no_model(self):
-        instance = [
-            {
-                'model': 'models.Company',
-                'data': {
-                    '!employees': {
-                        'data': {
-
-                        }
-                    }
-                }
-            }
-        ]
-
-        self.assertIsNone(SchemaValidator.validate(instance))
-
-
-if __name__ == '__main__':
-    unittest.main()
+    def test_parent_to_children_with_multi_data_without_model(self):
+        self.assertIsNone(SchemaValidator.validate(ins.PARENT_TO_CHILDREN_WITH_MULTI_DATA_WITHOUT_MODEL))

@@ -22,14 +22,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+from . import errors
+
 
 class Key:
     def __init__(self, label: str, type_):
         self.label = label
         self.type = type_
 
-    def unpack(self):
-        return self.label, self.type
+    # def unpack(self):
+    #     return self.label, self.type
 
     @classmethod
     def model(cls):
@@ -46,21 +48,8 @@ class Key:
     def is_valid_type(self, entity):
         return isinstance(entity, self.type)
 
-    @classmethod
-    def source_keys(cls):
-        """The possible pairs of model key [data, filter]
-
-        Returns:
-            list: list of keys object
-        """
-        return [cls.data(), cls.filter()]
-
-    @classmethod
-    def source_keys_labels(cls) -> list:
-        return [source_key.label for source_key in cls.source_keys()]
-
-    def __repr__(self):
-        return "<{}(label='{}', type='{}')>".format(self.__class__.__name__, self.label, self.type)
+    def __str__(self):
+        return self.label
 
     def __eq__(self, o: object) -> bool:
         if isinstance(o, self.__class__):
@@ -75,57 +64,81 @@ class Key:
         return hash(self.label)
 
 
-def validate_key(key: Key, entity: dict):
-    if key.label not in entity:
-        raise KeyError("Key {} not found".format(key.label))
-    if not isinstance(entity[key.label], key.type):
-        raise TypeError("Invalid type, entity['{}'] type is not '{}'".format(key.label, key.type))
+def check_model_key(entity: dict, entity_is_parent: bool):
+    model = Key.model()
+    if model not in entity and entity_is_parent:
+        raise errors.MissingRequiredKeyError("'model' key is missing.")
+    # check type
+    if model in entity and not model.is_valid_type(entity[model]):
+        raise errors.InvalidDataTypeError("'model' data should be 'string'.")
+
+
+def check_max_length(entity: dict):
+    if len(entity) > 2:
+        raise errors.MaxLengthExceededError("Length should not exceed by 2.")
+
+
+def check_source_key(entity: dict, source_keys: list[Key]) -> Key:
+    source_key: Key = next(
+        (sk for sk in source_keys if sk in entity),
+        None
+    )
+
+    # check if current keys has at least, data or filter key
+    if source_key is None:
+        raise errors.MissingRequiredKeyError("Missing 'data' or 'filter' key.")
+
+    return source_key
+
+
+def check_source_data(source_data, source_key: Key):
+    if not isinstance(source_data, dict) and not isinstance(source_data, list):
+        raise errors.InvalidDataTypeError(f"Invalid type, {str(source_key)} should be either 'dict' or 'list'.")
+
+    if isinstance(source_data, list) and len(source_data) == 0:
+        raise errors.EmptyDataError("Empty list, 'data' or 'filter' list should not be empty.")
+
+
+def iter_reference_relationships(kwargs: dict, ref_prefix):
+    for attr_name, value in kwargs.items():
+        if attr_name.startswith(ref_prefix):
+            # removed prefix
+            yield attr_name[len(ref_prefix):], value
 
 
 class SchemaValidator:
-    __model_key = Key.model()
-    __source_keys = Key.source_keys()
+    _source_keys = None
 
     @classmethod
-    def validate(cls, entities, ref_prefix='!'):
+    def validate(cls, entities, ref_prefix='!', source_keys=None):
+        if source_keys is None:
+            cls._source_keys = [Key.data(), Key.filter()]
         cls._pre_validate(entities, is_parent=True, ref_prefix=ref_prefix)
 
     @classmethod
     def _pre_validate(cls, entities: dict, is_parent=True, ref_prefix='!'):
+        if not isinstance(entities, dict) and not isinstance(entities, list):
+            raise errors.InvalidDataTypeError("Invalid type, should be list or dict")
+        if len(entities) == 0:
+            return
         if isinstance(entities, dict):
-            if len(entities) > 0:
-                return cls._validate(entities, is_parent, ref_prefix)
+            return cls._validate(entities, is_parent, ref_prefix)
         elif isinstance(entities, list):
             for entity in entities:
                 cls._pre_validate(entity, is_parent, ref_prefix)
-        else:
-            raise TypeError("Invalid type, should be list or dict")
 
     @classmethod
-    def _validate(cls, entity: dict, is_parent=True, ref_prefix='!'):
-        if len(entity) > 2:
-            raise ValueError("Should not have items for than 2.")
-
-        try:
-            validate_key(cls.__model_key, entity)
-        except KeyError as error:
-            if is_parent:
-                raise error
+    def _validate(cls, entity: dict, entity_is_parent=True, ref_prefix='!'):
+        check_max_length(entity)
+        check_model_key(entity, entity_is_parent)
 
         # get source key, either data or filter key
-        source_key = next(
-            (sk for sk in cls.__source_keys if sk.label in entity.keys()),
-            None)
+        source_key = check_source_key(entity, cls._source_keys)
+        source_data = entity[source_key]
 
-        # check if current keys has at least, data or filter key
-        if source_key is None:
-            raise KeyError("Missing 'data' or 'filter' key.")
-
-        source_data = entity[source_key.label]
+        check_source_data(source_data, source_key)
 
         if isinstance(source_data, list):
-            if len(source_data) == 0:
-                raise ValueError(f"'{source_key.label}' is empty.")
 
             for item in source_data:
                 if not source_key.is_valid_type(item):
@@ -137,9 +150,6 @@ class SchemaValidator:
         elif source_key.is_valid_type(source_data):
             # check if item is a relationship attribute
             cls._scan_attributes(source_data, ref_prefix)
-        else:
-            raise TypeError(
-                f"Invalid type, '{source_key.label}' should be '{source_key.type}'")
 
     @classmethod
     def _scan_attributes(cls, source_data: dict, ref_prefix):
