@@ -7,7 +7,7 @@
 - [ ] Customize prefix in seeder (default=`!`)
 - [x] Customize prefix in validator (default=`!`)
 - [ ] relationship entity no longer required `model` key since the program will search it for you, but can also be
-  overridden by providing a model data instead as it saves time
+  overridden by providing a model data instead as it saves performance time
 
 # In Progress
 

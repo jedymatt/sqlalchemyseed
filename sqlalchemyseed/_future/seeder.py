@@ -1,3 +1,27 @@
+"""
+MIT License
+
+Copyright (c) 2021 Jedy Matt Tabasco
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
+
 from typing import NamedTuple
 
 import sqlalchemy
@@ -118,17 +142,21 @@ class Seeder:
 
         kwargs = entity[self.__data_key]
 
-        if isinstance(kwargs, dict):
-            # instantiate object
-            instance = self._setup_instance(class_, kwargs, parent)
-            for attr_name, value in iter_ref_attr(kwargs, self.ref_prefix):
-                self._pre_seed(entity=value, parent=Entity(instance, attr_name))
-
-        else:  # source_data is list
+        # kwargs is list
+        if isinstance(kwargs, list):
             for kwargs_ in kwargs:
                 instance = self._setup_instance(class_, kwargs_, parent)
-                for attr_name, value in iter_ref_attr(kwargs_, self.ref_prefix):
-                    self._pre_seed(value, parent=Entity(instance, attr_name))
+                self._seed_children(instance, kwargs_)
+            return
+
+        # kwargs is dict
+        # instantiate object
+        instance = self._setup_instance(class_, kwargs, parent)
+        self._seed_children(instance, kwargs)
+
+    def _seed_children(self, instance, kwargs):
+        for attr_name, value in iter_ref_attr(kwargs, self.ref_prefix):
+            self._pre_seed(entity=value, parent=Entity(instance, attr_name))
 
     def _setup_instance(self, class_, kwargs: dict, parent: Entity):
         instance = class_(**filter_kwargs(kwargs, class_, self.ref_prefix))
