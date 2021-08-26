@@ -69,7 +69,7 @@ class TestSchemaValidator(unittest.TestCase):
 
 class TestKey(unittest.TestCase):
     def test_key_equal_key(self):
-        self.assertEqual(Key.model(), Key(label='model', type_=str))
+        self.assertEqual(Key.model(), Key(name='model', type_=str))
 
     def test_key_not_equal(self):
         self.assertNotEqual(Key.model(), Key.data())
