@@ -18,20 +18,6 @@ class TestSeeder(unittest.TestCase):
     def tearDown(self) -> None:
         Base.metadata.drop_all(self.engine)
 
-    def test_parent(self):
-        with self.Session() as session:
-            seeder = Seeder(session=session)
-            seeder.seed(instances.PARENT)
-            self.assertEqual(len(session.new), 1)
-            self.assertEqual(len(seeder.instances), 1)
-
-    def test_parent_without_data(self):
-        with self.Session() as session:
-            seeder = Seeder(session=session)
-            seeder.seed(instances.PARENT_WOUT_DATA)
-            self.assertEqual(len(session.new), 1)
-            self.assertEqual(len(seeder.instances), 1)
-
     def test_seed(self):
         instance = {
             'model': 'tests.models.Company',
