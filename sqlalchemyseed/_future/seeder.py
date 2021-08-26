@@ -168,4 +168,17 @@ class HybridSeeder:
         return tuple(self._instances)
 
     def seed(self, entities):
+        validator.SchemaValidator.validate(
+            entities, ref_prefix=self.ref_prefix)
+
+        self._pre_seed(entities)
+
+    def _pre_seed(self, entity, parent=None):
+        if isinstance(entity, dict):
+            self._seed(entity, parent)
+        else:  # is list
+            for item in entity:
+                self._pre_seed(item, parent)
+
+    def _seed(self, entity, parent):
         pass
