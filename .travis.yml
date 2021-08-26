@@ -14,19 +14,14 @@ before_install:
 install:
     - pip install -r requirements.txt
     - pip install .
-    - pip install pytest-cov
+    - pip install pytest
     - pip install codecov
 before_script:
     - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
     - chmod +x ./cc-test-reporter
 script:
-    - pytest --cov=sqlalchemyseed/
+    - pytest tests
     - coverage run --source=sqlalchemyseed -m pytest tests
 after_success:
 #  - bash <(curl -s https://codecov.io/bash)
   - codecov
-# for codecoverage on codeclimate.com
-env:
-  global:
-    - GIT_COMMITTED_AT=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then git log -1 --pretty=format:%ct; else git log -1 --skip 1 --pretty=format:%ct; fi)
-    - CC_TEST_REPORTER_ID=48ee9103b2354a6b5c3028f4bc09a0705b79f27d013328a4234107ed385c16ec
