@@ -78,7 +78,7 @@ def check_max_length(entity: dict):
         raise errors.MaxLengthExceededError("Length should not exceed by 2.")
 
 
-def check_source_key(entity: dict, source_keys: list[Key]) -> Key:
+def check_source_key(entity: dict, source_keys: list) -> Key:
     source_key: Key = next(
         (sk for sk in source_keys if sk in entity),
         None
