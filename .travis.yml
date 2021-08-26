@@ -28,5 +28,5 @@ after_success:
 # for codecoverage on codeclimate.com
 env:
   global:
-#     - GIT_COMMITTED_AT=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then git log -1 --pretty=format:%ct; else git log -1 --skip 1 --pretty=format:%ct; fi)
+    - GIT_COMMITTED_AT=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then git log -1 --pretty=format:%ct; else git log -1 --skip 1 --pretty=format:%ct; fi)
     - CC_TEST_REPORTER_ID=48ee9103b2354a6b5c3028f4bc09a0705b79f27d013328a4234107ed385c16ec
