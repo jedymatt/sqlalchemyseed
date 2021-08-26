@@ -10,8 +10,8 @@ Sqlalchemy seeder that supports nested relationships.
 
 Supported file types
 
-- json
-- yaml
+- [json](#json)
+- [yaml](#yaml)
 - [csv](#csv)
 
 ## Installation
@@ -268,14 +268,55 @@ seeder.seed(instance)
 
 ## Examples
 
+### JSON
+
+data.json
+
+```json5
+{
+    "model": "models.Person",
+    "data": [
+        {
+            "name": "John March",
+            "age": 23
+        },
+        {
+            "name": "Juan Dela Cruz",
+            "age": 21
+        }
+    ]
+}
+```
+
+### YAML
+
+data.yml
+
+```yaml
+model: models.Person
+data:
+    - name: John March
+      age: 23
+    - name: Juan Dela Cruz
+      age: 21
+```
+
 ### CSV
 
 data.csv
 
-`Note: Does not support relationships`
-
-```
+```text
 name, age
 John March, 23
 Juan Dela Cruz, 21
 ```
+
+To load a csv file
+
+`load_entities_from_csv("data.csv", models.Person)`
+
+or
+
+`load_entities_from_csv("data.csv", "models.Person")`
+
+**Note**: Does not support relationships

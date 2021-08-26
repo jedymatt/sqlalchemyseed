@@ -3,8 +3,8 @@ from typing import NamedTuple
 import sqlalchemy
 from sqlalchemy.orm.relationships import RelationshipProperty
 
-from sqlalchemyseed import errors, validator
 from sqlalchemyseed import class_registry
+from sqlalchemyseed import validator
 
 
 class Entity(NamedTuple):
@@ -59,21 +59,10 @@ class Seeder:
     __data_key = validator.Key.data()
 
     def __init__(self, session: sqlalchemy.orm.Session = None, ref_prefix="!"):
-        self._session = session
+        self.session = session
         self._class_registry = class_registry.ClassRegistry()
         self._instances = []
         self.ref_prefix = ref_prefix
-
-    @property
-    def session(self):
-        return self._session
-
-    @session.setter
-    def session(self, value):
-        if not isinstance(value, sqlalchemy.orm.Session):
-            raise TypeError("value type is not 'Session'.")
-
-        self._session = value
 
     @property
     def instances(self):
@@ -112,7 +101,7 @@ class Seeder:
         self._pre_seed(entities)
 
         if add_to_session:
-            self._session.add_all(self.instances)
+            self.session.add_all(self.instances)
 
     def _pre_seed(self, entity, parent: Entity = None):
         if isinstance(entity, dict):
@@ -165,4 +154,18 @@ class Seeder:
 
 
 class HybridSeeder:
-    pass
+    __model_key = validator.Key.model()
+    __source_keys = validator.Key.source_keys()
+
+    def __init__(self, session: sqlalchemy.orm.Session, ref_prefix):
+        self.session = session
+        self._class_registry = class_registry.ClassRegistry()
+        self._instances = []
+        self.ref_prefix = ref_prefix
+
+    @property
+    def instances(self):
+        return tuple(self._instances)
+
+    def seed(self, entities):
+        pass
