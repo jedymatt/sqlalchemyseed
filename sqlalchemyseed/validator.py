@@ -99,11 +99,11 @@ def check_source_data(source_data, source_key: Key):
         raise errors.EmptyDataError("Empty list, 'data' or 'filter' list should not be empty.")
 
 
-def iter_reference_relationships(kwargs: dict, ref_prefix):
-    for attr_name, value in kwargs.items():
-        if attr_name.startswith(ref_prefix):
-            # removed prefix
-            yield attr_name[len(ref_prefix):], value
+# def iter_reference_relationships(kwargs: dict, ref_prefix):
+#     for attr_name, value in kwargs.items():
+#         if attr_name.startswith(ref_prefix):
+#             # removed prefix
+#             yield attr_name[len(ref_prefix):], value
 
 
 class SchemaValidator:
@@ -123,9 +123,9 @@ class SchemaValidator:
             return
         if isinstance(entities, dict):
             return cls._validate(entities, is_parent, ref_prefix)
-        elif isinstance(entities, list):
-            for entity in entities:
-                cls._pre_validate(entity, is_parent, ref_prefix)
+        # iterate list
+        for entity in entities:
+            cls._pre_validate(entity, is_parent, ref_prefix)
 
     @classmethod
     def _validate(cls, entity: dict, entity_is_parent=True, ref_prefix='!'):
@@ -139,10 +139,9 @@ class SchemaValidator:
         check_source_data(source_data, source_key)
 
         if isinstance(source_data, list):
-
             for item in source_data:
                 if not source_key.is_valid_type(item):
-                    raise TypeError(
+                    raise errors.InvalidDataTypeError(
                         f"Invalid type, '{source_key.label}' should be '{source_key.type}'")
 
                 # check if item is a relationship attribute
@@ -156,8 +155,3 @@ class SchemaValidator:
         for key, value in source_data.items():
             if str(key).startswith(ref_prefix):
                 cls._pre_validate(value, is_parent=False, ref_prefix=ref_prefix)
-
-
-if __name__ == '__main__':
-    instance = [[]]
-    SchemaValidator.validate(instance)

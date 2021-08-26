@@ -152,33 +152,32 @@ class Seeder:
     #     if key is validator.Key.filter() and self.session is not None:
     #         return self.session.query(class_).filter_by(**filtered_kwargs).one()
 
-
-class HybridSeeder:
-    __model_key = validator.Key.model()
-    __source_keys = [validator.Key.data(), validator.Key.filter()]
-
-    def __init__(self, session: sqlalchemy.orm.Session, ref_prefix):
-        self.session = session
-        self._class_registry = class_registry.ClassRegistry()
-        self._instances = []
-        self.ref_prefix = ref_prefix
-
-    @property
-    def instances(self):
-        return tuple(self._instances)
-
-    def seed(self, entities):
-        validator.SchemaValidator.validate(
-            entities, ref_prefix=self.ref_prefix)
-
-        self._pre_seed(entities)
-
-    def _pre_seed(self, entity, parent=None):
-        if isinstance(entity, dict):
-            self._seed(entity, parent)
-        else:  # is list
-            for item in entity:
-                self._pre_seed(item, parent)
-
-    def _seed(self, entity, parent):
-        pass
+# class HybridSeeder:
+#     __model_key = validator.Key.model()
+#     __source_keys = [validator.Key.data(), validator.Key.filter()]
+#
+#     def __init__(self, session: sqlalchemy.orm.Session, ref_prefix):
+#         self.session = session
+#         self._class_registry = class_registry.ClassRegistry()
+#         self._instances = []
+#         self.ref_prefix = ref_prefix
+#
+#     @property
+#     def instances(self):
+#         return tuple(self._instances)
+#
+#     def seed(self, entities):
+#         validator.SchemaValidator.validate(
+#             entities, ref_prefix=self.ref_prefix)
+#
+#         self._pre_seed(entities)
+#
+#     def _pre_seed(self, entity, parent=None):
+#         if isinstance(entity, dict):
+#             self._seed(entity, parent)
+#         else:  # is list
+#             for item in entity:
+#                 self._pre_seed(item, parent)
+#
+#     def _seed(self, entity, parent):
+#         pass

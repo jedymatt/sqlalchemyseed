@@ -160,7 +160,7 @@ class Seeder:
         filtered_kwargs = {
             k: v
             for k, v in kwargs.items() if not k.startswith("!")
-            and not isinstance(getattr(class_, k), RelationshipProperty)
+                                          and not isinstance(getattr(class_, k), RelationshipProperty)
         }
 
         if key_is_data is True:
@@ -201,7 +201,7 @@ class HybridSeeder(Seeder):
         filtered_kwargs = {
             k: v
             for k, v in kwargs.items() if not k.startswith("!")
-            and not isinstance(getattr(class_, k), RelationshipProperty)
+                                          and not isinstance(getattr(class_, k), RelationshipProperty)
         }
 
         if key_is_data is True:
@@ -236,7 +236,3 @@ class HybridSeeder(Seeder):
         result = (self.session.query(getattr(
             class_, column_name)).filter_by(**filtered_kwargs).one())
         return getattr(result, column_name)
-
-
-if __name__ == "__main__":
-    pass

@@ -5,6 +5,25 @@ PARENT = {
     }
 }
 
+PARENT_INVALID = 'str is not valid type for parent'
+
+PARENT_EMPTY = []
+
+PARENT_EMPTY_DATA_LIST_INVALID = {
+    'model': 'tests.models.Company',
+    'data': []
+}
+
+PARENT_MISSING_MODEL_INVALID = {
+    'data': {
+
+    }
+}
+
+PARENT_INVALID_MODEL_INVALID = {
+    'model': 9_999
+}
+
 PARENT_WITH_EXTRA_LENGTH_INVALID = {
     'model': 'tests.models.Company',
     'data': {
@@ -32,6 +51,19 @@ PARENT_WITH_MULTI_DATA = {
             'name': 'Second Company'
         }
     ]
+}
+
+PARENT_WITH_DATA_AND_INVALID_DATA_INVALID = {
+    'model': 'tests.models.Company',
+    'data': [
+        {},
+        9_999_999
+    ]
+}
+
+PARENT_WITH_INVALID_DATA_INVALID = {
+    'model': 'tests.models.Company',
+    'data': 'str is an invalid type of \'data\''
 }
 
 PARENTS = [
