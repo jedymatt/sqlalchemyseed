@@ -64,6 +64,31 @@ class TestSeeder(unittest.TestCase):
             seeder.seed(instance)
             self.assertEqual(len(session.new), 3)
 
+    def test_seed_multiple_data(self):
+        instance = {
+            'model': 'tests.models.Company',
+            'data': [
+                {
+                    'name': 'MyCompany',
+                    '!employees': {
+                        'model': 'tests.models.Employee',
+                        'data': {
+                            'name': 'John Smith'
+                        }
+
+                    }
+                },
+                {
+                    'name': 'MySecondCompany'
+                },
+            ]
+        }
+
+        with self.Session() as session:
+            seeder = Seeder(session=session)
+            seeder.seed(instance)
+            self.assertEqual(len(session.new), 3)
+
     def test_seed_no_relationship(self):
         instance = {
             'model': 'tests.models.Company',
