@@ -21,3 +21,4 @@ script:
     - coverage run --source=sqlalchemyseed -m pytest tests
 after_success:
   - bash <(curl -s https://codecov.io/bash)
+  - codecov
