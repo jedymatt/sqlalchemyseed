@@ -6,6 +6,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemyseed import HybridSeeder
 from sqlalchemyseed import Seeder
 from tests.models import Base, Company
+from sqlalchemyseed import errors
 from tests import instances
 
 
@@ -219,7 +220,6 @@ class TestHybridSeeder(unittest.TestCase):
                     {
                         'name': 'John Smith',
                         '!company_id': {
-                            'model': 'tests.models.Company',
                             'filter': {
                                 'name': 'MyCompany'
                             }
@@ -228,7 +228,6 @@ class TestHybridSeeder(unittest.TestCase):
                     {
                         'name': 'Juan Dela Cruz',
                         '!company_id': {
-                            'model': 'tests.models.Company',
                             'filter': {
                                 'name': 'MyCompany'
                             }
@@ -309,4 +308,4 @@ class TestHybridSeeder(unittest.TestCase):
 
         with self.Session() as session:
             seeder = HybridSeeder(session)
-            self.assertRaises(TypeError, lambda: seeder.seed(instance))
+            self.assertRaises(errors.InvalidKeyError, lambda: seeder.seed(instance))

@@ -23,12 +23,12 @@ SOFTWARE.
 """
 
 from .seeder import HybridSeeder
-from ._future.seeder import Seeder
+from .seeder import Seeder
 from .loader import load_entities_from_json
 from .loader import load_entities_from_yaml
 from .loader import load_entities_from_csv
 
-__version__ = '1.0.0.dev1'
+__version__ = '1.0.0'
 
 if __name__ == '__main__':
     pass

@@ -22,217 +22,292 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from collections import namedtuple
+import abc
 from typing import NamedTuple
 
-import sqlalchemy.orm
-from sqlalchemy import inspect
+import sqlalchemy
 from sqlalchemy.orm import ColumnProperty
-from sqlalchemy.orm import RelationshipProperty
 from sqlalchemy.orm import object_mapper
+from sqlalchemy.orm.relationships import RelationshipProperty
+from sqlalchemy.sql import schema
 
-from . import validator
-from .class_registry import ClassRegistry
+from . import class_registry
 from . import errors
+from . import util
+from . import validator
 
 
-class Seeder:
-    def __init__(self, session: sqlalchemy.orm.Session = None):
-        self._session = session
-        self._class_registry = ClassRegistry()
-        self._instances = []
-
-        self._required_keys = [("model", "data")]
+class AbstractSeeder(abc.ABC):
 
     @property
-    def session(self):
-        return self._session
+    @abc.abstractmethod
+    def instances(self, *args, **kwargs): pass
 
-    @session.setter
-    def session(self, value):
-        if not isinstance(value, sqlalchemy.orm.Session):
-            raise TypeError("obj type is not 'Session'.")
+    @abc.abstractmethod
+    def seed(self, *args, **kwargs): pass
 
-        self._session = value
+    @abc.abstractmethod
+    def _pre_seed(self, *args, **kwargs): pass
+
+    @abc.abstractmethod
+    def _seed(self, *args, **kwargs): pass
+
+    @abc.abstractmethod
+    def _seed_children(self, *args, **kwargs): pass
+
+    @abc.abstractmethod
+    def _setup_instance(self, *args, **kwargs): pass
+
+
+class EntityTuple(NamedTuple):
+    instance: object
+    attr_name: str
+
+
+class Entity(EntityTuple):
+    @property
+    def class_attribute(self):
+        return getattr(self.instance.__class__, self.attr_name)
+
+    @property
+    def instance_attribute(self):
+        return getattr(self.instance, self.attr_name)
+
+    @instance_attribute.setter
+    def instance_attribute(self, value):
+        setattr(self.instance, self.attr_name, value)
+
+    def is_column_attribute(self):
+        return isinstance(self.class_attribute.property, ColumnProperty)
+
+    def is_relationship_attribute(self):
+        return isinstance(self.class_attribute.property, RelationshipProperty)
+
+    @property
+    def referenced_class(self):
+        # if self.is_column_attribute():
+        #     return
+        if self.is_relationship_attribute():
+            return self.class_attribute.mapper.class_
+
+        if self.is_column_attribute():
+            table_name = get_foreign_key_column(self.class_attribute).table.name
+            return next(
+                (
+                    mapper.class_
+                    for mapper in object_mapper(self.instance).registry.mappers
+                    if mapper.class_.__tablename__ == table_name
+                ),
+                errors.ClassNotFoundError(
+                    "A class with table name '{}' is not found in the mappers".format(table_name)
+                )
+            )
+
+
+def get_foreign_key_column(attr, idx=0) -> schema.Column:
+    return list(attr.foreign_keys)[idx].column
+
+
+def filter_kwargs(kwargs: dict, class_, ref_prefix):
+    return {
+        k: v for k, v in util.iter_non_ref_kwargs(kwargs, ref_prefix)
+        if not isinstance(getattr(class_, str(k)).property, RelationshipProperty)
+    }
+
+
+def set_parent_attr_value(instance, parent: Entity):
+    if parent.is_relationship_attribute():
+        if parent.class_attribute.property.uselist is True:
+            parent.instance_attribute.append(instance)
+        else:
+            parent.instance_attribute = instance
+
+    if parent.is_column_attribute():
+        parent.instance_attribute = instance
+
+
+class Seeder(AbstractSeeder):
+    __model_key = validator.Key.model()
+    __data_key = validator.Key.data()
+
+    def __init__(self, session: sqlalchemy.orm.Session = None, ref_prefix="!"):
+        self.session = session
+        self._class_registry = class_registry.ClassRegistry()
+        self._instances = []
+        self.ref_prefix = ref_prefix
 
     @property
     def instances(self):
-        return self._instances
+        return tuple(self._instances)
 
-    def seed(self, instance, add_to_session=True):
-        # validate
-        validator.SchemaValidator.validate(instance)
+    def get_model_class(self, entity, parent: Entity):
+        if self.__model_key in entity:
+            return self._class_registry.register_class(entity[self.__model_key])
+        # parent is not None
+        return parent.referenced_class
 
-        # clear previously generated objects
+    def seed(self, entities, add_to_session=True):
+        validator.SchemaValidator.validate(
+            entities, ref_prefix=self.ref_prefix, source_keys=[validator.Key.data()])
+
         self._instances.clear()
         self._class_registry.clear()
 
-        self._pre_seed(instance)
+        self._pre_seed(entities)
 
-        if add_to_session is True:
-            self._session.add_all(self.instances)
+        if add_to_session:
+            self.session.add_all(self.instances)
 
-    def _pre_seed(self, instance, parent=None, parent_attr_name=None):
-        if isinstance(instance, list):
-            for i in instance:
-                self._seed(i, parent, parent_attr_name)
+    def _pre_seed(self, entity, parent: Entity = None):
+        if isinstance(entity, dict):
+            self._seed(entity, parent)
+        else:  # is list
+            for item in entity:
+                self._pre_seed(item, parent)
+
+    def _seed(self, entity, parent: Entity = None):
+        class_ = self.get_model_class(entity, parent)
+
+        kwargs = entity[self.__data_key]
+
+        # kwargs is list
+        if isinstance(kwargs, list):
+            for kwargs_ in kwargs:
+                instance = self._setup_instance(class_, kwargs_, parent)
+                self._seed_children(instance, kwargs_)
+            return
+
+        # kwargs is dict
+        # instantiate object
+        instance = self._setup_instance(class_, kwargs, parent)
+        self._seed_children(instance, kwargs)
+
+    def _seed_children(self, instance, kwargs):
+        for attr_name, value in util.iter_ref_kwargs(kwargs, self.ref_prefix):
+            self._pre_seed(entity=value, parent=Entity(instance, attr_name))
+
+    def _setup_instance(self, class_, kwargs: dict, parent: Entity):
+        instance = class_(**filter_kwargs(kwargs, class_, self.ref_prefix))
+        if parent is not None:
+            set_parent_attr_value(instance, parent)
         else:
-            self._seed(instance, parent, parent_attr_name)
+            self._instances.append(instance)
+        return instance
 
-    def _seed(self, instance: dict, parent=None, parent_attr_name=None):
-        keys = None
-        for r_keys in self._required_keys:
-            if all(key in instance.keys() for key in r_keys):
-                keys = r_keys
-                break
+    # def instantiate_class(self, class_, kwargs: dict, key: validator.Key):
+    #     filtered_kwargs = {
+    #         k: v
+    #         for k, v in kwargs.items()
+    #         if not k.startswith("!")
+    #            and not isinstance(getattr(class_, k), RelationshipProperty)
+    #     }
+    #
+    #     if key is validator.Key.data():
+    #         return class_(**filtered_kwargs)
+    #
+    #     if key is validator.Key.filter() and self.session is not None:
+    #         return self.session.query(class_).filter_by(**filtered_kwargs).one()
 
-        if keys is None:
-            raise KeyError(
-                "'filter' key is not allowed. Use HybridSeeder instead.")
 
-        key_is_data = keys[1] == "data"
+class HybridSeeder(AbstractSeeder):
+    __model_key = validator.Key.model()
+    __source_keys = [validator.Key.data(), validator.Key.filter()]
 
-        class_path = instance[keys[0]]
-        self._class_registry.register_class(class_path)
+    def __init__(self, session: sqlalchemy.orm.Session, ref_prefix: str = '!'):
+        self.session = session
+        self._class_registry = class_registry.ClassRegistry()
+        self._instances = []
+        self.ref_prefix = ref_prefix
 
-        if isinstance(instance[keys[1]], list):
-            for value in instance[keys[1]]:
-                obj = self.instantiate_obj(class_path, value, key_is_data,
-                                           parent, parent_attr_name)
-                # print(obj, parent, parent_attr_name)
-                if parent is not None and parent_attr_name is not None:
-                    attr_ = getattr(parent.__class__, parent_attr_name)
-                    if isinstance(attr_.property, RelationshipProperty):
-                        if attr_.property.uselist is True:
-                            if getattr(parent, parent_attr_name) is None:
-                                setattr(parent, parent_attr_name, [])
+    @property
+    def instances(self):
+        return tuple(self._instances)
 
-                            getattr(parent, parent_attr_name).append(obj)
-                        else:
-                            setattr(parent, parent_attr_name, obj)
-                    else:
-                        setattr(parent, parent_attr_name, obj)
-                else:
-                    if inspect(obj.__class__) and key_is_data is True:
-                        self._instances.append(obj)
-                # check for relationships
-                for k, v in value.items():
-                    if str(k).startswith("!"):
-                        self._pre_seed(v, obj, k[1:])  # removed prefix
+    def get_model_class(self, entity, parent: Entity):
+        # if self.__model_key in entity and (parent is not None and parent.is_column_attribute()):
+        #     raise errors.InvalidKeyError("column attribute does not accept 'model' key")
 
-        elif isinstance(instance[keys[1]], dict):
-            obj = self.instantiate_obj(class_path, instance[keys[1]],
-                                       key_is_data, parent, parent_attr_name)
-            # print(parent, parent_attr_name)
-            if parent is not None and parent_attr_name is not None:
-                attr_ = getattr(parent.__class__, parent_attr_name)
-                if isinstance(attr_.property, RelationshipProperty):
-                    if attr_.property.uselist is True:
-                        if getattr(parent, parent_attr_name) is None:
-                            setattr(parent, parent_attr_name, [])
+        if self.__model_key in entity:
+            class_path = entity[self.__model_key]
+            return self._class_registry.register_class(class_path)
 
-                        getattr(parent, parent_attr_name).append(obj)
-                    else:
-                        setattr(parent, parent_attr_name, obj)
-                else:
-                    setattr(parent, parent_attr_name, obj)
-            else:
-                if inspect(obj.__class__) and key_is_data is True:
-                    self._instances.append(obj)
+        # parent is not None
+        if parent is not None:
+            return parent.referenced_class
 
-            # check for relationships
-            for k, v in instance[keys[1]].items():
-                # print(k, v)
-                if str(k).startswith("!"):
-                    # print(k)
-                    self._pre_seed(v, obj, k[1:])  # removed prefix '!'
+    def seed(self, entities):
+        validator.SchemaValidator.validate(
+            entities, ref_prefix=self.ref_prefix)
+
+        self._instances.clear()
+        self._class_registry.clear()
+
+        self._pre_seed(entities)
+
+    def _pre_seed(self, entity, parent=None):
+        if isinstance(entity, dict):
+            self._seed(entity, parent)
+        else:  # is list
+            for item in entity:
+                self._pre_seed(item, parent)
+
+    def _seed(self, entity, parent):
+        class_ = self.get_model_class(entity, parent)
+
+        source_key: validator.Key = next(
+            (sk for sk in self.__source_keys if sk in entity),
+            None
+        )
+
+        source_data = entity[source_key]
+
+        # source_data is list
+        if isinstance(source_data, list):
+            for kwargs in source_data:
+                instance = self._setup_instance(class_, kwargs, source_key, parent)
+                self._seed_children(instance, kwargs)
+            return
+
+        # source_data is dict
+        instance = self._setup_instance(class_, source_data, source_key, parent)
+        self._seed_children(instance, source_data)
+
+    def _seed_children(self, instance, kwargs):
+        for attr_name, value in util.iter_ref_kwargs(kwargs, self.ref_prefix):
+            self._pre_seed(entity=value, parent=Entity(instance, attr_name))
+
+    def _setup_instance(self, class_, kwargs: dict, key, parent):
+        filtered_kwargs = filter_kwargs(kwargs, class_, self.ref_prefix)
+
+        if key == key.data():
+            instance = self._setup_data_instance(class_, filtered_kwargs, parent)
+        else:  # key == key.filter()
+            # instance = self.session.query(class_).filter_by(**filtered_kwargs)
+            instance = self._setup_filter_instance(class_, filtered_kwargs, parent)
+
+        # setting parent
+        if parent is not None:
+            set_parent_attr_value(instance, parent)
 
         return instance
 
-    def instantiate_obj(self,
-                        class_path,
-                        kwargs,
-                        key_is_data,
-                        parent=None,
-                        parent_attr_name=None):
-        class_ = self._class_registry[class_path]
+    def _setup_data_instance(self, class_, filtered_kwargs, parent: Entity):
+        if parent is not None and parent.is_column_attribute():
+            raise errors.InvalidKeyError("'data' key is invalid for a column attribute.")
 
-        filtered_kwargs = {
-            k: v
-            for k, v in kwargs.items() if not k.startswith("!")
-                                          and not isinstance(getattr(class_, k), RelationshipProperty)
-        }
+        instance = class_(**filtered_kwargs)
+        self.session.add(instance)
+        if parent is None:
+            self._instances.append(instance)
 
-        if key_is_data is True:
-            return class_(**filtered_kwargs)
-        else:
-            raise KeyError("key is invalid")
+        return instance
 
+    def _setup_filter_instance(self, class_, filtered_kwargs, parent: Entity):
+        if parent is not None and parent.is_column_attribute():
+            foreign_key_column = get_foreign_key_column(parent.class_attribute)
+            return self.session.query(foreign_key_column).filter_by(**filtered_kwargs).one()[0]
 
-class HybridSeeder(Seeder):
-    def __init__(self, session: sqlalchemy.orm.Session):
-        super().__init__(session=session)
-        self._required_keys = [("model", "data"), ("model", "filter")]
+        if parent is not None and parent.is_relationship_attribute():
+            return self.session.query(parent.referenced_class).filter_by(**filtered_kwargs).one()
 
-    def seed(self, instance):
-        super().seed(instance, False)
-
-    def instantiate_obj(self,
-                        class_path,
-                        kwargs,
-                        key_is_data,
-                        parent=None,
-                        parent_attr_name=None):
-        """Instantiates or queries object, or queries ForeignKey
-
-        Args:
-            class_path (str): Class path
-            kwargs ([dict]): Class kwargs
-            key_is_data (bool): key is 'data'
-            parent (object): parent object
-            parent_attr_name (str): parent attribute name
-
-        Returns:
-            Any: instantiated object or queried object, or foreign key id
-        """
-
-        class_ = self._class_registry[class_path]
-
-        filtered_kwargs = {
-            k: v
-            for k, v in kwargs.items() if not k.startswith("!")
-                                          and not isinstance(getattr(class_, k), RelationshipProperty)
-        }
-
-        if key_is_data is True:
-            if parent is not None and parent_attr_name is not None:
-                class_attr = getattr(parent.__class__, parent_attr_name)
-                if isinstance(class_attr.property, ColumnProperty):
-                    raise TypeError("invalid class attribute type")
-
-            obj = class_(**filtered_kwargs)
-            self._session.add(obj)
-            # self._session.flush()
-            return obj
-        else:
-            if parent is not None and parent_attr_name is not None:
-                class_attr = getattr(parent.__class__, parent_attr_name)
-                if isinstance(class_attr.property, ColumnProperty):
-                    foreign_key = str(
-                        list(
-                            getattr(parent.__class__,
-                                    parent_attr_name).foreign_keys)[0].column)
-                    foreign_key_id = self._query_instance_id(
-                        class_, filtered_kwargs, foreign_key)
-                    return foreign_key_id
-
-            return self._session.query(class_).filter_by(
-                **filtered_kwargs).one()
-
-    def _query_instance_id(self, class_, filtered_kwargs, foreign_key):
-        arr = foreign_key.rsplit(".")
-        column_name = arr[len(arr) - 1]
-
-        result = (self.session.query(getattr(
-            class_, column_name)).filter_by(**filtered_kwargs).one())
-        return getattr(result, column_name)
+        return self.session.query(class_).filter_by(**filtered_kwargs).one()

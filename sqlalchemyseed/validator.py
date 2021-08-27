@@ -23,6 +23,7 @@ SOFTWARE.
 """
 
 from . import errors
+from . import util
 
 
 class Key:
@@ -64,10 +65,10 @@ class Key:
 def check_model_key(entity: dict, entity_is_parent: bool):
     model = Key.model()
     if model not in entity and entity_is_parent:
-        raise errors.MissingRequiredKeyError("'model' key is missing.")
+        raise errors.MissingKeyError("'model' key is missing.")
     # check type_
     if model in entity and not model.is_valid_type(entity[model]):
-        raise errors.InvalidDataTypeError("'model' data should be 'string'.")
+        raise errors.InvalidTypeError("'model' data should be 'string'.")
 
 
 def check_max_length(entity: dict):
@@ -83,14 +84,14 @@ def check_source_key(entity: dict, source_keys: list) -> Key:
 
     # check if current keys has at least, data or filter key
     if source_key is None:
-        raise errors.MissingRequiredKeyError("Missing 'data' or 'filter' key.")
+        raise errors.MissingKeyError(f"Missing {', '.join(map(str, source_keys))} key(s).")
 
     return source_key
 
 
 def check_source_data(source_data, source_key: Key):
     if not isinstance(source_data, dict) and not isinstance(source_data, list):
-        raise errors.InvalidDataTypeError(f"Invalid type_, {str(source_key)} should be either 'dict' or 'list'.")
+        raise errors.InvalidTypeError(f"Invalid type_, {str(source_key)} should be either 'dict' or 'list'.")
 
     if isinstance(source_data, list) and len(source_data) == 0:
         raise errors.EmptyDataError("Empty list, 'data' or 'filter' list should not be empty.")
@@ -98,15 +99,8 @@ def check_source_data(source_data, source_key: Key):
 
 def check_data_type(item, source_key: Key):
     if not source_key.is_valid_type(item):
-        raise errors.InvalidDataTypeError(
+        raise errors.InvalidTypeError(
             f"Invalid type_, '{source_key.name}' should be '{source_key.type_}'")
-
-
-def iter_reference_relationship_values(kwargs: dict, ref_prefix):
-    for attr_name, value in kwargs.items():
-        if attr_name.startswith(ref_prefix):
-            # removed prefix
-            yield value
 
 
 class SchemaValidator:
@@ -124,7 +118,7 @@ class SchemaValidator:
     @classmethod
     def _pre_validate(cls, entities: dict, entity_is_parent=True):
         if not isinstance(entities, dict) and not isinstance(entities, list):
-            raise errors.InvalidDataTypeError("Invalid type, should be list or dict")
+            raise errors.InvalidTypeError("Invalid type, should be list or dict")
         if len(entities) == 0:
             return
         if isinstance(entities, dict):
@@ -156,5 +150,5 @@ class SchemaValidator:
 
     @classmethod
     def check_attributes(cls, source_data: dict):
-        for value in iter_reference_relationship_values(source_data, cls._ref_prefix):
+        for _, value in util.iter_ref_kwargs(source_data, cls._ref_prefix):
             cls._pre_validate(value, entity_is_parent=False)

@@ -11,7 +11,7 @@ class TestSchemaValidator(unittest.TestCase):
         self.assertIsNone(SchemaValidator.validate(ins.PARENT))
 
     def test_parent_invalid(self):
-        self.assertRaises(errors.InvalidDataTypeError,
+        self.assertRaises(errors.InvalidTypeError,
                           lambda: SchemaValidator.validate(ins.PARENT_INVALID))
 
     def test_parent_empty(self):
@@ -22,11 +22,11 @@ class TestSchemaValidator(unittest.TestCase):
                           lambda: SchemaValidator.validate(ins.PARENT_EMPTY_DATA_LIST_INVALID))
 
     def test_parent_missing_model_invalid(self):
-        self.assertRaises(errors.MissingRequiredKeyError,
+        self.assertRaises(errors.MissingKeyError,
                           lambda: SchemaValidator.validate(ins.PARENT_MISSING_MODEL_INVALID))
 
     def test_parent_invalid_model_invalid(self):
-        self.assertRaises(errors.InvalidDataTypeError,
+        self.assertRaises(errors.InvalidTypeError,
                           lambda: SchemaValidator.validate(ins.PARENT_INVALID_MODEL_INVALID))
 
     def test_parent_with_extra_length_invalid(self):
@@ -40,15 +40,15 @@ class TestSchemaValidator(unittest.TestCase):
         self.assertIsNone(SchemaValidator.validate(ins.PARENT_WITH_MULTI_DATA))
 
     def test_parent_without_data_invalid(self):
-        self.assertRaises(errors.MissingRequiredKeyError,
+        self.assertRaises(errors.MissingKeyError,
                           lambda: SchemaValidator.validate(ins.PARENT_WITHOUT_DATA_INVALID))
 
     def test_parent_with_data_and_invalid_data_invalid(self):
-        self.assertRaises(errors.InvalidDataTypeError,
+        self.assertRaises(errors.InvalidTypeError,
                           lambda: SchemaValidator.validate(ins.PARENT_WITH_DATA_AND_INVALID_DATA_INVALID))
 
     def test_parent_with_invalid_data_invalid(self):
-        self.assertRaises(errors.InvalidDataTypeError,
+        self.assertRaises(errors.InvalidTypeError,
                           lambda: SchemaValidator.validate(ins.PARENT_WITH_INVALID_DATA_INVALID))
 
     def test_parent_to_child(self):
