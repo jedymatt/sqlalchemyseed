@@ -41,22 +41,28 @@ class AbstractSeeder(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def instances(self, *args, **kwargs): pass
+    def instances(self, *args, **kwargs):
+        pass
 
     @abc.abstractmethod
-    def seed(self, *args, **kwargs): pass
+    def seed(self, *args, **kwargs):
+        pass
 
     @abc.abstractmethod
-    def _pre_seed(self, *args, **kwargs): pass
+    def _pre_seed(self, *args, **kwargs):
+        pass
 
     @abc.abstractmethod
-    def _seed(self, *args, **kwargs): pass
+    def _seed(self, *args, **kwargs):
+        pass
 
     @abc.abstractmethod
-    def _seed_children(self, *args, **kwargs): pass
+    def _seed_children(self, *args, **kwargs):
+        pass
 
     @abc.abstractmethod
-    def _setup_instance(self, *args, **kwargs): pass
+    def _setup_instance(self, *args, **kwargs):
+        pass
 
 
 class EntityTuple(NamedTuple):
