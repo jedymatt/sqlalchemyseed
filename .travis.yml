@@ -25,9 +25,8 @@ before_script:
     - ./cc-test-reporter before-build
 script:
     # - pytest tests
-    - coverage run --source=sqlalchemyseed -m pytest tests
+    - coverage run --source=sqlalchemyseed/ --omit=**/_future/* -m pytest tests
 after_script:
-#    - coverage xml
     - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
 after_success:
 #  - bash <(curl -s https://codecov.io/bash)
