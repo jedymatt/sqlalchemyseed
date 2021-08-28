@@ -8,6 +8,9 @@ python:
 #     - linux
 #     - osx
 #     - windows
+env:
+  global:
+    - CC_TEST_REPORTER_ID=48ee9103b2354a6b5c3028f4bc09a0705b79f27d013328a4234107ed385c16ec
 before_install:
     - pip3 install --upgrade pip
 
@@ -16,12 +19,16 @@ install:
     - pip install .
     - pip install pytest
     - pip install codecov
-# before_script:
-#     - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-#     - chmod +x ./cc-test-reporter
+before_script:
+    - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+    - chmod +x ./cc-test-reporter
+    - ./cc-test-reporter before-build
 script:
     # - pytest tests
     - coverage run --source=sqlalchemyseed -m pytest tests
+after_script:
+    - coverage xml
+    - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
 after_success:
 #  - bash <(curl -s https://codecov.io/bash)
   - codecov
