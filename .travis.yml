@@ -19,15 +19,15 @@ install:
     - pip install .
     - pip install pytest
     - pip install codecov
-before_script:
-    - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-    - chmod +x ./cc-test-reporter
-    - ./cc-test-reporter before-build
+# before_script:
+#     - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+#     - chmod +x ./cc-test-reporter
+#     - ./cc-test-reporter before-build
 script:
     # - pytest tests
-    - coverage run --source=sqlalchemyseed/ --omit=**/_future/* -m pytest tests
-after_script:
-    - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+    - coverage run --source=sqlalchemyseed/ -m pytest tests
+# after_script:
+#     - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
 after_success:
 #  - bash <(curl -s https://codecov.io/bash)
     - codecov
