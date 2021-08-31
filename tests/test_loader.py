@@ -10,10 +10,24 @@ class TestLoader(unittest.TestCase):
         entities = load_entities_from_json('tests/res/data.json')
         self.assertEqual(len(entities), 6)
 
+    def test_load_entities_from_json_file_not_found(self):
+        self.assertRaises(FileNotFoundError,
+                          lambda: load_entities_from_json('tests/res/non-existent-file'))
+
     def test_load_entities_from_yaml(self):
         entities = load_entities_from_yaml('tests/res/data.yml')
         self.assertEqual(len(entities), 2)
 
-    def test_load_entities_from_csv(self):
-        entities = load_entities_from_csv('tests/res/companies.csv', 'tests.models.Company')
+    def test_load_entities_from_yaml_file_not_found(self):
+        self.assertRaises(FileNotFoundError,
+                          lambda: load_entities_from_yaml('tests/res/non-existent-file'))
+
+    def test_load_entities_from_csv_input_class(self):
+        from tests.models import Company
+        entities = load_entities_from_csv(
+            'tests/res/companies.csv', Company)
         self.assertEqual(len(entities['data']), 3)
+
+    def test_load_entities_from_csv_input_model_string(self):
+        self.assertIsNotNone(load_entities_from_csv(
+            'tests/res/companies.csv', "tests.models.Company"))

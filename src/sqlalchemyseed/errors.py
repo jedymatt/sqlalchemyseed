@@ -26,3 +26,7 @@ class EmptyDataError(Exception):
 class InvalidKeyError(Exception):
     """Raised when an invalid key is invoked"""
     pass
+
+class ParseError(Exception):
+    """Raised when parsing string fails"""
+    pass

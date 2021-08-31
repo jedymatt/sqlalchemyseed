@@ -83,7 +83,3 @@ def load_entities_from_csv(csv_filepath: str, model) -> dict:
     validator.SchemaValidator.validate(entities)
 
     return entities
-
-
-if __name__ == '__main__':
-    load_entities_from_yaml('tests/res/data.yaml')

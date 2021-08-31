@@ -26,13 +26,14 @@ import importlib
 from sqlalchemy.exc import NoInspectionAvailable
 from inspect import isclass
 from sqlalchemy import inspect
+from . import errors
 
 
 def parse_class_path(class_path: str):
     try:
         module_name, class_name = class_path.rsplit('.', 1)
     except ValueError:
-        raise ValueError('Invalid module or class input format.')
+        raise errors.ParseError('Invalid module or class input format.')
 
     # if class_name not in classes:
     class_ = getattr(importlib.import_module(module_name), class_name)
@@ -67,7 +68,7 @@ class ClassRegistry:
 
     @property
     def classes(self):
-        return self._classes
+        return tuple(self._classes)
 
     def clear(self):
         self._classes.clear()
