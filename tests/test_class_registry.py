@@ -1,5 +1,4 @@
 import unittest
-from sqlalchemyseed import class_registry
 from src.sqlalchemyseed import errors
 
 from src.sqlalchemyseed.class_registry import ClassRegistry
