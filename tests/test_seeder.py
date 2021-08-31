@@ -3,11 +3,9 @@ import unittest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from sqlalchemyseed import HybridSeeder
-from sqlalchemyseed import Seeder
+from src.sqlalchemyseed import HybridSeeder, errors
+from src.sqlalchemyseed import Seeder
 from tests.models import Base, Company
-from sqlalchemyseed import errors
-from tests import instances
 
 
 class TestSeeder(unittest.TestCase):

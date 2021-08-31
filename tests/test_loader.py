@@ -1,8 +1,8 @@
 import unittest
 
-from sqlalchemyseed import load_entities_from_json
-from sqlalchemyseed import load_entities_from_yaml
-from sqlalchemyseed import load_entities_from_csv
+from src.sqlalchemyseed import load_entities_from_json
+from src.sqlalchemyseed import load_entities_from_yaml
+from src.sqlalchemyseed import load_entities_from_csv
 
 
 class TestLoader(unittest.TestCase):

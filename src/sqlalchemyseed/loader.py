@@ -26,9 +26,7 @@ import csv
 import json
 import sys
 
-
 from . import validator
-
 
 try:
     import yaml

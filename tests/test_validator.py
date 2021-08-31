@@ -1,7 +1,7 @@
 import unittest
 
-from sqlalchemyseed import errors
-from sqlalchemyseed.validator import SchemaValidator, Key
+from src.sqlalchemyseed import errors
+from src.sqlalchemyseed.validator import SchemaValidator, Key
 from tests import instances as ins
 
 

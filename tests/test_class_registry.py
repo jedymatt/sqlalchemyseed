@@ -1,6 +1,6 @@
 import unittest
 
-from sqlalchemyseed.class_registry import ClassRegistry
+from src.sqlalchemyseed.class_registry import ClassRegistry
 
 
 class TestClassRegistry(unittest.TestCase):

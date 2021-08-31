@@ -31,10 +31,7 @@ from sqlalchemy.orm import object_mapper
 from sqlalchemy.orm.relationships import RelationshipProperty
 from sqlalchemy.sql import schema
 
-from . import class_registry
-from . import errors
-from . import util
-from . import validator
+from . import class_registry, validator, errors, util
 
 
 class AbstractSeeder(abc.ABC):

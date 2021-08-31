@@ -16,7 +16,7 @@ before_install:
 
 install:
     - pip install -r requirements.txt
-    - pip install .
+    - pip install . --use-feature=in-tree-build
     - pip install pytest
     - pip install codecov
 # before_script:
@@ -25,7 +25,7 @@ install:
 #     - ./cc-test-reporter before-build
 script:
     # - pytest tests
-    - coverage run --source=sqlalchemyseed/ -m pytest tests
+    - coverage run --source=src/ -m pytest tests
 # after_script:
 #     - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
 after_success:
