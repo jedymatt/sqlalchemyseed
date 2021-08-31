@@ -30,3 +30,15 @@ class InvalidKeyError(Exception):
 class ParseError(Exception):
     """Raised when parsing string fails"""
     pass
+
+class NotClassError(Exception):
+    """Raised when a value is not a class"""
+    pass
+
+class UnsupportedClassError(Exception):
+    """Raised when an unsupported class is invoked"""
+    pass
+
+class NotInModuleError(Exception):
+    """Raised when a value is not found in module"""
+    pass

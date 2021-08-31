@@ -36,16 +36,20 @@ def parse_class_path(class_path: str):
         raise errors.ParseError('Invalid module or class input format.')
 
     # if class_name not in classes:
-    class_ = getattr(importlib.import_module(module_name), class_name)
+    try:
+        class_ = getattr(importlib.import_module(module_name), class_name)
+    except AttributeError:
+        raise errors.NotInModuleError(f"{class_name} is not found in module {module_name}.")
 
     try:
         if isclass(class_) and inspect(class_):
             return class_
-        else:
-            raise TypeError("'{}' is not a class".format(class_name))
+
+        raise errors.NotClassError("'{}' is not a class".format(class_name))
     except NoInspectionAvailable:
-        raise TypeError(
+        raise errors.UnsupportedClassError(
             "'{}' is an unsupported class".format(class_name))
+
 
 class ClassRegistry:
     def __init__(self):

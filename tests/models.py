@@ -59,3 +59,9 @@ class GrandChild(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(255))
     parent_id = Column(Integer, ForeignKey('children.id'))
+
+not_class = 'this is not a class'
+
+class UnsupportedClass:
+    """This is an example of an unsupported class"""
+    pass
