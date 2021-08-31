@@ -8,9 +8,9 @@ python:
 #     - linux
 #     - osx
 #     - windows
-env:
-  global:
-    - CC_TEST_REPORTER_ID=48ee9103b2354a6b5c3028f4bc09a0705b79f27d013328a4234107ed385c16ec
+# env:
+#   global:
+#     - CC_TEST_REPORTER_ID=48ee9103b2354a6b5c3028f4bc09a0705b79f27d013328a4234107ed385c16ec
 before_install:
     - pip3 install --upgrade pip
 install:
