@@ -235,8 +235,7 @@ class HybridSeeder(AbstractSeeder):
             return self._class_registry.register_class(class_path)
 
         # parent is not None
-        if parent is not None:
-            return parent.referenced_class
+        return parent.referenced_class
 
     def seed(self, entities):
         validator.SchemaValidator.validate(
