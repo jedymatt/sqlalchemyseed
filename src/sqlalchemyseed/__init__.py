@@ -27,7 +27,7 @@ from .seeder import Seeder
 from .loader import load_entities_from_json
 from .loader import load_entities_from_yaml
 from .loader import load_entities_from_csv
-import importlib_metadata
+import importlib.metadata as importlib_metadata
 
 __version__ = importlib_metadata.version('sqlalchemyseed')
 
