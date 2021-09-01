@@ -8,9 +8,6 @@ python:
 #     - linux
 #     - osx
 #     - windows
-env:
-  global:
-    - CC_TEST_REPORTER_ID=18c8bf4f6d61e3e952e48feb48cb3b9ba4d144e9ea91e44d099912525fb8f385
 before_install:
     - pip3 install --upgrade pip
 install:
@@ -18,15 +15,9 @@ install:
     - pip install . --use-feature=in-tree-build
     - pip install pytest
     - pip install codecov
-before_script:
-    - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-    - chmod +x ./cc-test-reporter
-    - ./cc-test-reporter before-build
 script:
     # - pytest tests
     - coverage run -m pytest tests
-after_script:
-    - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
 after_success:
 #  - bash <(curl -s https://codecov.io/bash)
     - codecov
