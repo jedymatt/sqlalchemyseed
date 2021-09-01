@@ -30,7 +30,7 @@ from . import validator
 
 try:
     import yaml
-except ModuleNotFoundError:
+except ModuleNotFoundError: # pragma: no cover
     pass
 
 

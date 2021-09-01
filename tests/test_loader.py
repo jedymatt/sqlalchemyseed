@@ -1,9 +1,9 @@
 import unittest
+from sqlalchemyseed import loader
 
 from src.sqlalchemyseed import load_entities_from_json
 from src.sqlalchemyseed import load_entities_from_yaml
 from src.sqlalchemyseed import load_entities_from_csv
-
 
 class TestLoader(unittest.TestCase):
     def test_load_entities_from_json(self):
@@ -31,3 +31,13 @@ class TestLoader(unittest.TestCase):
     def test_load_entities_from_csv_input_model_string(self):
         self.assertIsNotNone(load_entities_from_csv(
             'tests/res/companies.csv', "tests.models.Company"))
+
+    def test_loader_yaml_not_installed(self):
+        from src.sqlalchemyseed import loader as loader_
+
+        loader_.sys.modules.pop('yaml')
+        self.assertRaises(
+            ModuleNotFoundError,
+            lambda: load_entities_from_yaml('tests/res/data.yml')
+        )
+        
