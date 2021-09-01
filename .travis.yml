@@ -12,8 +12,9 @@ before_install:
     - pip3 install --upgrade pip
 install:
     - pip install -r requirements.txt
-    - pip install . --use-feature=in-tree-build
-#     - pip install -e .
+#     don't use the line below because codecov generates a false 'miss'
+#     - pip install . --use-feature=in-tree-build
+    - pip install -e .
     - pip install pytest
     - pip install codecov
 script:
