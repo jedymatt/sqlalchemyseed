@@ -88,23 +88,16 @@ class Entity(EntityTuple):
 
     @property
     def referenced_class(self):
-        # if self.is_column_attribute():
-        #     return
         if self.is_relationship_attribute():
             return self.class_attribute.mapper.class_
 
-        if self.is_column_attribute():
-            table_name = get_foreign_key_column(self.class_attribute).table.name
-            return next(
-                (
-                    mapper.class_
-                    for mapper in object_mapper(self.instance).registry.mappers
-                    if mapper.class_.__tablename__ == table_name
-                ),
-                errors.ClassNotFoundError(
-                    "A class with table name '{}' is not found in the mappers".format(table_name)
-                )
-            )
+        # if self.is_column_attribute():
+        table_name = get_foreign_key_column(self.class_attribute).table.name
+
+        return next(filter(
+            lambda mapper: mapper.class_.__tablename__ == table_name,
+            object_mapper(self.instance).registry.mappers
+        )).class_
 
 
 def get_foreign_key_column(attr, idx=0) -> schema.Column:
@@ -125,7 +118,7 @@ def set_parent_attr_value(instance, parent: Entity):
         else:
             parent.instance_attribute = instance
 
-    if parent.is_column_attribute():
+    else:  # if parent.is_column_attribute():
         parent.instance_attribute = instance
 
 
@@ -150,8 +143,7 @@ class Seeder(AbstractSeeder):
         return parent.referenced_class
 
     def seed(self, entities, add_to_session=True):
-        validator.SchemaValidator.validate(
-            entities, ref_prefix=self.ref_prefix, source_keys=[validator.Key.data()])
+        validator.validate(entities=entities, ref_prefix=self.ref_prefix)
 
         self._instances.clear()
         self._class_registry.clear()
@@ -238,8 +230,7 @@ class HybridSeeder(AbstractSeeder):
         return parent.referenced_class
 
     def seed(self, entities):
-        validator.SchemaValidator.validate(
-            entities, ref_prefix=self.ref_prefix)
+        validator.hybrid_validate(entities=entities, ref_prefix=self.ref_prefix)
 
         self._instances.clear()
         self._class_registry.clear()
@@ -256,9 +247,8 @@ class HybridSeeder(AbstractSeeder):
     def _seed(self, entity, parent):
         class_ = self.get_model_class(entity, parent)
 
-        source_key: validator.Key = next(
-            (sk for sk in self.__source_keys if sk in entity),
-            None
+        source_key = next(
+            filter(lambda sk: sk in entity, self.__source_keys)
         )
 
         source_data = entity[source_key]
@@ -266,7 +256,8 @@ class HybridSeeder(AbstractSeeder):
         # source_data is list
         if isinstance(source_data, list):
             for kwargs in source_data:
-                instance = self._setup_instance(class_, kwargs, source_key, parent)
+                instance = self._setup_instance(
+                    class_, kwargs, source_key, parent)
                 self._seed_children(instance, kwargs)
             return
 
@@ -295,11 +286,13 @@ class HybridSeeder(AbstractSeeder):
 
     def _setup_data_instance(self, class_, filtered_kwargs, parent: Entity):
         if parent is not None and parent.is_column_attribute():
-            raise errors.InvalidKeyError("'data' key is invalid for a column attribute.")
+            raise errors.InvalidKeyError(
+                "'data' key is invalid for a column attribute.")
 
         instance = class_(**filtered_kwargs)
-        self.session.add(instance)
+
         if parent is None:
+            self.session.add(instance)
             self._instances.append(instance)
 
         return instance

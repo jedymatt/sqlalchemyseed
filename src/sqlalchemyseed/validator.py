@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+import abc
 from . import errors, util
 
 
@@ -83,17 +84,20 @@ def check_source_key(entity: dict, source_keys: list) -> Key:
 
     # check if current keys has at least, data or filter key
     if source_key is None:
-        raise errors.MissingKeyError(f"Missing {', '.join(map(str, source_keys))} key(s).")
+        raise errors.MissingKeyError(
+            f"Missing {', '.join(map(str, source_keys))} key(s).")
 
     return source_key
 
 
 def check_source_data(source_data, source_key: Key):
     if not isinstance(source_data, dict) and not isinstance(source_data, list):
-        raise errors.InvalidTypeError(f"Invalid type_, {str(source_key)} should be either 'dict' or 'list'.")
+        raise errors.InvalidTypeError(
+            f"Invalid type_, {str(source_key)} should be either 'dict' or 'list'.")
 
     if isinstance(source_data, list) and len(source_data) == 0:
-        raise errors.EmptyDataError("Empty list, 'data' or 'filter' list should not be empty.")
+        raise errors.EmptyDataError(
+            "Empty list, 'data' or 'filter' list should not be empty.")
 
 
 def check_data_type(item, source_key: Key):
@@ -102,37 +106,38 @@ def check_data_type(item, source_key: Key):
             f"Invalid type_, '{source_key.name}' should be '{source_key.type_}'")
 
 
-class SchemaValidator:
-    _source_keys = None
-    _ref_prefix = None
+class SchemaValidator(abc.ABC):
+
+    def __init__(self, source_keys, ref_prefix):
+        self._source_keys = source_keys
+        self._ref_prefix = ref_prefix
 
     @classmethod
-    def validate(cls, entities, ref_prefix='!', source_keys=None):
-        if source_keys is None:
-            cls._source_keys = [Key.data(), Key.filter()]
-        cls._ref_prefix = ref_prefix
+    def validate(cls, entities, source_keys, ref_prefix='!'):
+        self = cls(source_keys, ref_prefix)
+        self._source_keys = source_keys
+        self._ref_prefix = ref_prefix
 
-        cls._pre_validate(entities, entity_is_parent=True)
+        self._pre_validate(entities, entity_is_parent=True)
 
-    @classmethod
-    def _pre_validate(cls, entities: dict, entity_is_parent=True):
+    def _pre_validate(self, entities: dict, entity_is_parent=True):
         if not isinstance(entities, dict) and not isinstance(entities, list):
-            raise errors.InvalidTypeError("Invalid type, should be list or dict")
+            raise errors.InvalidTypeError(
+                "Invalid type, should be list or dict")
         if len(entities) == 0:
             return
         if isinstance(entities, dict):
-            return cls._validate(entities, entity_is_parent)
+            return self._validate(entities, entity_is_parent)
         # iterate list
         for entity in entities:
-            cls._pre_validate(entity, entity_is_parent)
+            self._pre_validate(entity, entity_is_parent)
 
-    @classmethod
-    def _validate(cls, entity: dict, entity_is_parent=True):
+    def _validate(self, entity: dict, entity_is_parent=True):
         check_max_length(entity)
         check_model_key(entity, entity_is_parent)
 
         # get source key, either data or filter key
-        source_key = check_source_key(entity, cls._source_keys)
+        source_key = check_source_key(entity, self._source_keys)
         source_data = entity[source_key]
 
         check_source_data(source_data, source_key)
@@ -141,13 +146,23 @@ class SchemaValidator:
             for item in source_data:
                 check_data_type(item, source_key)
                 # check if item is a relationship attribute
-                cls.check_attributes(item)
+                self.check_attributes(item)
         else:
             # source_data is dict
             # check if item is a relationship attribute
-            cls.check_attributes(source_data)
+            self.check_attributes(source_data)
 
-    @classmethod
-    def check_attributes(cls, source_data: dict):
-        for _, value in util.iter_ref_kwargs(source_data, cls._ref_prefix):
-            cls._pre_validate(value, entity_is_parent=False)
+    def check_attributes(self, source_data: dict):
+        for _, value in util.iter_ref_kwargs(source_data, self._ref_prefix):
+            self._pre_validate(value, entity_is_parent=False)
+
+
+def validate(entities, ref_prefix='!'):
+    SchemaValidator.validate(
+        entities, ref_prefix=ref_prefix, source_keys=[Key.data()])
+
+
+def hybrid_validate(entities, ref_prefix='!'):
+    SchemaValidator.validate(entities,
+                             ref_prefix=ref_prefix,
+                             source_keys=[Key.data(), Key.filter()])

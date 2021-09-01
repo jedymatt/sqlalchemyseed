@@ -27,6 +27,7 @@ from sqlalchemy.exc import NoInspectionAvailable
 from inspect import isclass
 from sqlalchemy import inspect
 from . import errors
+from . import util
 
 
 def parse_class_path(class_path: str):
@@ -41,14 +42,10 @@ def parse_class_path(class_path: str):
     except AttributeError:
         raise errors.NotInModuleError(f"{class_name} is not found in module {module_name}.")
 
-    try:
-        if isclass(class_) and inspect(class_):
-            return class_
-
-        raise errors.NotClassError("'{}' is not a class".format(class_name))
-    except NoInspectionAvailable:
-        raise errors.UnsupportedClassError(
-            "'{}' is an unsupported class".format(class_name))
+    if util.is_supported_class(class_):
+        return class_
+    else:
+        raise errors.UnsupportedClassError("'{}' is an unsupported class".format(class_name))
 
 
 class ClassRegistry:

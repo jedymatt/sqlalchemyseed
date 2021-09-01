@@ -44,7 +44,7 @@ class TestClassRegistry(unittest.TestCase):
     def test_register_class_not_a_class(self):
         class_registry = ClassRegistry()
         self.assertRaises(
-            errors.NotClassError,
+            errors.UnsupportedClassError,
             lambda: class_registry.register_class('tests.models.not_class')
         )
 

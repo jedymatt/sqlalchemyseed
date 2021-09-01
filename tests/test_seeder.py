@@ -3,163 +3,59 @@ import unittest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from src.sqlalchemyseed import HybridSeeder, errors
-from src.sqlalchemyseed import Seeder
+from sqlalchemyseed import HybridSeeder, errors
+from sqlalchemyseed import Seeder
 from tests.models import Base, Company
+
+from tests import instances as ins
 
 
 class TestSeeder(unittest.TestCase):
     def setUp(self) -> None:
         self.engine = create_engine('sqlite://')
         self.Session = sessionmaker(bind=self.engine)
+        self.session = self.Session()
+        self.seeder = Seeder(self.session)
         Base.metadata.create_all(self.engine)
 
     def tearDown(self) -> None:
         Base.metadata.drop_all(self.engine)
 
-    def test_seed(self):
-        instance = {
-            'model': 'tests.models.Company',
-            'data': {
-                'name': 'MyCompany',
-                '!employees': {
-                    'model': 'tests.models.Employee',
-                    'data': [
-                        {
-                            'name': 'John Smith'
-                        },
-                        {
-                            'name': 'Juan Dela Cruz'
-                        }
-                    ]
-                }
-            }
-        }
+    def test_seed_parent(self):
+        self.assertIsNone(self.seeder.seed(ins.PARENT))
 
-        with self.Session() as session:
-            seeder = Seeder(session=session)
-            seeder.seed(instance)
-            self.assertEqual(len(session.new), 3)
+    def test_seed_parent_add_to_session_false(self):
+        self.assertIsNone(self.seeder.seed(ins.PARENT, add_to_session=False))
 
-    def test_seed_child_no_model(self):
-        instance = {
-            'model': 'tests.models.Company',
-            'data': {
-                'name': 'MyCompany',
-                '!employees': {
-                    'data': [
-                        {
-                            'name': 'John Smith'
-                        },
-                        {
-                            'name': 'Juan Dela Cruz'
-                        }
-                    ]
-                }
-            }
-        }
+    def test_seed_parent_with_multi_data(self):
+        self.assertIsNone(self.seeder.seed(ins.PARENT_WITH_MULTI_DATA))
 
-        with self.Session() as session:
-            seeder = Seeder(session=session)
-            seeder.seed(instance)
-            self.assertEqual(len(session.new), 3)
+    def test_seed_parents(self):
+        self.assertIsNone(self.seeder.seed(ins.PARENTS))
 
-    def test_seed_multiple_data(self):
-        instance = {
-            'model': 'tests.models.Company',
-            'data': [
-                {
-                    'name': 'MyCompany',
-                    '!employees': {
-                        'model': 'tests.models.Employee',
-                        'data': {
-                            'name': 'John Smith'
-                        }
+    def test_seed_parents_with_empty_data(self):
+        self.assertIsNone(self.seeder.seed(ins.PARENTS_WITH_EMPTY_DATA))
 
-                    }
-                },
-                {
-                    'name': 'MySecondCompany'
-                },
-            ]
-        }
+    def test_seed_parents_with_multi_data(self):
+        self.assertIsNone(self.seeder.seed(ins.PARENTS_WITH_MULTI_DATA))
 
-        with self.Session() as session:
-            seeder = Seeder(session=session)
-            seeder.seed(instance)
-            self.assertEqual(len(session.new), 3)
+    def test_seed_parent_to_child(self):
+        self.assertIsNone(self.seeder.seed(ins.PARENT_TO_CHILD))
 
-    def test_seed_no_relationship(self):
-        instance = {
-            'model': 'tests.models.Company',
-            'data': [
-                {
-                    'name': 'Shader',
-                },
-                {
-                    'name': 'One'
-                }
-            ]
-        }
+    def test_seed_parent_to_children(self):
+        self.assertIsNone(self.seeder.seed(ins.PARENT_TO_CHILDREN))
 
-        with self.Session() as session:
-            seeder = Seeder(session)
-            # self.assertIsNone(seeder.seed(instance))
-            seeder.seed(instance)
-            self.assertEqual(len(session.new), 2)
+    def test_seed_parent_to_children_without_model(self):
+        self.assertIsNone(self.seeder.seed(ins.PARENT_TO_CHILDREN_WITHOUT_MODEL))
 
-    def test_seed_one_to_one_relationship(self):
-        instance = {
-            'model': 'tests.models.Employee',
-            'data': {
-                'name': 'Juan',
-                '!company': {
-                    'model': 'tests.models.Company',
-                    'data': {
-                        'name': 'Juan\'s Company'
-                    }
-                }
-            }
-        }
-        with self.Session() as session:
-            seeder = Seeder(session)
-            # self.assertIsNone(seeder.seed(instance))
-            seeder.seed(instance)
-            self.assertEqual(len(session.new), 2)
+    def test_seed_parent_to_children_with_multi_data(self):
+        self.assertIsNone(self.seeder.seed(ins.PARENT_TO_CHILDREN_WITH_MULTI_DATA))
 
-    def test_seed_multiple_entities(self):
-        instance = [
-            {
-                "model": "tests.models.Company",
-                "data": {
-                    "name": "Mike Corporation",
-                    "!employees": {
-                        "model": "tests.models.Employee",
-                        "data": {
-                        }
-                    }
-                }
-            },
-            {
-                "model": "tests.models.Company",
-                "data": [
-                    {
+    def test_seed_parent_to_child_without_child_model(self):
+        self.assertIsNone(self.seeder.seed(ins.PARENT_TO_CHILD_WITHOUT_CHILD_MODEL))
 
-                    }
-                ]
-            },
-            {
-                "model": "tests.models.Company",
-                "data": {
-
-                }
-            }
-        ]
-
-        with self.Session() as session:
-            seeder = Seeder(session)
-            seeder.seed(instance)
-            self.assertEqual(len(session.new), 4)
+    def test_seed_parent_to_children_with_multi_data_without_model(self):
+        self.assertIsNone(self.seeder.seed(ins.PARENT_TO_CHILDREN_WITH_MULTI_DATA_WITHOUT_MODEL))
 
 
 class TestHybridSeeder(unittest.TestCase):
@@ -307,3 +203,28 @@ class TestHybridSeeder(unittest.TestCase):
         with self.Session() as session:
             seeder = HybridSeeder(session)
             self.assertRaises(errors.InvalidKeyError, lambda: seeder.seed(instance))
+
+    def test_hybrid_seed_parent_to_child_with_ref_attribute(self):
+        with self.Session() as session:
+            seeder = HybridSeeder(session)
+            seeder.seed(ins.HYBRID_SEED_PARENT_TO_CHILD_WITH_REF_COLUMN)
+            employee = seeder.instances[1]
+            self.assertIsNotNone(employee.company)
+
+    def test_hybrid_seed_parent_to_child_with_ref_attribute_no_model(self):
+        with self.Session() as session:
+            seeder = HybridSeeder(session)
+            self.assertIsNone(seeder.seed(ins.HYBRID_SEED_PARENT_TO_CHILD_WITH_REF_COLUMN_NO_MODEL))
+            print(session.new, session.dirty)
+
+    def test_hybrid_seed_parent_to_child_with_ref_attribute_relationship(self):
+        with self.Session() as session:
+            seeder = HybridSeeder(session)
+            self.assertIsNone(seeder.seed(ins.HYBRID_SEED_PARENT_TO_CHILD_WITH_REF_RELATIONSHIP))
+            print(session.new, session.dirty)
+
+    def test_hybrid_seed_parent_to_child_with_ref_relationship_no_model(self):
+        with self.Session() as session:
+            seeder = HybridSeeder(session)
+            self.assertIsNone(seeder.seed(ins.HYBRID_SEED_PARENT_TO_CHILD_WITH_REF_RELATIONSHIP_NO_MODEL))
+            print(session.new, session.dirty)

@@ -26,11 +26,9 @@ import csv
 import json
 import sys
 
-from . import validator
-
 try:
     import yaml
-except ModuleNotFoundError: # pragma: no cover
+except ModuleNotFoundError:  # pragma: no cover
     pass
 
 
@@ -40,8 +38,6 @@ def load_entities_from_json(json_filepath):
             entities = json.loads(f.read())
     except FileNotFoundError as error:
         raise FileNotFoundError(error)
-
-    validator.SchemaValidator.validate(entities)
 
     return entities
 
@@ -58,8 +54,6 @@ def load_entities_from_yaml(yaml_filepath):
             entities = yaml.load(f.read(), Loader=yaml.SafeLoader)
     except FileNotFoundError as error:
         raise FileNotFoundError(error)
-
-    validator.SchemaValidator.validate(entities)
 
     return entities
 
@@ -79,7 +73,5 @@ def load_entities_from_csv(csv_filepath: str, model) -> dict:
             model_name = '.'.join([model.__module__, model.__name__])
 
         entities = {'model': model_name, 'data': source_data}
-
-    validator.SchemaValidator.validate(entities)
 
     return entities

@@ -245,6 +245,104 @@ PARENT_TO_CHILDREN_WITH_MULTI_DATA_WITHOUT_MODEL = {
     }
 }
 
+HYBRID_SEED_PARENT_TO_CHILD_WITH_REF_COLUMN_NO_MODEL = [
+    {
+        'model': 'tests.models.Company',
+        'data': {
+            'name': 'Init Company'
+        }
+    },
+    {
+        'model': 'tests.models.Employee',
+        'data': {
+            'name': 'John March',
+            '!company_id': {
+                'filter': {
+                    'name': 'Init Company'
+                }
+            }
+        }
+    }
+]
+
+HYBRID_SEED_PARENT_TO_CHILD_WITH_REF_COLUMN = [
+    {
+        'model': 'tests.models.Company',
+        'data': {
+            'name': 'Init Company'
+        }
+    },
+    {
+        'model': 'tests.models.Employee',
+        'data': {
+            'name': 'John March',
+            '!company_id': {
+                'model': 'tests.models.Company',
+                'filter': {
+                    'name': 'Init Company'
+                }
+            }
+        }
+    }
+]
+
+HYBRID_SEED_PARENT_TO_CHILD_WITH_REF_RELATIONSHIP_NO_MODEL = [
+    {
+        'model': 'tests.models.Company',
+        'data': {
+            'name': 'Init Company'
+        }
+    },
+    {
+        'model': 'tests.models.Employee',
+        'data': {
+            'name': 'John March',
+            '!company': {
+                'filter': {
+                    'name': 'Init Company'
+                }
+            }
+        }
+    }
+]
+
+HYBRID_SEED_PARENT_TO_CHILD_WITH_REF_RELATIONSHIP = [
+    {
+        'model': 'tests.models.Company',
+        'data': {
+            'name': 'Init Company'
+        }
+    },
+    {
+        'model': 'tests.models.Employee',
+        'data': {
+            'name': 'John March',
+            '!company': {
+                'model': 'tests.models.Company',
+                'filter': {
+                    'name': 'Init Company'
+                }
+            }
+        }
+    }
+]
+
+#
+# HYBRID_SEED_PARENT_TO_ANOTHER_CHILD_WITH_REF_ATTRIBUTE_NO_MODEL = [
+#
+#     {
+#         'model': 'tests.models.Employee',
+#         'data': {
+#             'name': 'John March',
+#             'company_id': {
+#                 'filter': {
+#                     'name': 'Init Company'
+#                 }
+#             }
+#         }
+#     }
+# ]
+
 instance = {
     'model': 'tests.models.Company',
     'data': {

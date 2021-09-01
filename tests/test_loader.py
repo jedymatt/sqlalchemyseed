@@ -33,9 +33,7 @@ class TestLoader(unittest.TestCase):
             'tests/res/companies.csv', "tests.models.Company"))
 
     def test_loader_yaml_not_installed(self):
-        from src.sqlalchemyseed import loader as loader_
-
-        loader_.sys.modules.pop('yaml')
+        loader.sys.modules.pop('yaml')
         self.assertRaises(
             ModuleNotFoundError,
             lambda: load_entities_from_yaml('tests/res/data.yml')
