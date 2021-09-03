@@ -228,3 +228,45 @@ class TestHybridSeeder(unittest.TestCase):
             seeder = HybridSeeder(session)
             self.assertIsNone(seeder.seed(ins.HYBRID_SEED_PARENT_TO_CHILD_WITH_REF_RELATIONSHIP_NO_MODEL))
             print(session.new, session.dirty)
+
+class TestSeederCostumizedPrefix(unittest.TestCase):
+    def setUp(self) -> None:
+        self.engine = create_engine('sqlite://')
+        self.Session = sessionmaker(bind=self.engine)
+        Base.metadata.create_all(self.engine)
+
+    def test_seeder_parent_to_child(self):
+        import json
+        custom_instance =  json.dumps(ins.PARENT_TO_CHILD)
+        custom_instance = custom_instance.replace('!', '@')
+        custom_instance = json.loads(custom_instance)
+
+        with self.Session() as session:
+            seeder = Seeder(session, ref_prefix='@')
+            seeder.seed(custom_instance)
+            employee = seeder.instances[0]
+            self.assertIsNotNone(employee.company)
+
+    def test_hybrid_seeder_parent_to_child_with_ref_column(self):
+        import json
+        custom_instance =  json.dumps(ins.HYBRID_SEED_PARENT_TO_CHILD_WITH_REF_COLUMN)
+        custom_instance = custom_instance.replace('!', '@')
+        custom_instance = json.loads(custom_instance)
+
+        with self.Session() as session:
+            seeder = HybridSeeder(session, ref_prefix='@')
+            seeder.seed(custom_instance)
+            employee = seeder.instances[1]
+            self.assertIsNotNone(employee.company)
+
+    def test_hybrid_seeder_parent_to_child_with_ref_relationship(self):
+        import json
+        custom_instance =  json.dumps(ins.HYBRID_SEED_PARENT_TO_CHILD_WITH_REF_RELATIONSHIP)
+        custom_instance = custom_instance.replace('!', '@')
+        custom_instance = json.loads(custom_instance)
+
+        with self.Session() as session:
+            seeder = HybridSeeder(session, ref_prefix='@')
+            seeder.seed(custom_instance)
+            employee = seeder.instances[1]
+            self.assertIsNotNone(employee.company)
