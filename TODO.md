@@ -10,10 +10,10 @@
   overridden by providing a model data instead as it saves performance time
 - [x] Add test case for overriding default reference prefix
 - [ ] Update README description
-- [ ] add docstrings
+- [ ] Add docstrings
 - [ ] Refactor test instances and test cases
 
 ## Tentative Plans
 
-- load entities from excel support
-- add docs
+- Support load entities from excel
+- Add docs

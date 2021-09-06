@@ -22,7 +22,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-import abc
 from . import errors, util
 
 
@@ -106,18 +105,13 @@ def check_data_type(item, source_key: Key):
             f"Invalid type_, '{source_key.name}' should be '{source_key.type_}'")
 
 
-class SchemaValidator(abc.ABC):
+class SchemaValidator:
 
     def __init__(self, source_keys, ref_prefix):
         self._source_keys = source_keys
         self._ref_prefix = ref_prefix
 
-    @classmethod
-    def validate(cls, entities, source_keys, ref_prefix='!'):
-        self = cls(source_keys, ref_prefix)
-        self._source_keys = source_keys
-        self._ref_prefix = ref_prefix
-
+    def validate(self, entities):
         self._pre_validate(entities, entity_is_parent=True)
 
     def _pre_validate(self, entities: dict, entity_is_parent=True):
@@ -158,11 +152,12 @@ class SchemaValidator(abc.ABC):
 
 
 def validate(entities, ref_prefix='!'):
-    SchemaValidator.validate(
-        entities, ref_prefix=ref_prefix, source_keys=[Key.data()])
+
+    SchemaValidator(source_keys=[Key.data()], ref_prefix=ref_prefix) \
+        .validate(entities=entities)
 
 
 def hybrid_validate(entities, ref_prefix='!'):
-    SchemaValidator.validate(entities,
-                             ref_prefix=ref_prefix,
-                             source_keys=[Key.data(), Key.filter()])
+
+    SchemaValidator(source_keys=[Key.data(), Key.filter()], ref_prefix=ref_prefix) \
+        .validate(entities=entities)

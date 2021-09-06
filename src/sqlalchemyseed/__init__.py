@@ -29,7 +29,7 @@ from .loader import load_entities_from_yaml
 from .loader import load_entities_from_csv
 
 
-__version__ = "1.0.2"
+__version__ = "1.0.3"
 
 if __name__ == '__main__':
     pass

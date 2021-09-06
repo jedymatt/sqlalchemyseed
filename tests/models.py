@@ -62,6 +62,14 @@ class GrandChild(Base):
     parent_id = Column(Integer, ForeignKey('children.id'))
 
 
+
+class Person(Base):
+    __tablename__ = 'persons'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(50))
+
+
 not_class = 'this is not a class'
 
 

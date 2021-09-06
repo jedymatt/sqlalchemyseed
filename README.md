@@ -50,7 +50,7 @@ from db import session
 entities = load_entities_from_json('tests/test_data.json')
 
 # Initializing Seeder
-seeder = Seeder()  # or Seeder(session)
+seeder = Seeder()  # or Seeder(session),
 
 # Seeding
 seeder.session = session  # assign session if no session assigned before seeding
@@ -62,12 +62,11 @@ session.commit()  # or seeder.session.commit()
 
 ## Seeder vs. HybridSeeder
 
-| Features & Options                                                     | Seeder             | HybridSeeder       |
-| :--------------------------------------------------------------------- | :----------------- | :----------------- |
-| Support `model` and `data` keys                                        | :heavy_check_mark: | :heavy_check_mark: |
-| Support `model` and `filter` keys                                      | :x:                | :heavy_check_mark: |
-| Optional argument `add_to_session=False` in the `seed` method          | :heavy_check_mark: | :x:                |
-| Assign existing objects from session or db to a relationship attribute | :x:                | :heavy_check_mark: |
+| Features & Options                                            | Seeder             | HybridSeeder       |
+| :------------------------------------------------------------ | :----------------- | :----------------- |
+| Support `model` and `data` keys                               | :heavy_check_mark: | :heavy_check_mark: |
+| Support `model` and `filter` keys                             | :x:                | :heavy_check_mark: |
+| Optional argument `add_to_session=False` in the `seed` method | :heavy_check_mark: | :x:                |
 
 ## When to use HybridSeeder and 'filter' key field?
 
@@ -81,7 +80,7 @@ from db import session
 data = {
     "model": "models.Parent",
     "data": {
-        "!child": {
+        "!child": { # '!' is the reference prefix
             "model": "models.Child",
             "filter": {
                 "age": 5
@@ -91,7 +90,8 @@ data = {
 }
 
 # When seeding instances that has 'filter' key, then use HybridSeeder, otherwise use Seeder.
-seeder = HybridSeeder(session)
+# ref_prefix can be changed according to your needs, defaults  to '!'
+seeder = HybridSeeder(session, ref_prefix='!') 
 seeder.seed(data)
 
 session.commit()  # or seeder.sesssion.commit()
@@ -99,7 +99,8 @@ session.commit()  # or seeder.sesssion.commit()
 
 ## Relationships
 
-In adding a relationship attribute, add prefix **!** to the key in order to identify it.
+In adding a reference attribute, add prefix **!** or to the key in order to identify it.
+If you want '@' as prefix, you can just specify it to what seeder you use by adding ref_prefix='@' in the argument when instantiating the seeder in order for the seeder to identify the referencing attributes
 
 ### Referencing relationship object or a foreign key
 
@@ -122,7 +123,7 @@ instance = [
                 'name': 'John Smith',
                 # foreign key attribute
                 '!company_id': {
-                    'model': 'tests.models.Company',
+                    'model': 'tests.models.Company', # models can be removed if it is a referencing attribute
                     'filter': {
                         'name': 'MyCompany'
                     }
@@ -132,7 +133,7 @@ instance = [
                 'name': 'Juan Dela Cruz',
                 # relationship attribute
                 '!company': {
-                    'model': 'tests.models.Company',
+                    'model': 'tests.models.Company', # models can be removed if it is a referencing attribute
                     'filter': {
                         'name': 'MyCompany'
                     }
@@ -143,6 +144,7 @@ instance = [
 
 seeder = HybridSeeder(session)
 seeder.seed(instance)
+seeder.session.commit() # or session.commit()
 ```
 
 ### No Relationship
@@ -267,7 +269,7 @@ seeder.seed(instance)
 }
 ```
 
-## Examples
+## File Input Examples
 
 ### JSON
 
