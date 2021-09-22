@@ -23,7 +23,7 @@ Default installation
 pip install sqlalchemyseed
 ```
 
-When using yaml to loading entities from yaml files. Execute this command to install necessary dependencies
+When using yaml to load entities from yaml files, execute this command to install necessary dependencies
 
 ```shell
 pip install sqlalchemyseed[yaml]
@@ -37,23 +37,24 @@ Required dependencies
 
 Optional dependencies
 
-- PyYAML>=5.4.0
+- yaml
+  - PyYAML>=5.4.0
 
 ## Getting Started
 
 ```python
 # main.py
-from sqlalchemyseed import load_entities_from_json, Seeder
+from sqlalchemyseed import load_entities_from_json
+from sqlalchemyseed import Seeder
 from db import session
 
 # load entities
-entities = load_entities_from_json('tests/test_data.json')
+entities = load_entities_from_json('data.json')
 
 # Initializing Seeder
-seeder = Seeder()  # or Seeder(session),
+seeder = Seeder(session)
 
 # Seeding
-seeder.session = session  # assign session if no session assigned before seeding
 seeder.seed(entities)
 
 # Committing
@@ -62,16 +63,16 @@ session.commit()  # or seeder.session.commit()
 
 ## Seeder vs. HybridSeeder
 
-| Features & Options                                            | Seeder             | HybridSeeder       |
-| :------------------------------------------------------------ | :----------------- | :----------------- |
-| Support `model` and `data` keys                               | :heavy_check_mark: | :heavy_check_mark: |
-| Support `model` and `filter` keys                             | :x:                | :heavy_check_mark: |
-| Optional argument `add_to_session=False` in the `seed` method | :heavy_check_mark: | :x:                |
+| Features & Options                                            | Seeder | HybridSeeder |
+| :------------------------------------------------------------ | :----- | :----------- |
+| Support `model` and `data` keys                               | ✔️      | ✔️            |
+| Support `model` and `filter` keys                             | ❌      | ✔️            |
+| Optional argument `add_to_session=False` in the `seed` method | ✔️      | ❌            |
 
 ## When to use HybridSeeder and 'filter' key field?
 
-Assuming that `Child(age=5)` exists in the database or session, then we should use *filter* instead of *data*, the
-values of *filter* will query from the database or session, and assign it to the `Parent.child`
+Assuming that `Child(age=5)` exists in the database or session, then we should use `filter` instead of `data`, the
+values of `filter` will query from the database or session, and assign it to the `Parent.child`
 
 ```python
 from sqlalchemyseed import HybridSeeder
@@ -89,8 +90,10 @@ data = {
     }
 }
 
-# When seeding instances that has 'filter' key, then use HybridSeeder, otherwise use Seeder.
-# ref_prefix can be changed according to your needs, defaults  to '!'
+# When seeding instances that has 'filter' key,
+# then use HybridSeeder, otherwise use Seeder.
+# ref_prefix can be changed according to your needs,
+# defaults  to '!'
 seeder = HybridSeeder(session, ref_prefix='!') 
 seeder.seed(data)
 
@@ -99,13 +102,20 @@ session.commit()  # or seeder.sesssion.commit()
 
 ## Relationships
 
-In adding a reference attribute, add prefix **!** or to the key in order to identify it.
-If you want '@' as prefix, you can just specify it to what seeder you use by adding ref_prefix='@' in the argument when instantiating the seeder in order for the seeder to identify the referencing attributes
+In adding a reference attribute, add prefix to the key in order to identify it. Default prefix is `!`.
+
+Reference attribute can either be foreign key or relationship attribute. See examples below.
+
+### Customizing prefix
+
+If you want '@' as prefix, you can just specify it to what seeder you use by adding ref_prefix='@' in the argument like this `seeder = Seeder(session, ref_prefix='@')`, in order for the seeder to identify the referencing attributes
 
 ### Referencing relationship object or a foreign key
 
 If your class don't have a relationship attribute but instead a foreign key attribute you can use it the same as how you
 did it on a relationship attribute
+
+**Note**: `model` can be removed if it is a reference attribute.  
 
 ```python
 from sqlalchemyseed import HybridSeeder
@@ -150,7 +160,7 @@ seeder.session.commit() # or session.commit()
 ### No Relationship
 
 ```json5
-// test_data.json
+// data.json
 [
     {
         "model": "models.Person",
@@ -196,7 +206,7 @@ seeder.session.commit() # or session.commit()
         }
     },
     // or this, if you want to add relationship that exists
-    // in your database use 'filter' instead of 'obj'
+    // in your database use 'filter' instead of 'data'
     {
         "model": "models.Person",
         "data": {
@@ -306,7 +316,9 @@ data:
 
 ### CSV
 
-data.csv
+In line one, name and age, are attributes of a model that will be specified when loading the file.
+
+`people.csv`
 
 ```text
 name, age
@@ -316,10 +328,13 @@ Juan Dela Cruz, 21
 
 To load a csv file
 
-`load_entities_from_csv("data.csv", models.Person)`
+`main.py`
 
-or
-
-`load_entities_from_csv("data.csv", "models.Person")`
+```python
+# second argument, model, accepts class
+load_entities_from_csv("people.csv", models.Person)
+# or string
+load_entities_from_csv("people.csv", "models.Person")
+```
 
 **Note**: Does not support relationships
