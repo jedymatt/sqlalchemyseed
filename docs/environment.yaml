@@ -1,0 +1,7 @@
+name: docs
+channels:
+    - defaults
+dependencies:
+    - sphinx==4.2.0
+    - pip:
+          - sphinx_rtd_theme
