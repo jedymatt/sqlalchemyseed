@@ -1,40 +1,38 @@
-.. currentmodule:: sqlalchemyseed
-
 API Reference
 =============
 
 Seeders
---------------
+-------
 
-.. autoclass:: seeder.Seeder
+.. autoclass:: sqlalchemyseed.Seeder
     :members:
     :undoc-members:
 
-.. autoclass:: seeder.HybridSeeder
+.. autoclass:: sqlalchemyseed.HybridSeeder
     :members:
     :undoc-members:
 
 Loaders
 -------
 
-.. automodule:: loader
-    :members:
-    :undoc-members:
+.. autofunction:: sqlalchemyseed.load_entities_from_json
+    
+.. autofunction:: sqlalchemyseed.load_entities_from_yaml
+
+.. autofunction:: sqlalchemyseed.load_entities_from_csv
+
 
 Validators
 ----------
 
-.. autoclass:: validator.SchemaValidator
-    :members:
-
-.. autofunction:: validator.validate
+.. autofunction:: sqlalchemyseed.validator.validate
 
 
-.. autofunction:: validator.hybrid_validate 
+.. autofunction:: sqlalchemyseed.validator.hybrid_validate 
     
 
 Exceptions
 ----------
 
-.. automodule:: errors
+.. automodule:: sqlalchemyseed.errors
     :members:
