@@ -1,7 +1,7 @@
 Introduction
 ============
 
-sqlalchemyseed is a SQLAlchemy seeder that supports nested relationships
+`sqlalchemyseed`_ is a SQLAlchemy seeder that supports nested relationships
 with an easy to read text files.
 
 Supported file types.
@@ -9,6 +9,8 @@ Supported file types.
 - json
 - yaml
 - csv
+
+.. _sqlalchemyseed: https://pypi.org/project/sqlalchemyseed/
 
 Installation
 ------------
@@ -36,12 +38,13 @@ Required dependencies
 Optional dependencies
 
 - yaml
+
   - PyYAML>=5.4.0
 
 Getting Started
 ---------------
 
-Here's a simple snippet to get started from :code:`main.py` file.
+Here's a simple snippet to get started from ``main.py`` file.
 
 .. code-block:: python
 
@@ -62,7 +65,7 @@ Here's a simple snippet to get started from :code:`main.py` file.
     session.commit()  # or seeder.session.commit()
 
 
-And the :code:`data.json` file.
+And the ``data.json`` file.
 
 .. code-block:: json
     
