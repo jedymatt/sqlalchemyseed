@@ -10,10 +10,50 @@ Supported file types.
 - yaml
 - csv
 
-Example of json file
+Installation
+------------
 
-.. code-block :: json
+Default installation
 
+.. code-block:: console
+
+    pip install sqlalchemyseed
+
+When using yaml to load entities from yaml files,
+execute this command to install necessary dependencies
+
+.. code-block:: console
+
+    pip install sqlalchemyseed[yaml]
+
+Getting Started
+---------------
+
+Here's a simple snippet to get started from :code:`main.py` file.
+
+.. code-block:: python
+
+    from sqlalchemyseed import load_entities_from_json
+    from sqlalchemyseed import Seeder
+    from db import session
+
+    # load entities
+    entities = load_entities_from_json('data.json')
+
+    # Initializing Seeder
+    seeder = Seeder(session)
+
+    # Seeding
+    seeder.seed(entities)
+
+    # Committing
+    session.commit()  # or seeder.session.commit()
+
+
+And the :code:`data.json` file.
+
+.. code-block:: json
+    
     {
         "model": "models.Person",
         "data": [
@@ -27,16 +67,3 @@ Example of json file
             }
         ]
     }
-
-
-Installation
-------------
-
-Default installation ::
-
-    pip install sqlalchemyseed
-
-When using yaml to load entities from yaml files,
-execute this command to install necessary dependencies ::
-
-    pip install sqlalchemyseed[yaml]

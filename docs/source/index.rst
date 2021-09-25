@@ -6,14 +6,9 @@
 Welcome to sqlalchemyseed's documentation!
 ==========================================
 
-sqlalchemyseed is a SQLAlchemy seeder that supports nested relationships
-with an easy to read text files.
-
-Contents
-========
-
 .. toctree::
     :maxdepth: 2
+    :caption: Contents
     
     intro
     api
