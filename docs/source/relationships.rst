@@ -29,9 +29,9 @@ which translates to ``Employee.name`` and ``Employee.company``, respectively.
 
 Customizing prefix
 ------------------
-If you want '@' as prefix,
+If you want ``@`` as prefix,
 you can just specify it to what seeder you use by
-adding ref_prefix='@' in the argument when initializing a seeder class.
+adding ``ref_prefix='@'`` in the argument when initializing a seeder class.
 
 .. code-block:: python
 
