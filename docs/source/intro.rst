@@ -4,7 +4,7 @@ Introduction
 `sqlalchemyseed`_ is a SQLAlchemy seeder that supports nested relationships
 with an easy to read text files.
 
-Supported file types.
+Supported file types :
 
 - json
 - yaml
@@ -17,32 +17,32 @@ Installation
 
 Default installation
 
-.. code-block:: console
+.. code-block:: shell
 
     pip install sqlalchemyseed
 
 When using yaml to load entities from yaml files,
 execute this command to install necessary dependencies
 
-.. code-block:: console
+.. code-block:: shell
 
     pip install sqlalchemyseed[yaml]
 
 Dependencies
 ------------
 
-Required dependencies
+Required dependencies:
 
 - SQAlchemy>=1.4.0
 
-Optional dependencies
+Optional dependencies:
 
 - yaml
 
   - PyYAML>=5.4.0
 
-Getting Started
----------------
+Quickstart
+----------
 
 Here's a simple snippet to get started from ``main.py`` file.
 

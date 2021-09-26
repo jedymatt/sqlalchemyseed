@@ -27,7 +27,6 @@ Validators
 
 .. autofunction:: sqlalchemyseed.validator.validate
 
-
 .. autofunction:: sqlalchemyseed.validator.hybrid_validate 
     
 

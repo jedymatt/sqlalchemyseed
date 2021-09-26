@@ -1,5 +1,5 @@
-Relationships
-=============
+Referencing Relationships
+==========================
 
 To add reference attribute,
 add prefix to the attribute to differentiate reference attribute from normal ones.
