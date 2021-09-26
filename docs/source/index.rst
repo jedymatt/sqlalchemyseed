@@ -6,9 +6,8 @@
 Welcome to sqlalchemyseed's documentation!
 ==========================================
 
-.. seealso::
 
-    Project Links: `Github`_ | `PyPI`_
+Project Links: `Github`_ | `PyPI`_
 
 .. _Github: https://github.com/jedymatt/sqlalchemyseed
 .. _PyPI: https://pypi.org/project/sqlalchemyseed
@@ -19,6 +18,7 @@ Welcome to sqlalchemyseed's documentation!
     
     intro
     relationships
+    examples
     api
 
 Indices and tables

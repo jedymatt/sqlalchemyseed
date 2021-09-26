@@ -12,9 +12,9 @@ Sqlalchemy seeder that supports nested relationships.
 
 Supported file types
 
-- [json](#json)
-- [yaml](#yaml)
-- [csv](#csv)
+- json
+- yaml
+- csv
 
 ## Installation
 
@@ -24,24 +24,7 @@ Default installation
 pip install sqlalchemyseed
 ```
 
-When using yaml to load entities from yaml files, execute this command to install necessary dependencies
-
-```shell
-pip install sqlalchemyseed[yaml]
-```
-
-## Dependencies
-
-Required dependencies
-
-- SQAlchemy>=1.4.0
-
-Optional dependencies
-
-- yaml
-  - PyYAML>=5.4.0
-
-## Getting Started
+## Quickstart
 
 ```python
 # main.py
@@ -62,101 +45,7 @@ seeder.seed(entities)
 session.commit()  # or seeder.session.commit()
 ```
 
-## Seeder vs. HybridSeeder
-
-| Features & Options                                            | Seeder | HybridSeeder |
-| :------------------------------------------------------------ | :----- | :----------- |
-| Support `model` and `data` keys                               | ✔️      | ✔️            |
-| Support `model` and `filter` keys                             | ❌      | ✔️            |
-| Optional argument `add_to_session=False` in the `seed` method | ✔️      | ❌            |
-
-## When to use HybridSeeder and 'filter' key field?
-
-Assuming that `Child(age=5)` exists in the database or session, then we should use `filter` instead of `data`, the
-values of `filter` will query from the database or session, and assign it to the `Parent.child`
-
-```python
-from sqlalchemyseed import HybridSeeder
-from db import session
-
-data = {
-    "model": "models.Parent",
-    "data": {
-        "!child": { # '!' is the reference prefix
-            "model": "models.Child",
-            "filter": {
-                "age": 5
-            }
-        }
-    }
-}
-
-# When seeding instances that has 'filter' key,
-# then use HybridSeeder, otherwise use Seeder.
-# ref_prefix can be changed according to your needs,
-# defaults  to '!'
-seeder = HybridSeeder(session, ref_prefix='!') 
-seeder.seed(data)
-
-session.commit()  # or seeder.sesssion.commit()
-```
-
-## Relationships
-
-In adding a reference attribute, add prefix to the key in order to identify it. Default prefix is `!`.
-
-Reference attribute can either be foreign key or relationship attribute. See examples below.
-
-### Customizing prefix
-
-If you want '@' as prefix, you can just specify it to what seeder you use by adding ref_prefix='@' in the argument like this `seeder = Seeder(session, ref_prefix='@')`, in order for the seeder to identify the referencing attributes
-
-### Referencing relationship object or a foreign key
-
-If your class don't have a relationship attribute but instead a foreign key attribute you can use it the same as how you
-did it on a relationship attribute
-
-**Note**: `model` can be removed if it is a reference attribute.  
-
-```python
-from sqlalchemyseed import HybridSeeder
-from db import session
-
-instance = [
-    {
-        'model': 'tests.models.Company',
-        'data': {'name': 'MyCompany'}
-    },
-    {
-        'model': 'tests.models.Employee',
-        'data': [
-            {
-                'name': 'John Smith',
-                # foreign key attribute
-                '!company_id': {
-                    'model': 'tests.models.Company', # models can be removed if it is a referencing attribute
-                    'filter': {
-                        'name': 'MyCompany'
-                    }
-                }
-            },
-            {
-                'name': 'Juan Dela Cruz',
-                # relationship attribute
-                '!company': {
-                    'model': 'tests.models.Company', # models can be removed if it is a referencing attribute
-                    'filter': {
-                        'name': 'MyCompany'
-                    }
-                }
-        ]
-    }
-]
-
-seeder = HybridSeeder(session)
-seeder.seed(instance)
-seeder.session.commit() # or session.commit()
-```
+See the [documentation](https://sqlalchemyseed.readthedocs.io/) for more details.
 
 ### No Relationship
 
@@ -279,63 +168,3 @@ seeder.session.commit() # or session.commit()
     }
 }
 ```
-
-## File Input Examples
-
-### JSON
-
-data.json
-
-```json5
-{
-    "model": "models.Person",
-    "data": [
-        {
-            "name": "John March",
-            "age": 23
-        },
-        {
-            "name": "Juan Dela Cruz",
-            "age": 21
-        }
-    ]
-}
-```
-
-### YAML
-
-data.yml
-
-```yaml
-model: models.Person
-data:
-    - name: John March
-      age: 23
-    - name: Juan Dela Cruz
-      age: 21
-```
-
-### CSV
-
-In line one, name and age, are attributes of a model that will be specified when loading the file.
-
-`people.csv`
-
-```text
-name, age
-John March, 23
-Juan Dela Cruz, 21
-```
-
-To load a csv file
-
-`main.py`
-
-```python
-# second argument, model, accepts class
-load_entities_from_csv("people.csv", models.Person)
-# or string
-load_entities_from_csv("people.csv", "models.Person")
-```
-
-**Note**: Does not support relationships
