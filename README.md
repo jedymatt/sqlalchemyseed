@@ -45,9 +45,11 @@ seeder.seed(entities)
 session.commit()  # or seeder.session.commit()
 ```
 
-See the [documentation](https://sqlalchemyseed.readthedocs.io/) for more details.
+## Documentation
 
-### No Relationship
+<https://sqlalchemyseed.readthedocs.io/>
+
+## No Relationship
 
 ```json5
 // data.json
@@ -76,7 +78,7 @@ See the [documentation](https://sqlalchemyseed.readthedocs.io/) for more details
 ]
 ```
 
-### One to One
+## One to One
 
 ```json5
 // test_data.json
@@ -113,7 +115,7 @@ See the [documentation](https://sqlalchemyseed.readthedocs.io/) for more details
 ]
 ```
 
-### One to Many
+## One to Many
 
 ```json5
 //test_data.json
@@ -142,7 +144,7 @@ See the [documentation](https://sqlalchemyseed.readthedocs.io/) for more details
 ]
 ```
 
-### Example of Nested Relationships
+## Example of Nested Relationships
 
 ```json
 {

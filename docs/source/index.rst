@@ -17,6 +17,7 @@ Project Links: `Github`_ | `PyPI`_
     :caption: Contents
     
     intro
+    seeding
     relationships
     examples
     api
