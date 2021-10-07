@@ -6,6 +6,7 @@
 Welcome to sqlalchemyseed's documentation!
 ==========================================
 
+SQLAlchemy seeder that supports nested relationships with an easy to read text files.
 
 Project Links: `Github`_ | `PyPI`_
 
