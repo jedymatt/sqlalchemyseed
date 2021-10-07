@@ -10,10 +10,11 @@
   overridden by providing a model data instead as it saves performance time
 - [x] Add test case for overriding default reference prefix
 - [ ] Update README description
-- [ ] Add docstrings
+- [x] Add docstrings
 - [ ] Refactor test instances and test cases
 
 ## Tentative Plans
 
 - Support load entities from excel
-- Add docs
+- any order of entities will not affect in seeding
+  - approach: failed entity will be pushed back to the last to wait to be seed again
