@@ -12,9 +12,8 @@
 - [ ] Update README description
 - [x] Add docstrings
 - [ ] Refactor test instances and test cases
+- [ ] add PersistentSeeder refer to [this image](persistent-seeder.png)
 
 ## Tentative Plans
 
 - Support load entities from excel
-- any order of entities will not affect in seeding
-  - approach: failed entity will be pushed back to the last to wait to be seed again
