@@ -55,3 +55,123 @@ To load a csv file
 
 .. note::
     csv does not support referencing relationships.
+
+
+No Relationship
+---------------
+
+.. code-block:: json
+
+    [
+        {
+            "model": "models.Person",
+            "data": {
+                "name": "You",
+                "age": 18
+            }
+        },
+        {
+            "model": "models.Person",
+            "data": [
+                {
+                    "name": "You",
+                    "age": 18
+                },
+                {
+                    "name": "Still You But Older",
+                    "age": 40
+                }
+            ]
+        }
+    ]
+
+
+One to One Relationship
+-----------------------
+
+.. code-block:: json
+
+    [
+        {
+            "model": "models.Person",
+            "data": {
+                "name": "John",
+                "age": 18,
+                "!job": {
+                    "model": "models.Job",
+                    "data": {
+                        "job_name": "Programmer",
+                    }
+                }
+            }
+        },
+        {
+            "model": "models.Person",
+            "data": {
+                "name": "Jeniffer",
+                "age": 18,
+                "!job": {
+                    "model": "models.Job",
+                    "filter": {
+                        "job_name": "Programmer",
+                    }
+                }
+            }
+        }
+    ]
+
+One to Many Relationship
+------------------------
+
+.. code-block:: json
+    
+    [
+        {
+            "model": "models.Person",
+            "data": {
+                "name": "John",
+                "age": 18,
+                "!items": [
+                    {
+                        "model": "models.Item",
+                        "data": {
+                            "name": "Pencil"
+                        }
+                    },
+                    {
+                        "model": "models.Item",
+                        "data": {
+                            "name": "Eraser"
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+
+Nested Relationships
+
+.. code-block:: json
+    
+    {
+        "model": "models.Parent",
+        "data": {
+            "name": "John Smith",
+            "!children": [
+                {
+                    "model": "models.Child",
+                    "data": {
+                        "name": "Mark Smith",
+                        "!children": [
+                            {
+                                "model": "models.GrandChild",
+                                "data": {
+                                    "name": "Alice Smith"
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    }
