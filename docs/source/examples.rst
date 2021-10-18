@@ -28,9 +28,9 @@ yaml
     model: models.Person
     data:
         - name: John March
-        age: 23
+          age: 23
         - name: Juan Dela Cruz
-        age: 21
+          age: 21
 
 csv
 ---
