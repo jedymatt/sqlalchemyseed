@@ -26,8 +26,8 @@ pip install sqlalchemyseed
 
 ## Quickstart
 
+main.py
 ```python
-# main.py
 from sqlalchemyseed import load_entities_from_json
 from sqlalchemyseed import Seeder
 from db import session
@@ -43,6 +43,24 @@ seeder.seed(entities)
 
 # Committing
 session.commit()  # or seeder.session.commit()
+```
+
+data.json
+
+```json
+{
+    "model": "models.Person",
+    "data": [
+        {
+            "name": "John March",
+            "age": 23
+        },
+        {
+            "name": "Juan Dela Cruz",
+            "age": 21
+        }
+    ]
+}
 ```
 
 ## Documentation
