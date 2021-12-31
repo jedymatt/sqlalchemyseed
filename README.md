@@ -27,6 +27,7 @@ pip install sqlalchemyseed
 ## Quickstart
 
 main.py
+
 ```python
 from sqlalchemyseed import load_entities_from_json
 from sqlalchemyseed import Seeder
