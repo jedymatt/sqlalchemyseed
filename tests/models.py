@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, Column, String, ForeignKey
+from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -62,7 +62,6 @@ class GrandChild(Base):
     parent_id = Column(Integer, ForeignKey('children.id'))
 
 
-
 class Person(Base):
     __tablename__ = 'persons'
 
@@ -103,3 +102,12 @@ class AnotherEmployee(AnotherBase):
 
     def __repr__(self) -> str:
         return f"<AnotherEmployee(name='{self.name}', company='{self.company}')>"
+
+
+class Single(Base):
+    """
+    A class with no child
+    """
+    __tablename__ = 'single'
+    id = Column(Integer, primary_key=True)
+    value = Column(String)

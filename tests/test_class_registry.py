@@ -1,3 +1,6 @@
+"""
+Tests class_registry module
+"""
 import unittest
 from src.sqlalchemyseed import errors
 
@@ -5,6 +8,9 @@ from src.sqlalchemyseed.class_registry import ClassRegistry
 
 
 class TestClassRegistry(unittest.TestCase):
+    """
+    Tests ClassRegistry class
+    """
     def test_get_invalid_item(self):
         class_registry = ClassRegistry()
         self.assertRaises(KeyError, lambda: class_registry['InvalidClass'])

@@ -1,4 +1,7 @@
-from inspect import isclass
+"""
+Utility functions
+"""
+
 
 from sqlalchemy import inspect
 
@@ -19,4 +22,33 @@ def iter_non_ref_kwargs(kwargs: dict, ref_prefix: str):
 
 
 def is_supported_class(class_):
-    return True if isclass(class_) and inspect(class_, raiseerr=False) else False
+    """
+    Check if it is a class and supports sqlalchemy
+    """
+    insp = inspect(class_, raiseerr=False)
+    # insp.is_mapper means it is a mapped class
+    return insp is not None and insp.is_mapper
+
+
+def generate_repr(instance: object) -> str:
+    """
+    Generate repr of object instance
+
+    Example:
+    ```
+    class Person(Base):
+        ...
+        def __repr__(self):
+            return generate_repr(self)
+    ```
+
+    Output format:
+    ```
+    "<Person(id='1',name='John Doe')>"
+    ```
+    """
+    class_name = instance.__class__.__name__
+    insp = inspect(instance)
+    attributes = {column.key: column.value for column in insp.attrs}
+    str_attributes = ",".join(f"{k}='{v}'" for k, v in attributes.items())
+    return f"<{class_name}({str_attributes})>"

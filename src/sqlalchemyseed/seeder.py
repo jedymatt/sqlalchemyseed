@@ -35,31 +35,46 @@ from . import class_registry, validator, errors, util
 
 
 class AbstractSeeder(abc.ABC):
+    """
+    AbstractSeeder class
+    """
 
     @property
     @abc.abstractmethod
-    def instances(self, *args, **kwargs):
-        pass
+    def instances(self):
+        """
+        Seeded instances
+        """
 
     @abc.abstractmethod
-    def seed(self, *args, **kwargs):
-        pass
+    def seed(self, entities):
+        """
+        Seed data
+        """
 
     @abc.abstractmethod
     def _pre_seed(self, *args, **kwargs):
-        pass
+        """
+        Pre-seeding phase
+        """
 
     @abc.abstractmethod
     def _seed(self, *args, **kwargs):
-        pass
+        """
+        Seeding phase
+        """
 
     @abc.abstractmethod
     def _seed_children(self, *args, **kwargs):
-        pass
+        """
+        Seed children
+        """
 
     @abc.abstractmethod
     def _setup_instance(self, *args, **kwargs):
-        pass
+        """
+        Setup instance
+        """
 
 
 class EntityTuple(NamedTuple):
@@ -123,6 +138,9 @@ def set_parent_attr_value(instance, parent: Entity):
 
 
 class Seeder(AbstractSeeder):
+    """
+    Basic Seeder class
+    """
     __model_key = validator.Key.model()
     __data_key = validator.Key.data()
 
@@ -205,6 +223,9 @@ class Seeder(AbstractSeeder):
 
 
 class HybridSeeder(AbstractSeeder):
+    """
+    HybridSeeder class. Accepts 'filter' key for referencing children.
+    """
     __model_key = validator.Key.model()
     __source_keys = [validator.Key.data(), validator.Key.filter()]
 
@@ -230,7 +251,8 @@ class HybridSeeder(AbstractSeeder):
         return parent.referenced_class
 
     def seed(self, entities):
-        validator.hybrid_validate(entities=entities, ref_prefix=self.ref_prefix)
+        validator.hybrid_validate(
+            entities=entities, ref_prefix=self.ref_prefix)
 
         self._instances.clear()
         self._class_registry.clear()
@@ -262,7 +284,8 @@ class HybridSeeder(AbstractSeeder):
             return
 
         # source_data is dict
-        instance = self._setup_instance(class_, source_data, source_key, parent)
+        instance = self._setup_instance(
+            class_, source_data, source_key, parent)
         self._seed_children(instance, source_data)
 
     def _seed_children(self, instance, kwargs):
@@ -273,10 +296,12 @@ class HybridSeeder(AbstractSeeder):
         filtered_kwargs = filter_kwargs(kwargs, class_, self.ref_prefix)
 
         if key == key.data():
-            instance = self._setup_data_instance(class_, filtered_kwargs, parent)
+            instance = self._setup_data_instance(
+                class_, filtered_kwargs, parent)
         else:  # key == key.filter()
             # instance = self.session.query(class_).filter_by(**filtered_kwargs)
-            instance = self._setup_filter_instance(class_, filtered_kwargs, parent)
+            instance = self._setup_filter_instance(
+                class_, filtered_kwargs, parent)
 
         # setting parent
         if parent is not None:

@@ -1,25 +1,5 @@
 """
-MIT License
-
-Copyright (c) 2021 Jedy Matt Tabasco
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Text file loader module
 """
 
 import csv
@@ -32,17 +12,23 @@ except ModuleNotFoundError:  # pragma: no cover
     pass
 
 
-def load_entities_from_json(json_filepath):
+def load_entities_from_json(json_filepath) -> dict:
+    """
+    Get entities from json
+    """
     try:
-        with open(json_filepath, 'r') as f:
-            entities = json.loads(f.read())
+        with open(json_filepath, 'r', encoding='utf-8') as file:
+            entities = json.loads(file.read())
     except FileNotFoundError as error:
-        raise FileNotFoundError(error)
+        raise FileNotFoundError from error
 
     return entities
 
 
 def load_entities_from_yaml(yaml_filepath):
+    """
+    Get entities from yaml
+    """
     if 'yaml' not in sys.modules:
         raise ModuleNotFoundError(
             'PyYAML is not installed and is required to run this function. '
@@ -50,10 +36,10 @@ def load_entities_from_yaml(yaml_filepath):
         )
 
     try:
-        with open(yaml_filepath, 'r') as f:
-            entities = yaml.load(f.read(), Loader=yaml.SafeLoader)
+        with open(yaml_filepath, 'r', encoding='utf-8') as file:
+            entities = yaml.load(file.read(), Loader=yaml.SafeLoader)
     except FileNotFoundError as error:
-        raise FileNotFoundError(error)
+        raise FileNotFoundError from error
 
     return entities
 
@@ -65,8 +51,9 @@ def load_entities_from_csv(csv_filepath: str, model) -> dict:
     :param model: either str or class
     :return: dict of entities
     """
-    with open(csv_filepath, 'r') as f:
-        source_data = list(map(dict, csv.DictReader(f, skipinitialspace=True)))
+    with open(csv_filepath, 'r', encoding='utf-8') as file:
+        source_data = list(
+            map(dict, csv.DictReader(file, skipinitialspace=True)))
         if isinstance(model, str):
             model_name = model
         else:
