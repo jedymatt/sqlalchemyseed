@@ -41,5 +41,3 @@ jobs:
     - name: Test with pytest
       run: |
         pytest
-    - name: Codecov
-      uses: codecov/codecov-action@v2.1.0
