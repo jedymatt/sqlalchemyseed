@@ -171,33 +171,29 @@ class Seeder(AbstractSeeder):
         if add_to_session:
             self.session.add_all(self.instances)
 
-    def _pre_seed(self, entity, parent: Entity = None):
-        if isinstance(entity, dict):
-            self._seed(entity, parent)
+    def _pre_seed(self, json, parent=None):
+        if isinstance(json, dict):
+            self._seed(json, parent)
         else:  # is list
-            for item in entity:
-                self._pre_seed(item, parent)
+            for item in json:
+                self._seed(item, parent)
 
     def _seed(self, entity, parent: Entity = None):
         class_ = self.get_model_class(entity, parent)
 
-        kwargs = entity[self.__data_key]
+        kwargs_list = entity[self.__data_key]
+
+        if isinstance(kwargs_list, dict):
+            kwargs_list = [kwargs_list]
 
         # kwargs is list
-        if isinstance(kwargs, list):
-            for kwargs_ in kwargs:
-                instance = self._setup_instance(class_, kwargs_, parent)
-                self._seed_children(instance, kwargs_)
-            return
-
-        # kwargs is dict
-        # instantiate object
-        instance = self._setup_instance(class_, kwargs, parent)
-        self._seed_children(instance, kwargs)
+        for kwargs_ in kwargs_list:
+            instance = self._setup_instance(class_, kwargs_, parent)
+            self._seed_children(instance, kwargs_)
 
     def _seed_children(self, instance, kwargs):
         for attr_name, value in util.iter_ref_kwargs(kwargs, self.ref_prefix):
-            self._pre_seed(entity=value, parent=Entity(instance, attr_name))
+            self._pre_seed(json=value, parent=Entity(instance, attr_name))
 
     def _setup_instance(self, class_, kwargs: dict, parent: Entity):
         instance = class_(**filter_kwargs(kwargs, class_, self.ref_prefix))
