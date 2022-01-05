@@ -215,19 +215,19 @@ class TestHybridSeeder(unittest.TestCase):
         with self.Session() as session:
             seeder = HybridSeeder(session)
             self.assertIsNone(seeder.seed(ins.HYBRID_SEED_PARENT_TO_CHILD_WITH_REF_COLUMN_NO_MODEL))
-            print(session.new, session.dirty)
+            # print(session.new, session.dirty)
 
     def test_hybrid_seed_parent_to_child_with_ref_attribute_relationship(self):
         with self.Session() as session:
             seeder = HybridSeeder(session)
             self.assertIsNone(seeder.seed(ins.HYBRID_SEED_PARENT_TO_CHILD_WITH_REF_RELATIONSHIP))
-            print(session.new, session.dirty)
+            # print(session.new, session.dirty)
 
     def test_hybrid_seed_parent_to_child_with_ref_relationship_no_model(self):
         with self.Session() as session:
             seeder = HybridSeeder(session)
             self.assertIsNone(seeder.seed(ins.HYBRID_SEED_PARENT_TO_CHILD_WITH_REF_RELATIONSHIP_NO_MODEL))
-            print(session.new, session.dirty)
+            # print(session.new, session.dirty)
 
 class TestSeederCostumizedPrefix(unittest.TestCase):
     def setUp(self) -> None:

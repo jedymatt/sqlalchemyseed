@@ -85,6 +85,7 @@ class EntityTuple(NamedTuple):
 class Entity(EntityTuple):
     @property
     def class_attribute(self):
+        print(type(getattr(self.instance.__class__, self.attr_name)))
         return getattr(self.instance.__class__, self.attr_name)
 
     @property

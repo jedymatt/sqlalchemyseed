@@ -1,7 +1,9 @@
 from dataclasses import dataclass
 
-from sqlalchemy import inspect
-from sqlalchemy.orm.state import InstanceState
+import sqlalchemy
+from sqlalchemy import inspect, orm
+from sqlalchemy.orm.attributes import InstrumentedAttribute, QueryableAttribute
+from sqlalchemy.orm.state import AttributeState, InstanceState
 
 from sqlalchemyseed.util import is_supported_class
 
@@ -21,8 +23,22 @@ class KeyValue:
     key: str
     value: object = None
 
+
+@dataclass
+class Attribute:
+    """
+    Attribute class
+    """
+    value: InstrumentedAttribute
+
+    @property
+    def property(self):
+        """
+        Attribute property
+        """
+        return self.value.property
+        # return self.value.property
 # key_value = KeyValue(key="key")
 
 # print(key_value == KeyValue(key="key", value="fre"))
 # print(str(key_value))
-
