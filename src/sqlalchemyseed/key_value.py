@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Iterable, Iterator
 
 from sqlalchemy import ForeignKey, inspect, orm
 from sqlalchemy.orm.attributes import InstrumentedAttribute

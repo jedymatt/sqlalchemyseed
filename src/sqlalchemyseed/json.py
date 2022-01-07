@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, List, Union
 from dataclasses import dataclass
 
 
@@ -7,7 +7,7 @@ class JsonWalker:
     JsonWalker class
     """
 
-    def __init__(self, json: list | dict = None) -> None:
+    def __init__(self, json: Union[list, dict] = None) -> None:
         self.path = []
         self.root = json
         self.current = json
@@ -19,7 +19,7 @@ class JsonWalker:
         """
         return self.path[-1]
 
-    def forward(self, keys: list[int, str]):
+    def forward(self, keys: List[Union[int, str]]):
         """
         Move and replace current json forward.
         Returns current json.
@@ -39,19 +39,19 @@ class JsonWalker:
         self.current = self.find_from_root(self.path[:-1])
         self.path.pop()
 
-    def find_from_current(self, keys: list[int, str]):
+    def find_from_current(self, keys: List[Union[int, str]]):
         """
         Find item from current json that correlates list of keys
         """
         return self._find(self.current, keys)
 
-    def _find(self, json: list | dict, keys: list[int, str]):
+    def _find(self, json: Union[list, dict], keys: List[Union[int, str]]):
         """
         Recursive call of finding item
         """
         return self._find(json[keys[0]], keys[1:]) if keys else json
 
-    def find_from_root(self, keys: list):
+    def find_from_root(self, keys: List[Union[int, str]]):
         """
         Find item from the root json that correlates list of keys
         """

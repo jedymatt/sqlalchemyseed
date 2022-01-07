@@ -3,7 +3,8 @@ Scratch file
 """
 
 
-from typing import Generic, NewType, Type, TypeVar
+import dataclasses
+from typing import Generic, NewType, Type, TypeVar, Union
 from sqlalchemy import Column, Integer, String, create_engine, types
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import ColumnProperty, relationship, sessionmaker
@@ -13,6 +14,7 @@ import sqlalchemyseed
 from sqlalchemyseed import *
 from sqlalchemyseed.key_value import *
 from sqlalchemyseed.util import generate_repr
+from dataclasses import dataclass
 
 Base = declarative_base()
 
@@ -60,28 +62,25 @@ print(sqlalchemyseed.__version__)
 single = Single(value='343')
 
 
-MANY_SINGLE = [
-    {
-        'model': 'scratch.Single',
-        'data': {
-            'value': 'Single Value',
-        },
-    },
-    {
-        'model': 'scratch.Single',
-        'data': {
-            'value': 'Single Value',
-        },
-    },
-]
+T = TypeVar('T')
 
-seeder = Seeder()
-seeder.seed(MANY_SINGLE, add_to_session=False)
 
-# js = JsonWalker([2, [1, {'yaha': 'lost', 'hello': 'world'}, 4]])
-# val = js.find([1, 1])
-# js.forward([1, 1])
-# print(js.path)
-# js.forward(['yaha'])
-# print(js.path)
-# print(js.current)
+# class Stack(Generic[T]):
+#     def __init__(self) -> None:
+#         # Create an empty list with items of type T
+#         self.items: list[T] = []
+
+#     def push(self, item: T) -> None:
+#         self.items.append(item)
+
+#     def pop(self) -> T:
+#         return self.items.pop()
+
+#     def empty(self) -> bool:
+#         return not self.items
+
+
+# stack = Stack[int]()
+# stack.push(2)
+# stack.pop()
+# stack.push('x')        # Type error

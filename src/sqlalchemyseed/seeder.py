@@ -4,7 +4,7 @@ Seeder module
 
 import abc
 from types import FunctionType, LambdaType
-from typing import Any, Callable, Iterable, NamedTuple
+from typing import Any, Callable, Iterable, NamedTuple, Union
 from sqlalchemyseed.constants import MODEL_KEY, DATA_KEY
 
 import sqlalchemy
@@ -144,7 +144,7 @@ class Seeder(AbstractSeeder):
         # parent is not None
         return parent.referenced_class
 
-    def seed(self, entities, add_to_session=True):
+    def seed(self, entities: Union[list, dict], add_to_session=True):
         validator.validate(entities=entities, ref_prefix=self.ref_prefix)
 
         self._instances.clear()
@@ -174,16 +174,15 @@ class Seeder(AbstractSeeder):
         # iterate json.current as list
         for kwargs in self._json.iter_as_list():
             instance = self._setup_instance(class_, kwargs, parent)
-            self._seed_children(instance, kwargs)
+            self._seed_children(instance)
 
         self._json.backward()
 
-    def _seed_children(self, instance, kwargs):
+    def _seed_children(self, instance):
         # expected json is dict:
         # {'model': ...}
         for key, _ in self._json.iter_as_dict_items():
             # key is equal to self._json.current_key
-
             if str(key).startswith(self.ref_prefix):
                 attr_name = key[len(self.ref_prefix):]
                 self._pre_seed(parent=Entity(instance, attr_name))

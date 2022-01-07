@@ -11,9 +11,15 @@ from tests import instances as ins
 
 
 class TestSeeder(unittest.TestCase):
+    """
+    Test class for Seeder class
+    """
+
     def setUp(self) -> None:
         self.engine = create_engine('sqlite://')
-        self.Session = sessionmaker(bind=self.engine)
+        self.Session = sessionmaker(  # pylint: disable=invalid-name
+            bind=self.engine,
+        )
         self.session = self.Session()
         self.seeder = Seeder(self.session)
         Base.metadata.create_all(self.engine)
@@ -46,22 +52,27 @@ class TestSeeder(unittest.TestCase):
         self.assertIsNone(self.seeder.seed(ins.PARENT_TO_CHILDREN))
 
     def test_seed_parent_to_children_without_model(self):
-        self.assertIsNone(self.seeder.seed(ins.PARENT_TO_CHILDREN_WITHOUT_MODEL))
+        self.assertIsNone(self.seeder.seed(
+            ins.PARENT_TO_CHILDREN_WITHOUT_MODEL))
 
     def test_seed_parent_to_children_with_multi_data(self):
-        self.assertIsNone(self.seeder.seed(ins.PARENT_TO_CHILDREN_WITH_MULTI_DATA))
+        self.assertIsNone(self.seeder.seed(
+            ins.PARENT_TO_CHILDREN_WITH_MULTI_DATA))
 
     def test_seed_parent_to_child_without_child_model(self):
-        self.assertIsNone(self.seeder.seed(ins.PARENT_TO_CHILD_WITHOUT_CHILD_MODEL))
+        self.assertIsNone(self.seeder.seed(
+            ins.PARENT_TO_CHILD_WITHOUT_CHILD_MODEL))
 
     def test_seed_parent_to_children_with_multi_data_without_model(self):
-        self.assertIsNone(self.seeder.seed(ins.PARENT_TO_CHILDREN_WITH_MULTI_DATA_WITHOUT_MODEL))
+        self.assertIsNone(self.seeder.seed(
+            ins.PARENT_TO_CHILDREN_WITH_MULTI_DATA_WITHOUT_MODEL))
 
 
 class TestHybridSeeder(unittest.TestCase):
     def setUp(self) -> None:
         self.engine = create_engine('sqlite://')
-        self.Session = sessionmaker(bind=self.engine)
+        self.Session = sessionmaker(
+            bind=self.engine)  # pylint: disable=invalid-name
         Base.metadata.create_all(self.engine)
 
     def tearDown(self) -> None:
@@ -202,7 +213,8 @@ class TestHybridSeeder(unittest.TestCase):
 
         with self.Session() as session:
             seeder = HybridSeeder(session)
-            self.assertRaises(errors.InvalidKeyError, lambda: seeder.seed(instance))
+            self.assertRaises(errors.InvalidKeyError,
+                              lambda: seeder.seed(instance))
 
     def test_hybrid_seed_parent_to_child_with_ref_attribute(self):
         with self.Session() as session:
@@ -214,20 +226,24 @@ class TestHybridSeeder(unittest.TestCase):
     def test_hybrid_seed_parent_to_child_with_ref_attribute_no_model(self):
         with self.Session() as session:
             seeder = HybridSeeder(session)
-            self.assertIsNone(seeder.seed(ins.HYBRID_SEED_PARENT_TO_CHILD_WITH_REF_COLUMN_NO_MODEL))
+            self.assertIsNone(seeder.seed(
+                ins.HYBRID_SEED_PARENT_TO_CHILD_WITH_REF_COLUMN_NO_MODEL))
             # print(session.new, session.dirty)
 
     def test_hybrid_seed_parent_to_child_with_ref_attribute_relationship(self):
         with self.Session() as session:
             seeder = HybridSeeder(session)
-            self.assertIsNone(seeder.seed(ins.HYBRID_SEED_PARENT_TO_CHILD_WITH_REF_RELATIONSHIP))
+            self.assertIsNone(seeder.seed(
+                ins.HYBRID_SEED_PARENT_TO_CHILD_WITH_REF_RELATIONSHIP))
             # print(session.new, session.dirty)
 
     def test_hybrid_seed_parent_to_child_with_ref_relationship_no_model(self):
         with self.Session() as session:
             seeder = HybridSeeder(session)
-            self.assertIsNone(seeder.seed(ins.HYBRID_SEED_PARENT_TO_CHILD_WITH_REF_RELATIONSHIP_NO_MODEL))
+            self.assertIsNone(seeder.seed(
+                ins.HYBRID_SEED_PARENT_TO_CHILD_WITH_REF_RELATIONSHIP_NO_MODEL))
             # print(session.new, session.dirty)
+
 
 class TestSeederCostumizedPrefix(unittest.TestCase):
     def setUp(self) -> None:
@@ -237,7 +253,7 @@ class TestSeederCostumizedPrefix(unittest.TestCase):
 
     def test_seeder_parent_to_child(self):
         import json
-        custom_instance =  json.dumps(ins.PARENT_TO_CHILD)
+        custom_instance = json.dumps(ins.PARENT_TO_CHILD)
         custom_instance = custom_instance.replace('!', '@')
         custom_instance = json.loads(custom_instance)
 
@@ -249,7 +265,8 @@ class TestSeederCostumizedPrefix(unittest.TestCase):
 
     def test_hybrid_seeder_parent_to_child_with_ref_column(self):
         import json
-        custom_instance =  json.dumps(ins.HYBRID_SEED_PARENT_TO_CHILD_WITH_REF_COLUMN)
+        custom_instance = json.dumps(
+            ins.HYBRID_SEED_PARENT_TO_CHILD_WITH_REF_COLUMN)
         custom_instance = custom_instance.replace('!', '@')
         custom_instance = json.loads(custom_instance)
 
@@ -261,7 +278,8 @@ class TestSeederCostumizedPrefix(unittest.TestCase):
 
     def test_hybrid_seeder_parent_to_child_with_ref_relationship(self):
         import json
-        custom_instance =  json.dumps(ins.HYBRID_SEED_PARENT_TO_CHILD_WITH_REF_RELATIONSHIP)
+        custom_instance = json.dumps(
+            ins.HYBRID_SEED_PARENT_TO_CHILD_WITH_REF_RELATIONSHIP)
         custom_instance = custom_instance.replace('!', '@')
         custom_instance = json.loads(custom_instance)
 
