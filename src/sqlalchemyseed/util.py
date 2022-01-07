@@ -3,6 +3,7 @@ Utility functions
 """
 
 
+from typing import Callable, Iterable
 from sqlalchemy import inspect
 
 
@@ -12,6 +13,15 @@ def iter_ref_kwargs(kwargs: dict, ref_prefix: str):
         if attr_name.startswith(ref_prefix):
             # removed prefix
             yield attr_name[len(ref_prefix):], value
+
+
+def iter_kwargs_with_prefix(kwargs: dict, prefix: str):
+    """
+    Iterate kwargs(dict) that has the specified prefix.
+    """
+    for key, value in kwargs.items():
+        if str(key).startswith(prefix):
+            yield key, value
 
 
 def iterate_json(json: dict, key_prefix: str):
@@ -74,3 +84,10 @@ def generate_repr(instance: object) -> str:
     attributes = {column.key: column.value for column in insp.attrs}
     str_attributes = ",".join(f"{k}='{v}'" for k, v in attributes.items())
     return f"<{class_name}({str_attributes})>"
+
+
+def find_item(json: Iterable, keys: list):
+    """
+    Finds item of json from keys
+    """
+    return find_item(json[keys[0]], keys[1:]) if keys else json

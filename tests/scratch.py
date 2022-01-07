@@ -2,25 +2,16 @@
 Scratch file
 """
 
-import logging
 
-import sqlalchemy
-from sqlalchemy.orm.attributes import set_attribute
-from sqlalchemy.orm.base import class_mapper, object_mapper, object_state
-from sqlalchemy.orm.interfaces import MapperProperty
-from sqlalchemy.orm.relationships import foreign
-import sqlalchemy.orm.state
-from sqlalchemy import Column, create_engine, String, Integer
+from typing import Generic, NewType, Type, TypeVar
+from sqlalchemy import Column, Integer, String, create_engine, types
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import ColumnProperty, relationship, sessionmaker
-from sqlalchemy.sql.base import ColumnCollection, Immutable, ImmutableColumnCollection
 from sqlalchemy.sql.schema import ForeignKey
-from sqlalchemy.util._collections import ImmutableProperties
-from sqlalchemy_utils import generic_repr
 
 import sqlalchemyseed
+from sqlalchemyseed import *
 from sqlalchemyseed.key_value import *
-from sqlalchemyseed.seeder import Entity, EntityTuple
 from sqlalchemyseed.util import generate_repr
 
 Base = declarative_base()
@@ -68,36 +59,29 @@ print(sqlalchemyseed.__version__)
 
 single = Single(value='343')
 
-# print(single)
-# print(generate_repr(single))
 
-wrapped = AttributeValue(Child.name, 1)
-attr: InstrumentedAttribute = wrapped.attr
-parent: orm.Mapper = attr.parent
-comp: ColumnProperty.Comparator = attr.comparator
-prop: ColumnProperty = attr.property
+MANY_SINGLE = [
+    {
+        'model': 'scratch.Single',
+        'data': {
+            'value': 'Single Value',
+        },
+    },
+    {
+        'model': 'scratch.Single',
+        'data': {
+            'value': 'Single Value',
+        },
+    },
+]
 
-print(parent.tables[0].name)
-print(wrapped.referenced_class)
+seeder = Seeder()
+seeder.seed(MANY_SINGLE, add_to_session=False)
 
-
-# entity = Entity(instance=Parent(name="John Doe"), attr_name='name')
-
-# print(entity.referenced_class)
-
-
-for col in wrapped.parent.columns:
-    print(col)
-    foreign_keys = tuple(col.foreign_keys)
-    if len(foreign_keys) > 0:
-        foreign_keys = foreign_keys[0]
-        col_: Column = foreign_keys.column
-        print(col_.table.name)
-        class_ = next(filter(
-            lambda mapper: mapper.class_.__tablename__ == col_.table.name,
-            wrapped.parent.registry.mappers
-        )).class_
-        print(f"referenced class: {class_}")
-        # print(foreign_keys.column.key)
-        # print(foreign_keys.column.name)
-    print()
+# js = JsonWalker([2, [1, {'yaha': 'lost', 'hello': 'world'}, 4]])
+# val = js.find([1, 1])
+# js.forward([1, 1])
+# print(js.path)
+# js.forward(['yaha'])
+# print(js.path)
+# print(js.current)

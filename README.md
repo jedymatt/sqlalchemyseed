@@ -67,3 +67,9 @@ data.json
 ## Documentation
 
 <https://sqlalchemyseed.readthedocs.io/>
+
+
+## Found Bug?
+
+Report here in this link:
+<https://github.com/jedymatt/sqlalchemyseed/issues>

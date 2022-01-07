@@ -3,13 +3,17 @@ Seeder module
 """
 
 import abc
-from typing import NamedTuple
+from types import FunctionType, LambdaType
+from typing import Any, Callable, Iterable, NamedTuple
+from sqlalchemyseed.constants import MODEL_KEY, DATA_KEY
 
 import sqlalchemy
 from sqlalchemy.orm import ColumnProperty
 from sqlalchemy.orm import object_mapper
 from sqlalchemy.orm.relationships import RelationshipProperty
 from sqlalchemy.sql import schema
+
+from sqlalchemyseed.json import JsonWalker
 
 from . import class_registry, validator, errors, util
 
@@ -122,22 +126,21 @@ class Seeder(AbstractSeeder):
     """
     Basic Seeder class
     """
-    __model_key = validator.Key.model()
-    __data_key = validator.Key.data()
 
     def __init__(self, session: sqlalchemy.orm.Session = None, ref_prefix="!"):
         self.session = session
         self._class_registry = class_registry.ClassRegistry()
         self._instances = []
         self.ref_prefix = ref_prefix
+        self._json: JsonWalker = JsonWalker()
 
     @property
     def instances(self):
         return tuple(self._instances)
 
     def get_model_class(self, entity, parent: Entity):
-        if self.__model_key in entity:
-            return self._class_registry.register_class(entity[self.__model_key])
+        if MODEL_KEY.key in entity:
+            return self._class_registry.register_class(entity[MODEL_KEY.key])
         # parent is not None
         return parent.referenced_class
 
@@ -147,34 +150,43 @@ class Seeder(AbstractSeeder):
         self._instances.clear()
         self._class_registry.clear()
 
-        self._pre_seed(entities)
+        self._json.reset(root=entities)
+
+        self._pre_seed()
 
         if add_to_session:
             self.session.add_all(self.instances)
 
-    def _pre_seed(self, json, parent=None):
-        if isinstance(json, dict):
-            self._seed(json, parent)
-        else:  # is list
-            for item in json:
-                self._seed(item, parent)
+    def _pre_seed(self, parent=None):
+        # iterates current json as list
+        # expected json value is [{'model': ...}, ...]
+        for _ in self._json.iter_as_list():
+            self._seed(parent)
 
-    def _seed(self, entity, parent: Entity = None):
-        class_ = self.get_model_class(entity, parent)
+    def _seed(self,  parent: Entity = None):
+        # expected json value is {'model': ..., 'data': ...}
+        json = self._json.current
+        class_ = self.get_model_class(json, parent)
 
-        kwargs_list = entity[self.__data_key]
+        # moves json.current to json.current[self.__data_key]
+        # expected json value is [{'value':...}]
+        self._json.forward([DATA_KEY.key])
+        # iterate json.current as list
+        for kwargs in self._json.iter_as_list():
+            instance = self._setup_instance(class_, kwargs, parent)
+            self._seed_children(instance, kwargs)
 
-        if isinstance(kwargs_list, dict):
-            kwargs_list = [kwargs_list]
-
-        # kwargs is list
-        for kwargs_ in kwargs_list:
-            instance = self._setup_instance(class_, kwargs_, parent)
-            self._seed_children(instance, kwargs_)
+        self._json.backward()
 
     def _seed_children(self, instance, kwargs):
-        for attr_name, value in util.iter_ref_kwargs(kwargs, self.ref_prefix):
-            self._pre_seed(json=value, parent=Entity(instance, attr_name))
+        # expected json is dict:
+        # {'model': ...}
+        for key, _ in self._json.iter_as_dict_items():
+            # key is equal to self._json.current_key
+
+            if str(key).startswith(self.ref_prefix):
+                attr_name = key[len(self.ref_prefix):]
+                self._pre_seed(parent=Entity(instance, attr_name))
 
     def _setup_instance(self, class_, kwargs: dict, parent: Entity):
         instance = class_(**filter_kwargs(kwargs, class_, self.ref_prefix))
@@ -183,20 +195,6 @@ class Seeder(AbstractSeeder):
         else:
             self._instances.append(instance)
         return instance
-
-    # def instantiate_class(self, class_, kwargs: dict, key: validator.Key):
-    #     filtered_kwargs = {
-    #         k: v
-    #         for k, v in kwargs.items()
-    #         if not k.startswith("!")
-    #            and not isinstance(getattr(class_, k), RelationshipProperty)
-    #     }
-    #
-    #     if key is validator.Key.data():
-    #         return class_(**filtered_kwargs)
-    #
-    #     if key is validator.Key.filter() and self.session is not None:
-    #         return self.session.query(class_).filter_by(**filtered_kwargs).one()
 
 
 class HybridSeeder(AbstractSeeder):
