@@ -10,6 +10,22 @@ from tests.models import Base, Company
 from tests import instances as ins
 
 
+# class TestSeeder(unittest.TestCase):
+#     """
+#     TestSeeder class for testing Seeder class.
+#     """
+#     def setUp(self) -> None:
+#         self.engine = create_engine('sqlite://')
+#         Session = sessionmaker(bind=self.engine)
+#         session = Session()
+#         Base.metadata.create_all(self.engine)
+#         self.seeder = Seeder(session)
+
+#     def tearDown(self) -> None:
+#         Base.metadata.drop_all(self.engine)
+    
+#     def test_single(self):
+        
 class TestSeeder(unittest.TestCase):
     """
     Test class for Seeder class

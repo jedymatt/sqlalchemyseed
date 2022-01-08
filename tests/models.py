@@ -106,8 +106,17 @@ class AnotherEmployee(AnotherBase):
 
 class Single(Base):
     """
-    A class with no child
+    Single class with no child
     """
     __tablename__ = 'single'
     id = Column(Integer, primary_key=True)
-    value = Column(String)
+    value = Column(String(45))
+
+
+class One(Base):
+    """
+    SingleParent class with no other Parent that relates to its child.
+    """
+    __tablename__ = 'single_parent'
+    id = Column(Integer, primary_key=True)
+    value = Column(String(45))
