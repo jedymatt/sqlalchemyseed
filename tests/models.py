@@ -1,6 +1,8 @@
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
+from sqlalchemy.util.langhelpers import generic_repr
+from sqlalchemyseed.util import generate_repr
 
 Base = declarative_base()
 AnotherBase = declarative_base()
@@ -112,11 +114,63 @@ class Single(Base):
     id = Column(Integer, primary_key=True)
     value = Column(String(45))
 
+    def __repr__(self) -> str:
+        return generic_repr(self)
+
 
 class One(Base):
     """
-    SingleParent class with no other Parent that relates to its child.
+    One class with no other Parent that relates to its child.
     """
     __tablename__ = 'single_parent'
     id = Column(Integer, primary_key=True)
     value = Column(String(45))
+
+    def __repr__(self) -> str:
+        return generate_repr(self)
+
+
+class OneToOne(Base):
+    """
+    OneToOne class
+    """
+    __tablename__ = 'one_to_one'
+
+    id = Column(Integer, primary_key=True)
+
+
+class OneToMany(Base):
+    """
+    OneToMany class
+    """
+    __tablename__ = 'one_to_many'
+
+    id = Column(Integer, primary_key=True)
+
+    def __repr__(self) -> str:
+        return generic_repr(self)
+
+
+class ManyToOne(Base):
+    """
+    ManyToOne class
+    """
+    __tablename__ = 'many_to_one'
+
+    id = Column(Integer, primary_key=True)
+
+
+class ManyToMany(Base):
+    """
+    ManyToMany class
+    """
+    __tablename__ = 'many_to_many'
+
+    id = Column(Integer, primary_key=True)
+
+    def __repr__(self) -> str:
+        return generic_repr(self,)
+
+
+val = Single(value='str value')
+print(repr(val))
