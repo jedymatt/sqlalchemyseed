@@ -1,3 +1,4 @@
+from typing import List
 import unittest
 
 from sqlalchemy import create_engine
@@ -6,26 +7,74 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemyseed import HybridSeeder, errors
 from sqlalchemyseed import Seeder
 from tests.models import Base, Company
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy.orm import relationship
+
 
 from tests import instances as ins
+from tests import relationships as rel
 
 
-# class TestSeeder(unittest.TestCase):
-#     """
-#     TestSeeder class for testing Seeder class.
-#     """
-#     def setUp(self) -> None:
-#         self.engine = create_engine('sqlite://')
-#         Session = sessionmaker(bind=self.engine)
-#         session = Session()
-#         Base.metadata.create_all(self.engine)
-#         self.seeder = Seeder(session)
+class TestSeederRelationship(unittest.TestCase):
+    """
+    TestSeederRelationship class for testing Seeder class dealing with relationships.
+    """
 
-#     def tearDown(self) -> None:
-#         Base.metadata.drop_all(self.engine)
-    
-#     def test_single(self):
-        
+    def setUp(self) -> None:
+        self.engine = create_engine('sqlite://')
+        Session = sessionmaker(bind=self.engine)
+        session = Session()
+        self.seeder = Seeder(session)
+        self.Base = None
+
+    def tearDown(self) -> None:
+
+        self.Base.metadata.drop_all(self.engine)
+        self.Base = None
+
+    def test_seed_one_to_many(self):
+        """
+        Test seed one to many relationship
+        """
+        # assign classes to remove module
+        Parent = rel.one_to_many.Parent
+        Child = rel.one_to_many.Child
+
+        self.Base = rel.one_to_many.Base
+        self.Base.metadata.create_all(self.engine)
+        json = {
+            'model': 'tests.relationships.one_to_many.Parent',
+            'data': {
+                'value': 'parent',
+                '!children': [
+                    {
+                        'data': {
+                            'value': 'child',
+                        },
+                    },
+                    {
+                        'data': {
+                            'value': 'child',
+                        },
+                    },
+                ],
+            },
+        }
+        self.seeder.seed(json)
+
+        # seeder.instances should only contain the first level entities
+        self.assertEqual(len(self.seeder.instances), 1)
+
+        parent: Parent = self.seeder.instances[0]
+        children: List[Child] = parent.children
+
+        self.assertEqual(parent.value, 'parent')
+        for child in children:
+            self.assertEqual(child.value, 'child')
+            self.assertEqual(child.parent, parent)
+
+
 class TestSeeder(unittest.TestCase):
     """
     Test class for Seeder class

@@ -1,7 +1,6 @@
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-from sqlalchemy.util.langhelpers import generic_repr
 from sqlalchemyseed.util import generate_repr
 
 Base = declarative_base()
@@ -115,7 +114,7 @@ class Single(Base):
     value = Column(String(45))
 
     def __repr__(self) -> str:
-        return generic_repr(self)
+        return generate_repr(self)
 
 
 class One(Base):
@@ -123,6 +122,7 @@ class One(Base):
     One class with no other Parent that relates to its child.
     """
     __tablename__ = 'single_parent'
+
     id = Column(Integer, primary_key=True)
     value = Column(String(45))
 
@@ -137,7 +137,10 @@ class OneToOne(Base):
     __tablename__ = 'one_to_one'
 
     id = Column(Integer, primary_key=True)
+    value = Column(String(45))
 
+    def __repr__(self) -> str:
+        return generate_repr(self)
 
 class OneToMany(Base):
     """
@@ -148,7 +151,7 @@ class OneToMany(Base):
     id = Column(Integer, primary_key=True)
 
     def __repr__(self) -> str:
-        return generic_repr(self)
+        return generate_repr(self)
 
 
 class ManyToOne(Base):
@@ -169,7 +172,7 @@ class ManyToMany(Base):
     id = Column(Integer, primary_key=True)
 
     def __repr__(self) -> str:
-        return generic_repr(self,)
+        return generate_repr(self,)
 
 
 val = Single(value='str value')
