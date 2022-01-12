@@ -129,7 +129,7 @@ class AttributeWrapper:
         self.is_column = isinstance(class_attribute.property, ColumnProperty)
         self.is_relationship = isinstance(
             class_attribute.property,
-            RelationshipProperty,
+            RelationshipProperty
         )
         self._cache_ref_class = None
 

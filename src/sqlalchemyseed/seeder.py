@@ -3,19 +3,15 @@ Seeder module
 """
 
 import abc
-from types import FunctionType, LambdaType
-from typing import Any, Callable, Iterable, NamedTuple, Union
-from sqlalchemyseed.constants import MODEL_KEY, DATA_KEY
+from typing import NamedTuple, Union
 
 import sqlalchemy
-from sqlalchemy.orm import ColumnProperty
-from sqlalchemy.orm import object_mapper
-from sqlalchemy.orm.relationships import RelationshipProperty
-from sqlalchemy.sql import schema
 
-from sqlalchemyseed.json import JsonWalker
-
-from . import class_registry, validator, errors, util
+from . import class_registry, errors, util, validator
+from .attribute import (attr_is_column, attr_is_relationship, foreign_key_column, get_instrumented_attribute,
+                        referenced_class, set_instance_attribute)
+from .constants import DATA_KEY, MODEL_KEY
+from .json import JsonWalker
 
 
 class AbstractSeeder(abc.ABC):
@@ -63,63 +59,18 @@ class AbstractSeeder(abc.ABC):
 
 class EntityTuple(NamedTuple):
     instance: object
-    attr_name: str
+    attr: str
 
 
-class Entity(EntityTuple):
-    @property
-    def class_attribute(self):
-        print(type(getattr(self.instance.__class__, self.attr_name)))
-        return getattr(self.instance.__class__, self.attr_name)
-
-    @property
-    def instance_attribute(self):
-        return getattr(self.instance, self.attr_name)
-
-    @instance_attribute.setter
-    def instance_attribute(self, value):
-        setattr(self.instance, self.attr_name, value)
-
-    def is_column_attribute(self):
-        return isinstance(self.class_attribute.property, ColumnProperty)
-
-    def is_relationship_attribute(self):
-        return isinstance(self.class_attribute.property, RelationshipProperty)
-
-    @property
-    def referenced_class(self):
-        if self.is_relationship_attribute():
-            return self.class_attribute.mapper.class_
-
-        # if self.is_column_attribute():
-        table_name = get_foreign_key_column(self.class_attribute).table.name
-
-        return next(filter(
-            lambda mapper: mapper.class_.__tablename__ == table_name,
-            object_mapper(self.instance).registry.mappers
-        )).class_
-
-
-def get_foreign_key_column(attr, idx=0) -> schema.Column:
-    return list(attr.foreign_keys)[idx].column
+# def get_foreign_key_column(attr) -> schema.Column:
+#     return next(iter(attr.foreign_keys)).column
 
 
 def filter_kwargs(kwargs: dict, class_, ref_prefix):
     return {
         k: v for k, v in util.iter_non_ref_kwargs(kwargs, ref_prefix)
-        if not isinstance(getattr(class_, str(k)).property, RelationshipProperty)
+        if not attr_is_relationship(get_instrumented_attribute(class_, str(k)))
     }
-
-
-def set_parent_attr_value(instance, parent: Entity):
-    if parent.is_relationship_attribute():
-        if parent.class_attribute.property.uselist is True:
-            parent.instance_attribute.append(instance)
-        else:
-            parent.instance_attribute = instance
-
-    else:  # if parent.is_column_attribute():
-        parent.instance_attribute = instance
 
 
 class Seeder(AbstractSeeder):
@@ -138,17 +89,18 @@ class Seeder(AbstractSeeder):
     def instances(self):
         return tuple(self._instances)
 
-    def get_model_class(self, entity, parent: Entity):
+    def get_model_class(self, entity, parent: EntityTuple):
         if MODEL_KEY.key in entity:
             return self._class_registry.register_class(entity[MODEL_KEY.key])
         # parent is not None
-        return parent.referenced_class
+        return referenced_class(get_instrumented_attribute(parent.instance, parent.attr))
 
     def seed(self, entities: Union[list, dict], add_to_session=True):
         validator.validate(entities=entities, ref_prefix=self.ref_prefix)
 
         self._instances.clear()
         self._class_registry.clear()
+        self._parent = None
 
         self._json.reset(root=entities)
 
@@ -163,7 +115,7 @@ class Seeder(AbstractSeeder):
         for _ in self._json.iter_as_list():
             self._seed(parent)
 
-    def _seed(self,  parent: Entity = None):
+    def _seed(self, parent):
         # expected json value is {'model': ..., 'data': ...}
         json = self._json.current
         class_ = self.get_model_class(json, parent)
@@ -185,12 +137,12 @@ class Seeder(AbstractSeeder):
             # key is equal to self._json.current_key
             if str(key).startswith(self.ref_prefix):
                 attr_name = key[len(self.ref_prefix):]
-                self._pre_seed(parent=Entity(instance, attr_name))
+                self._pre_seed(parent=EntityTuple(instance, attr_name))
 
-    def _setup_instance(self, class_, kwargs: dict, parent: Entity):
+    def _setup_instance(self, class_, kwargs: dict, parent: EntityTuple):
         instance = class_(**filter_kwargs(kwargs, class_, self.ref_prefix))
         if parent is not None:
-            set_parent_attr_value(instance, parent)
+            set_instance_attribute(parent.instance, parent.attr, instance)
         else:
             self._instances.append(instance)
         return instance
@@ -213,7 +165,7 @@ class HybridSeeder(AbstractSeeder):
     def instances(self):
         return tuple(self._instances)
 
-    def get_model_class(self, entity, parent: Entity):
+    def get_model_class(self, entity, parent: EntityTuple):
         # if self.__model_key in entity and (parent is not None and parent.is_column_attribute()):
         #     raise errors.InvalidKeyError("column attribute does not accept 'model' key")
 
@@ -222,7 +174,7 @@ class HybridSeeder(AbstractSeeder):
             return self._class_registry.register_class(class_path)
 
         # parent is not None
-        return parent.referenced_class
+        return referenced_class(get_instrumented_attribute(parent.instance, parent.attr))
 
     def seed(self, entities):
         validator.hybrid_validate(
@@ -264,9 +216,10 @@ class HybridSeeder(AbstractSeeder):
 
     def _seed_children(self, instance, kwargs):
         for attr_name, value in util.iter_ref_kwargs(kwargs, self.ref_prefix):
-            self._pre_seed(entity=value, parent=Entity(instance, attr_name))
+            self._pre_seed(
+                entity=value, parent=EntityTuple(instance, attr_name))
 
-    def _setup_instance(self, class_, kwargs: dict, key, parent):
+    def _setup_instance(self, class_, kwargs: dict, key, parent: EntityTuple):
         filtered_kwargs = filter_kwargs(kwargs, class_, self.ref_prefix)
 
         if key == key.data():
@@ -275,16 +228,17 @@ class HybridSeeder(AbstractSeeder):
         else:  # key == key.filter()
             # instance = self.session.query(class_).filter_by(**filtered_kwargs)
             instance = self._setup_filter_instance(
-                class_, filtered_kwargs, parent)
+                class_, filtered_kwargs, parent
+            )
 
         # setting parent
         if parent is not None:
-            set_parent_attr_value(instance, parent)
+            set_instance_attribute(parent.instance, parent.attr, instance)
 
         return instance
 
-    def _setup_data_instance(self, class_, filtered_kwargs, parent: Entity):
-        if parent is not None and parent.is_column_attribute():
+    def _setup_data_instance(self, class_, filtered_kwargs, parent: EntityTuple):
+        if parent is not None and attr_is_column(get_instrumented_attribute(parent.instance, parent.attr)):
             raise errors.InvalidKeyError(
                 "'data' key is invalid for a column attribute.")
 
@@ -296,12 +250,20 @@ class HybridSeeder(AbstractSeeder):
 
         return instance
 
-    def _setup_filter_instance(self, class_, filtered_kwargs, parent: Entity):
-        if parent is not None and parent.is_column_attribute():
-            foreign_key_column = get_foreign_key_column(parent.class_attribute)
-            return self.session.query(foreign_key_column).filter_by(**filtered_kwargs).one()[0]
+    def _setup_filter_instance(self, class_, filtered_kwargs, parent: EntityTuple):
+        if parent is not None:
+            instr_attr = get_instrumented_attribute(
+                parent.instance, parent.attr)
+        else:
+            instr_attr = None
 
-        if parent is not None and parent.is_relationship_attribute():
-            return self.session.query(parent.referenced_class).filter_by(**filtered_kwargs).one()
+        if instr_attr is not None and attr_is_column(instr_attr):
+            column = foreign_key_column(instr_attr)
+            return self.session.query(column).filter_by(**filtered_kwargs).one()[0]
+
+        if instr_attr is not None and attr_is_relationship(instr_attr):
+            return self.session.query(referenced_class(instr_attr)).filter_by(
+                **filtered_kwargs
+            ).one()
 
         return self.session.query(class_).filter_by(**filtered_kwargs).one()

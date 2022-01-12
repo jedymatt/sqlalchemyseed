@@ -2,12 +2,15 @@
 Scratch file
 """
 
-
 import dataclasses
 from typing import Generic, NewType, Type, TypeVar, Union
 from sqlalchemy import Column, Integer, String, create_engine, types
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import ColumnProperty, relationship, sessionmaker
+from sqlalchemy.orm import MapperProperty
+from sqlalchemy.orm import attributes
+from sqlalchemy.orm.attributes import ScalarAttributeImpl, get_attribute, set_committed_value
+from sqlalchemy.orm.base import state_attribute_str
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy import inspect
 from sqlalchemy.orm.mapper import Mapper, class_mapper
@@ -18,6 +21,7 @@ from sqlalchemyseed import *
 from sqlalchemyseed.key_value import *
 from sqlalchemyseed.util import generate_repr
 from dataclasses import dataclass
+from sqlalchemy.orm.instrumentation import ClassManager
 
 Base = declarative_base()
 
@@ -62,9 +66,19 @@ Base.metadata.create_all(engine)
 
 print(sqlalchemyseed.__version__)
 
-single = Single(value='343')
+single = Single(value='str')
 
-
+wrapper = AttributeWrapper(getattr(single, 'value'))
+print(wrapper.is_column)
 mapper: Mapper = object_mapper(single)
+class_manager: ClassManager = mapper.class_manager
 
-print(mapper.identity_key_from_instance(single))
+attr = get_attribute(single, 'value')
+for c in list(mapper.attrs):
+    c: ColumnProperty = c
+    print(c.key)
+    parent: Mapper = c.parent
+    print(parent.class_.__name__)
+    var: InstrumentedAttribute = c.class_attribute
+
+InstrumentedList
