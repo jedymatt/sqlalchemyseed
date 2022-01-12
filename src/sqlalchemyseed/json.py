@@ -71,10 +71,10 @@ class JsonWalker:
     def iter_as_list(self):
         """
         Iterates current as list.
-        Yiels value.
+        Yields value.
 
         If current is not a list, then it only yields the current value.
-        Forward method will not be called.
+        Forward and backward method will not be called.
         """
         if not self.is_list:
             yield self.current
