@@ -270,6 +270,56 @@ class TestSeederRelationship(unittest.TestCase):
         self.assertEqual(child_4.value, 'child_4')
         self.assertEqual(child_4.parents, [parent_2])
 
+    def test_seed_association_object(self):
+        """
+        Test seed association object relationship
+        """
+
+        self.base = many_to_many.Base
+        self.base.metadata.create_all(self.engine)
+
+        module_path = 'tests.relationships.association_object'
+
+        json = \
+            {
+                'model': f'{module_path}.Parent',
+                'data': {
+                    'value': 'parent_1',
+                    '!children': [
+                        {
+                            'model': f'{module_path}.Association',
+                            'data': {
+                                'extra_value': 'association_1',
+                                '!child': {
+                                    'model': f'{module_path}.Child',
+                                    'data': {
+                                        'value': 'child_1'
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+
+        self.seeder.seed(json)
+
+        self.assertEqual(len(self.seeder.instances), 1)
+
+        parent: association_object.Parent = self.seeder.instances[0]
+        self.assertEqual(parent.value, 'parent_1')
+
+        self.assertEqual(len(parent.children), 1)
+        association: association_object.Association = parent.children[0]
+        self.assertEqual(association.extra_value, 'association_1')
+        self.assertEqual(association.parent, parent)
+        self.assertIsNotNone(association.child)
+        
+        child: association_object.Child = association.child
+        self.assertEqual(child.value, 'child_1')
+        self.assertEqual(child.parents[0], association)
+        
+
 
 class TestSeeder(unittest.TestCase):
     """
