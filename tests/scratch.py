@@ -9,6 +9,9 @@ from sqlalchemy import Column, Integer, String, create_engine, types
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import ColumnProperty, relationship, sessionmaker
 from sqlalchemy.sql.schema import ForeignKey
+from sqlalchemy import inspect
+from sqlalchemy.orm.mapper import Mapper, class_mapper
+from sqlalchemy.orm import object_mapper
 
 import sqlalchemyseed
 from sqlalchemyseed import *
@@ -62,25 +65,6 @@ print(sqlalchemyseed.__version__)
 single = Single(value='343')
 
 
-T = TypeVar('T')
+mapper: Mapper = object_mapper(single)
 
-
-# class Stack(Generic[T]):
-#     def __init__(self) -> None:
-#         # Create an empty list with items of type T
-#         self.items: list[T] = []
-
-#     def push(self, item: T) -> None:
-#         self.items.append(item)
-
-#     def pop(self) -> T:
-#         return self.items.pop()
-
-#     def empty(self) -> bool:
-#         return not self.items
-
-
-# stack = Stack[int]()
-# stack.push(2)
-# stack.pop()
-# stack.push('x')        # Type error
+print(mapper.identity_key_from_instance(single))

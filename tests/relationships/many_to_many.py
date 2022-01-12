@@ -21,7 +21,8 @@ class Parent(Base):
     children = relationship(
         "Child",
         secondary=association_table,
-        back_populates="parents")
+        back_populates="parents"
+    )
 
 
 class Child(Base):
@@ -31,4 +32,5 @@ class Child(Base):
     parents = relationship(
         "Parent",
         secondary=association_table,
-        back_populates="children")
+        back_populates="children"
+    )

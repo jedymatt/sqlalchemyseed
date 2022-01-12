@@ -43,26 +43,27 @@ class TestSeederRelationship(unittest.TestCase):
 
         module_path = 'tests.relationships.one_to_many'
 
-        json = {
-            'model': f'{module_path}.Parent',
-            'data': {
-                'value': 'parent_1',
-                '!children': [
-                    {
-                        'model': f'{module_path}.Child',
-                        'data': {
-                            'value': 'child_1',
+        json = \
+            {
+                'model': f'{module_path}.Parent',
+                'data': {
+                    'value': 'parent_1',
+                    '!children': [
+                        {
+                            'model': f'{module_path}.Child',
+                            'data': {
+                                'value': 'child_1'
+                            },
                         },
-                    },
-                    {
-                        'model': f'{module_path}.Child',
-                        'data': {
-                            'value': 'child_2',
+                        {
+                            'model': f'{module_path}.Child',
+                            'data': {
+                                'value': 'child_2'
+                            },
                         },
-                    },
-                ],
-            },
-        }
+                    ],
+                },
+            }
         self.seeder.seed(json)
 
         # seeder.instances should only contain the first level entities
@@ -86,7 +87,7 @@ class TestSeederRelationship(unittest.TestCase):
 
     def test_seed_many_to_one(self):
         """
-        Test seed many to one
+        Test seed many to one relationship
         """
 
         self.base = many_to_one.Base
@@ -94,7 +95,63 @@ class TestSeederRelationship(unittest.TestCase):
 
         module_path = 'tests.relationships.many_to_one'
 
-        json = [
+        json = \
+            [
+                {
+                    'model': f'{module_path}.Parent',
+                    'data': {
+                        'value': 'parent_1',
+                        '!child': {
+                            'model': f'{module_path}.Child',
+                            'data': {
+                                'value': 'child_1'
+                            }
+                        }
+                    }
+                },
+                {
+                    'model': f'{module_path}.Parent',
+                    'data': {
+                        'value': 'parent_2',
+                        '!child': {
+                            'model': f'{module_path}.Child',
+                            'data': {
+                                'value': 'child_2'
+                            }
+                        }
+                    }
+                }
+            ]
+
+        self.seeder.seed(json)
+
+        Parent = many_to_one.Parent
+
+        self.assertEqual(len(self.seeder.instances), 2)
+
+        parents: List[Parent] = self.seeder.instances
+
+        parent_1 = parents[0]
+        self.assertEqual(parent_1.value, 'parent_1')
+        self.assertEqual(parent_1.child.value, 'child_1')
+        self.assertEqual(parent_1.child.parents, [parent_1])
+
+        parent_2 = parents[1]
+        self.assertEqual(parent_2.value, 'parent_2')
+        self.assertEqual(parent_2.child.value, 'child_2')
+        self.assertEqual(parent_2.child.parents, [parent_2])
+
+    def test_seed_one_to_one(self):
+        """
+        Test seed one to one relationship
+        """
+
+        self.base = one_to_one.Base
+        self.base.metadata.create_all(self.engine)
+
+        module_path = 'tests.relationships.one_to_one'
+
+        json = \
             {
                 'model': f'{module_path}.Parent',
                 'data': {
@@ -106,37 +163,112 @@ class TestSeederRelationship(unittest.TestCase):
                         }
                     }
                 }
-            },
-            {
-                'model': f'{module_path}.Parent',
-                'data': {
-                    'value': 'parent_2',
-                    '!child': {
-                        'model': f'{module_path}.Child',
-                        'data': {
-                            'value': 'child_2'
-                        }
-                    }
-                }
             }
-        ]
 
         self.seeder.seed(json)
 
-        Parent = many_to_one.Parent
-        # Child = many_to_one.Child
+        self.assertEqual(len(self.seeder.instances), 1)
+
+        parent = self.seeder.instances[0]
+        child = parent.child
+
+        self.assertEqual(parent.value, 'parent_1')
+        self.assertEqual(child.value, 'child_1')
+
+        self.assertEqual(child.parent, parent)
+
+    def test_seed_many_to_many(self):
+        """
+        Test seed many to many relationship
+        """
+
+        self.base = many_to_many.Base
+        self.base.metadata.create_all(self.engine)
+
+        module_path = 'tests.relationships.many_to_many'
+
+        json = \
+            [
+                {
+                    'model': f'{module_path}.Parent',
+                    'data': {
+                        'value': 'parent_1',
+                        '!children': [
+                            {
+                                'model': f'{module_path}.Child',
+                                'data': {
+                                    'value': 'child_1'
+                                }
+                            },
+                            {
+                                'model': f'{module_path}.Child',
+                                'data': {
+                                    'value': 'child_2'
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    'model': f'{module_path}.Parent',
+                    'data': {
+                        'value': 'parent_2',
+                        '!children': [
+                            {
+                                'model': f'{module_path}.Child',
+                                'data': {
+                                    'value': 'child_3'
+                                }
+                            },
+                            {
+                                'model': f'{module_path}.Child',
+                                'data': {
+                                    'value': 'child_4'
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        self.seeder.seed(json)
 
         self.assertEqual(len(self.seeder.instances), 2)
 
-        parents: List[Parent] = self.seeder.instances
+        parents = self.seeder.instances
 
-        parent_1 = parents[0]
+        parents: List[many_to_many.Parent] = self.seeder.instances
+
+        self.assertEqual(len(parents), 2)
+
+        # parent 1
+        parent_1: many_to_many.Parent = parents[0]
         self.assertEqual(parent_1.value, 'parent_1')
-        self.assertEqual(parent_1.child.value, 'child_1')
 
-        parent_2 = parents[1]
+        parent_1_children: List[many_to_many.Child] = parent_1.children
+        self.assertEqual(len(parent_1_children), 2)
+
+        child_1 = parent_1_children[0]
+        self.assertEqual(child_1.value, 'child_1')
+        self.assertEqual(child_1.parents, [parent_1])
+
+        child_2 = parent_1_children[1]
+        self.assertEqual(child_2.value, 'child_2')
+        self.assertEqual(child_2.parents, [parent_1])
+
+        # parent 2
+        parent_2: many_to_many.Parent = parents[1]
         self.assertEqual(parent_2.value, 'parent_2')
-        self.assertEqual(parent_2.child.value, 'child_2')
+
+        parent_2_children: List[many_to_many.Child] = parent_2.children
+        self.assertEqual(len(parent_2_children), 2)
+
+        child_3 = parent_2_children[0]
+        self.assertEqual(child_3.value, 'child_3')
+        self.assertEqual(child_3.parents, [parent_2])
+
+        child_4 = parent_2_children[1]
+        self.assertEqual(child_4.value, 'child_4')
+        self.assertEqual(child_4.parents, [parent_2])
 
 
 class TestSeeder(unittest.TestCase):
