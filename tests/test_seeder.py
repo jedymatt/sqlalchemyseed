@@ -1,16 +1,13 @@
-from typing import List
 import unittest
+from typing import List
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from sqlalchemyseed import HybridSeeder, errors
-from sqlalchemyseed import Seeder
-from tests.models import Base, Company
-
-
+from sqlalchemyseed import HybridSeeder, Seeder, errors
 from tests import instances as ins
-from tests.relationships import one_to_many, many_to_one, one_to_one, many_to_many, association_object
+from tests.models import Base, Company
+from tests.relationships import association_object, many_to_many, many_to_one, one_to_many, one_to_one
 
 
 class TestSeederRelationship(unittest.TestCase):
@@ -314,11 +311,10 @@ class TestSeederRelationship(unittest.TestCase):
         self.assertEqual(association.extra_value, 'association_1')
         self.assertEqual(association.parent, parent)
         self.assertIsNotNone(association.child)
-        
+
         child: association_object.Child = association.child
         self.assertEqual(child.value, 'child_1')
         self.assertEqual(child.parents[0], association)
-        
 
 
 class TestSeeder(unittest.TestCase):
