@@ -1,12 +1,7 @@
-from sqlalchemy.orm import ColumnProperty
-from sqlalchemy.orm import RelationshipProperty
-from sqlalchemy.orm.attributes import InstrumentedAttribute
-from sqlalchemy.orm.attributes import get_attribute
-from sqlalchemy.orm.attributes import set_attribute
-from sqlalchemy.orm.base import object_mapper
 from inspect import isclass
 
-from sqlalchemy.sql.operators import isnot
+from sqlalchemy.orm import ColumnProperty, RelationshipProperty
+from sqlalchemy.orm.attributes import InstrumentedAttribute, get_attribute, set_attribute
 
 
 def get_instrumented_attribute(object_or_class, key: str):
@@ -66,6 +61,5 @@ def referenced_class(instrumented_attr: InstrumentedAttribute):
 
     return next(filter(
         lambda mapper: mapper.class_.__tablename__ == table_name,
-        # object_mapper(instance).registry.mappers
         instrumented_attr.parent.registry.mappers
     )).class_
