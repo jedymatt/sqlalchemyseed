@@ -3,12 +3,15 @@ Utility functions
 """
 
 
-from typing import Callable, Iterable
+from typing import Iterable
+
 from sqlalchemy import inspect
 
 
 def iter_ref_kwargs(kwargs: dict, ref_prefix: str):
-    """Iterate kwargs with name prefix or references"""
+    """
+    Iterate kwargs with name prefix or references
+    """
     for attr_name, value in kwargs.items():
         if attr_name.startswith(ref_prefix):
             # removed prefix
@@ -65,19 +68,6 @@ def is_supported_class(class_):
 def generate_repr(instance: object) -> str:
     """
     Generate repr of object instance
-
-    Example:
-    ```
-    class Person(Base):
-        ...
-        def __repr__(self):
-            return generate_repr(self)
-    ```
-
-    Output format:
-    ```
-    "<Person(id='1',name='John Doe')>"
-    ```
     """
     class_name = instance.__class__.__name__
     insp = inspect(instance)

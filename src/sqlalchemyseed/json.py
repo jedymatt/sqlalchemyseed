@@ -1,4 +1,4 @@
-from typing import Any, List, Union
+from typing import Any, Callable, List, Union
 from dataclasses import dataclass
 
 
@@ -10,10 +10,29 @@ class JsonWalker:
     def __init__(self, json: Union[list, dict] = None) -> None:
         self.path = []
         self.root = json
-        self.current = json
+        self._current = json
 
     @property
-    def current_key(self):
+    def json(self):
+        """
+        Returns current json
+        """
+        return self._current
+
+    def keys(self):
+        """
+        Returns list of keys either str or int
+        """
+        if self.is_dict:
+            return self._current.keys()
+
+        if self.is_list:
+            return list(map(lambda index: index, range(len(self._current))))
+
+        return []
+
+    @property
+    def current_key(self) -> Union[int, str]:
         """
         Returns the key of the current json
         """
@@ -24,9 +43,13 @@ class JsonWalker:
         Move and replace current json forward.
         Returns current json.
         """
-        self.current = self.find_from_current(keys)
+
+        if len(keys) == 0:
+            return self._current
+
+        self._current = self.find_from_current(keys)
         self.path.extend(keys)
-        return self.current
+        return self._current
 
     def backward(self):
         """
@@ -36,14 +59,14 @@ class JsonWalker:
         if len(self.path) == 0:
             raise ValueError('No parent found error')
 
-        self.current = self.find_from_root(self.path[:-1])
+        self._current = self.find_from_root(self.path[:-1])
         self.path.pop()
 
     def find_from_current(self, keys: List[Union[int, str]]):
         """
         Find item from current json that correlates list of keys
         """
-        return self._find(self.current, keys)
+        return self._find(self._current, keys)
 
     def _find(self, json: Union[list, dict], keys: List[Union[int, str]]):
         """
@@ -65,37 +88,54 @@ class JsonWalker:
         if root is not None:
             self.root = root
 
-        self.current = self.root
+        self._current = self.root
         self.path.clear()
+
+    def exec_func_iter(self, func: Callable):
+        """
+        Executes function when iterating
+        """
+        current = self._current
+        if self.is_dict:
+            for key in current.keys():
+                self.forward([key])
+                func()
+                self.backward()
+        elif self.is_list:
+            for index in range(len(current)):
+                self.forward([index])
+                func()
+                self.backward()
+        else:
+            func()
 
     def iter_as_list(self):
         """
         Iterates current as list.
-        Yields value.
+        Yields index and value.
 
-        If current is not a list, then it only yields the current value.
-        Forward and backward method will not be called.
+        Raises TypeError if current json is not list
         """
         if not self.is_list:
-            yield self.current
-            return  # exit method
+            raise TypeError('json is not list')
 
-        current = self.current
+        current = self._current
         for index, value in enumerate(current):
             self.forward([index])
-            yield value
+            yield index, value
             self.backward()
 
     def iter_as_dict_items(self):
         """
         Iterates current as dict.
         Yields key and value.
-        Nothing will be yielded if curent is not dict
+
+        Raises TypeError if current json is not dict
         """
         if not self.is_dict:
-            return
+            raise TypeError('json is not dict')
 
-        current = self.current
+        current = self._current
         for key, value in current.items():
             self.forward([key])
             yield key, value
@@ -106,14 +146,14 @@ class JsonWalker:
         """
         Returns true if current json is dict
         """
-        return isinstance(self.current, dict)
+        return isinstance(self._current, dict)
 
     @property
     def is_list(self):
         """
         Returns true if current json is list
         """
-        return isinstance(self.current, list)
+        return isinstance(self._current, list)
 
 
 @dataclass(frozen=True)
@@ -123,3 +163,16 @@ class JsonKey:
     """
     key: str
     type_: Any
+
+
+def sort_json(json: Union[list, dict], reverse=False):
+    """
+    Sort json function
+    """
+    if isinstance(json, list):
+        return sorted(sorted(sort_json(item), reverse=reverse) for item in json)
+
+    if isinstance(json, dict):
+        return {key: sort_json(value, reverse=reverse) for key, value in json.items()}
+
+    return json

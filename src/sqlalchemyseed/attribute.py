@@ -1,18 +1,22 @@
+"""
+attribute module containing helper functions for instrumented attribute.
+"""
+
 from inspect import isclass
 
 from sqlalchemy.orm import ColumnProperty, RelationshipProperty
 from sqlalchemy.orm.attributes import InstrumentedAttribute, get_attribute, set_attribute
 
 
-def get_instrumented_attribute(object_or_class, key: str):
+def instrumented_attribute(class_or_instance, key: str):
     """
-    Returns instrumented attribute from the object or class.
+    Returns instrumented attribute from the class or instance.
     """
 
-    if isclass(object_or_class):
-        return getattr(object_or_class, key)
+    if isclass(class_or_instance):
+        return getattr(class_or_instance, key)
 
-    return getattr(object_or_class.__class__, key)
+    return getattr(class_or_instance.__class__, key)
 
 
 def attr_is_relationship(instrumented_attr: InstrumentedAttribute):

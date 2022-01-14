@@ -4,34 +4,32 @@ API Reference
 Seeders
 -------
 
-.. autoclass:: sqlalchemyseed.Seeder
-    :members:
-    :undoc-members:
-
-.. autoclass:: sqlalchemyseed.HybridSeeder
+.. automodule:: sqlalchemyseed.seeder
     :members:
     :undoc-members:
 
 Loaders
 -------
 
-.. autofunction:: sqlalchemyseed.load_entities_from_json
-    
-.. autofunction:: sqlalchemyseed.load_entities_from_yaml
-
-.. autofunction:: sqlalchemyseed.load_entities_from_csv
-
+.. automodule:: sqlalchemyseed.loader
+    :members:
 
 Validators
 ----------
 
-.. autofunction:: sqlalchemyseed.validator.validate
-
-.. autofunction:: sqlalchemyseed.validator.hybrid_validate 
-    
+.. automodule:: sqlalchemyseed.validator
+    :members:
+    :undoc-members:    
 
 Exceptions
 ----------
 
 .. automodule:: sqlalchemyseed.errors
     :members:
+
+Utility
+---------
+
+.. automodule:: sqlalchemyseed.util
+    :members:
+    :undoc-members:

@@ -1,9 +1,6 @@
 import unittest
-from contextlib import AbstractContextManager
-from typing import Any
 
 from sqlalchemyseed.json import JsonWalker
-from tests.instances import PARENT, PARENT_TO_CHILD, PARENTS
 
 
 class TestJsonWalker(unittest.TestCase):
@@ -12,41 +9,49 @@ class TestJsonWalker(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.json = JsonWalker()
+        self.walker = JsonWalker()
 
-    def test_parent(self):
+    def test_forward(self):
         """
-        Test parent
+        Test JsonWalker.forward
         """
-        self.json.reset(PARENT)
 
-        def iter_json():
-            iter(self.json.iter_as_list())
+        json = {
+            'key': {
+                'key_1': 'value_1',
+                'arr': [
+                    0,
+                    1,
+                    2
+                ]
+            }
+        }
 
-        self.assertIsNone(iter_json())
+        self.walker.reset(json)
+        self.walker.forward(['key', 'key_1'])
+        expected_value = json['key']['key_1']
+        self.assertEqual(self.walker.json, expected_value)
 
-    def test_parents(self):
+    def test_backward(self):
         """
-        Test parents
+        Test JsonWalker.backward
         """
-        self.json.reset(PARENTS)
 
-        def iter_json():
-            iter(self.json.iter_as_list())
+        json = \
+            {
+                'a': {
+                    'aa': {
+                        'aaa': 'value'
+                    }
+                }
+            }
 
-        self.assertIsNone(iter_json())
-
-    def test_parent_to_child(self):
-        """
-        Test parent to child
-        """
-        self.json.reset(PARENT_TO_CHILD)
-
-        def iter_json():
-            self.json.forward(['data', '!company'])
-            iter(self.json.iter_as_list())
-
-        self.assertIsNone(iter_json())
+        self.walker.reset(json)
+        self.walker.forward(['a', 'aa', 'aaa'])
+        self.walker.backward()
+        self.assertEqual(self.walker.json, json['a']['aa'])
+        self.walker.backward()
+        self.assertEqual(self.walker.json, json['a'])
 
 
 if __name__ == '__main__':
