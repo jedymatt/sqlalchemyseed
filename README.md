@@ -75,7 +75,9 @@ Report here in this link:
 
 ## Want to contribute?
 
-Clone this [repository](https://github.com/jedymatt/sqlalchemyseed)
+First, Clone this [repository](https://github.com/jedymatt/sqlalchemyseed).
+
+### Install dev dependencies
 
 Inside the folder, paste this in the terminal to install necessary dependencies:
 
@@ -86,9 +88,7 @@ pip install -r doc/requirements.txt
 
 Note: make sure you have the virtual environment and enabled, or if you are using vs code and docker then you can simply re-open this as container.
 
-
-
-Run tests
+### Run tests
 
 Before running tests, make sure that the package is installed as editable:
 
