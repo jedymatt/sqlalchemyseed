@@ -79,16 +79,25 @@ Clone this [repository](https://github.com/jedymatt/sqlalchemyseed)
 
 Inside the folder, paste this in the terminal to install necessary dependencies:
 
-```console
+```shell
 pip install -r requirements.txt
 pip install -r doc/requirements.txt
-python setup.py develop --user
 ```
 
 Note: make sure you have the virtual environment and enabled, or if you are using vs code and docker then you can simply re-open this as container.
 
+
+
 Run tests
 
-```console
+Before running tests, make sure that the package is installed as editable:
+
+```shell
+python setup.py develop --user
+```
+
+Then run the test:
+
+```shell
 pytest tests
 ```
