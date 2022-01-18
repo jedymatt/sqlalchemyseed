@@ -82,7 +82,7 @@ Inside the folder, paste this in the terminal to install necessary dependencies:
 ```console
 pip install -r requirements.txt
 pip install -r doc/requirements.txt
-python setup.py develop
+python setup.py develop --user
 ```
 
 Note: make sure you have the virtual environment and enabled, or if you are using vs code and docker then you can simply re-open this as container.
