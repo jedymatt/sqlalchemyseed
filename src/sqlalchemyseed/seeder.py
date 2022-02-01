@@ -8,8 +8,12 @@ from typing import NamedTuple, Union
 import sqlalchemy
 
 from . import class_registry, errors, util, validator
-from .attribute import (attr_is_column, attr_is_relationship, foreign_key_column, instrumented_attribute,
-                        referenced_class, set_instance_attribute)
+from .attribute import (attr_is_column,
+                        attr_is_relationship,
+                        foreign_key_column,
+                        instrumented_attribute,
+                        referenced_class,
+                        set_instance_attribute)
 from .constants import DATA_KEY, MODEL_KEY, SOURCE_KEYS
 from .json import JsonKey, JsonWalker
 
@@ -69,7 +73,7 @@ def filter_kwargs(kwargs: dict, class_, ref_prefix):
     }
 
 
-class Seeder(AbstractSeeder):
+class Seeder:
     """
     Basic Seeder class
     """
@@ -84,6 +88,9 @@ class Seeder(AbstractSeeder):
 
     @property
     def instances(self):
+        """
+        Returns instances of the seeded entities
+        """
         return tuple(self._instances)
 
     def _model_class(self):
