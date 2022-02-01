@@ -80,14 +80,15 @@ class Seeder:
 
     def __init__(self, session: sqlalchemy.orm.Session = None, ref_prefix="!"):
         self.session = session
-        self._class_registry = class_registry.ClassRegistry()
-        self._instances = []
         self.ref_prefix = ref_prefix
+
+        self._instances: list = []
         self._walker: JsonWalker = JsonWalker()
         self._parent: InstanceAttributeTuple = None
+        self._cached_classes: dict = {}
 
     @property
-    def instances(self):
+    def instances(self) -> tuple:
         """
         Returns instances of the seeded entities
         """
@@ -97,22 +98,33 @@ class Seeder:
         """
         Returns class from class path or referenced class
         """
-        json: dict = self._walker.json
-        if MODEL_KEY.key in json:
-            class_path = json[MODEL_KEY.key]
-            return self._class_registry.register_class(class_path)
+        if MODEL_KEY.key in self._walker.json:
+            class_path = self._walker.json[MODEL_KEY.key]
 
-        # parent is not None
+            if class_path in self._cached_classes:
+                return self._cached_classes[class_path]
+
+            class_ = util.parse_class_path(class_path)
+
+            # Store class in cache
+            self._cached_classes[class_path] = class_
+
+            return class_
+
+        # Expects parent is not None
         ins_attr = instrumented_attribute(
             self._parent.instance, self._parent.attr_name
         )
         return referenced_class(ins_attr)
 
     def seed(self, entities: Union[list, dict], add_to_session=True):
+        """
+        seed method
+        """
         validator.validate(entities=entities, ref_prefix=self.ref_prefix)
 
         self._instances.clear()
-        self._class_registry.clear()
+        self._cached_classes.clear()
 
         self._walker.reset(root=entities)
         self._parent = None

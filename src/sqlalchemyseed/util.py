@@ -3,9 +3,13 @@ Utility functions
 """
 
 
+import importlib
 from typing import Iterable
 
 from sqlalchemy import inspect
+from sqlalchemyseed import errors
+
+from sqlalchemyseed.constants import MODEL_KEY
 
 
 def iter_ref_kwargs(kwargs: dict, ref_prefix: str):
@@ -81,3 +85,27 @@ def find_item(json: Iterable, keys: list):
     Finds item of json from keys
     """
     return find_item(json[keys[0]], keys[1:]) if keys else json
+
+
+def parse_class_path(class_path: str):
+    """
+    Parse the path of the class the specified class
+    """
+    try:
+        module_name, class_name = class_path.rsplit('.', 1)
+    except ValueError as error:
+        raise errors.ParseError(
+            'Invalid module or class input format.') from error
+
+    # if class_name not in classes:
+    try:
+        class_ = getattr(importlib.import_module(module_name), class_name)
+    except AttributeError as error:
+        raise errors.NotInModuleError(
+            f"{class_name} is not found in module {module_name}.") from error
+
+    if not is_supported_class(class_):
+        raise errors.UnsupportedClassError(
+            f"'{class_name}' is an unsupported class")
+
+    return class_
