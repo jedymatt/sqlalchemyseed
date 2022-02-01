@@ -3,17 +3,14 @@ Seeder module
 """
 
 import abc
+from functools import lru_cache
 from typing import NamedTuple, Union
 
 import sqlalchemy
 
 from . import class_registry, errors, util, validator
-from .attribute import (attr_is_column,
-                        attr_is_relationship,
-                        foreign_key_column,
-                        instrumented_attribute,
-                        referenced_class,
-                        set_instance_attribute)
+from .attribute import (attr_is_column, attr_is_relationship, foreign_key_column, instrumented_attribute,
+                        referenced_class, set_instance_attribute)
 from .constants import DATA_KEY, MODEL_KEY, SOURCE_KEYS
 from .json import JsonKey, JsonWalker
 
@@ -84,8 +81,7 @@ class Seeder:
 
         self._instances: list = []
         self._walker: JsonWalker = JsonWalker()
-        self._parent: InstanceAttributeTuple = None
-        self._cached_classes: dict = {}
+        self._current_parent: InstanceAttributeTuple = None
 
     @property
     def instances(self) -> tuple:
@@ -100,34 +96,25 @@ class Seeder:
         """
         if MODEL_KEY.key in self._walker.json:
             class_path = self._walker.json[MODEL_KEY.key]
-
-            if class_path in self._cached_classes:
-                return self._cached_classes[class_path]
-
-            class_ = util.parse_class_path(class_path)
-
-            # Store class in cache
-            self._cached_classes[class_path] = class_
-
-            return class_
+            return util.parse_class_path(class_path)
 
         # Expects parent is not None
-        ins_attr = instrumented_attribute(
-            self._parent.instance, self._parent.attr_name
+        instr_attr = getattr(
+            self._current_parent.instance.__class__,
+            self._current_parent.attr_name
         )
-        return referenced_class(ins_attr)
+        return referenced_class(instr_attr)
 
     def seed(self, entities: Union[list, dict], add_to_session=True):
         """
-        seed method
+        Seed method
         """
         validator.validate(entities=entities, ref_prefix=self.ref_prefix)
 
         self._instances.clear()
-        self._cached_classes.clear()
 
         self._walker.reset(root=entities)
-        self._parent = None
+        self._current_parent = None
 
         self._pre_seed()
 
@@ -138,12 +125,16 @@ class Seeder:
         # iterates current json as list
         # expected json value is [{'model': ...}, ...] or {'model': ...}
 
-        if self._walker.is_list:
-            self._walker.exec_func_iter(self._seed)
-        elif self._walker.is_dict:
+        if self._walker.json_is_list:
+            for index in range(len(self._walker.json)):
+                self._walker.forward([index])
+                self._seed()
+                self._walker.backward()
+
+        elif self._walker.json_is_dict:
             self._seed()
 
-        self._parent = None
+        self._current_parent = None
 
     def _seed(self):
         # expected json value is {'model': ..., 'data': ...}
@@ -154,22 +145,26 @@ class Seeder:
         self._walker.forward([DATA_KEY.key])
         # iterate json.current as list
 
+        # @lru_cache()
         def init_item():
             kwargs = self._walker.json
             filtered_kwargs = filter_kwargs(kwargs, class_, self.ref_prefix)
             instance = class_(**filtered_kwargs)
 
-            if self._parent is not None:
+            if self._current_parent is not None:
                 set_instance_attribute(
-                    self._parent.instance, self._parent.attr_name, instance
+                    self._current_parent.instance, self._current_parent.attr_name, instance
                 )
             else:
                 self._instances.append(instance)
 
             self._seed_children(instance)
 
-        if self._walker.is_list:
-            self._walker.exec_func_iter(init_item)
+        if self._walker.json_is_list:
+            for index in range(len(self._walker.json)):
+                self._walker.forward([index])
+                init_item()
+                self._walker.backward()
         else:
             init_item()
 
@@ -182,7 +177,8 @@ class Seeder:
             key = self._walker.current_key
             if key.startswith(self.ref_prefix):
                 attr_name = key[len(self.ref_prefix):]
-                self._parent = InstanceAttributeTuple(instance, attr_name)
+                self._current_parent = InstanceAttributeTuple(
+                    instance, attr_name)
                 self._pre_seed()
 
         self._walker.exec_func_iter(seed_child)

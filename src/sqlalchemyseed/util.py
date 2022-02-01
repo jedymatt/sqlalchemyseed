@@ -3,13 +3,12 @@ Utility functions
 """
 
 
+from functools import lru_cache
 import importlib
 from typing import Iterable
 
 from sqlalchemy import inspect
 from sqlalchemyseed import errors
-
-from sqlalchemyseed.constants import MODEL_KEY
 
 
 def iter_ref_kwargs(kwargs: dict, ref_prefix: str):
@@ -87,9 +86,12 @@ def find_item(json: Iterable, keys: list):
     return find_item(json[keys[0]], keys[1:]) if keys else json
 
 
+@lru_cache()
 def parse_class_path(class_path: str):
     """
     Parse the path of the class the specified class
+
+    Returns the class
     """
     try:
         module_name, class_name = class_path.rsplit('.', 1)

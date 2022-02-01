@@ -23,10 +23,10 @@ class JsonWalker:
         """
         Returns list of keys either str or int
         """
-        if self.is_dict:
+        if self.json_is_dict:
             return self._current.keys()
 
-        if self.is_list:
+        if self.json_is_list:
             return list(map(lambda index: index, range(len(self._current))))
 
         return []
@@ -96,12 +96,12 @@ class JsonWalker:
         Executes function when iterating
         """
         current = self._current
-        if self.is_dict:
+        if self.json_is_dict:
             for key in current.keys():
                 self.forward([key])
                 func()
                 self.backward()
-        elif self.is_list:
+        elif self.json_is_list:
             for index in range(len(current)):
                 self.forward([index])
                 func()
@@ -116,7 +116,7 @@ class JsonWalker:
 
         Raises TypeError if current json is not list
         """
-        if not self.is_list:
+        if not self.json_is_list:
             raise TypeError('json is not list')
 
         current = self._current
@@ -132,7 +132,7 @@ class JsonWalker:
 
         Raises TypeError if current json is not dict
         """
-        if not self.is_dict:
+        if not self.json_is_dict:
             raise TypeError('json is not dict')
 
         current = self._current
@@ -142,14 +142,14 @@ class JsonWalker:
             self.backward()
 
     @property
-    def is_dict(self):
+    def json_is_dict(self):
         """
         Returns true if current json is dict
         """
         return isinstance(self._current, dict)
 
     @property
-    def is_list(self):
+    def json_is_list(self):
         """
         Returns true if current json is list
         """

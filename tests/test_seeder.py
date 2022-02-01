@@ -26,7 +26,6 @@ class TestSeederRelationship(unittest.TestCase):
         self.base = None
 
     def tearDown(self) -> None:
-
         self.base.metadata.drop_all(self.engine)
         self.base = None
 
