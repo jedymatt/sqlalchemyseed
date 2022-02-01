@@ -2,6 +2,7 @@
 attribute module containing helper functions for instrumented attribute.
 """
 
+from functools import lru_cache
 from inspect import isclass
 
 from sqlalchemy.orm import ColumnProperty, RelationshipProperty
@@ -45,14 +46,14 @@ def set_instance_attribute(instance, key, value):
     else:
         set_attribute(instance, key, value)
 
-
+@lru_cache()
 def foreign_key_column(instrumented_attr: InstrumentedAttribute):
     """
     Returns the table name of the first foreignkey.
     """
     return next(iter(instrumented_attr.foreign_keys)).column
 
-
+@lru_cache()
 def referenced_class(instrumented_attr: InstrumentedAttribute):
     """
     Returns class that the attribute is referenced to.
