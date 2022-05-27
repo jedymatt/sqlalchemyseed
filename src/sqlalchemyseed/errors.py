@@ -32,3 +32,7 @@ class UnsupportedClassError(Exception):
 
 class NotInModuleError(Exception):
     """Raised when a value is not found in module"""
+
+
+class InvalidModelPath(Exception):
+    """Raised when an invalid model path is invoked"""

@@ -86,28 +86,29 @@ def find_item(json: Iterable, keys: list):
     return find_item(json[keys[0]], keys[1:]) if keys else json
 
 
-@lru_cache()
-def parse_class_path(class_path: str):
+# check if class is a sqlalchemy model
+def is_model(class_):
     """
-    Parse the path of the class the specified class
+    Check if class is a sqlalchemy model
+    """
+    insp = inspect(class_, raiseerr=False)
+    return insp is not None and insp.is_mapper
 
-    Returns the class
+
+# get sqlalchemy model class from path
+@lru_cache(maxsize=None)
+def get_model_class(path: str):
+    """
+    Get sqlalchemy model class from path
     """
     try:
-        module_name, class_name = class_path.rsplit('.', 1)
-    except ValueError as error:
-        raise errors.ParseError(
-            'Invalid module or class input format.') from error
+        module_name, class_name = path.rsplit(".", 1)
+        module = importlib.import_module(module_name)
+    except (ImportError, AttributeError) as e:
+        raise errors.InvalidModelPath(path=path, error=e)
 
-    # if class_name not in classes:
-    try:
-        class_ = getattr(importlib.import_module(module_name), class_name)
-    except AttributeError as error:
-        raise errors.NotInModuleError(
-            f"{class_name} is not found in module {module_name}.") from error
-
-    if not is_supported_class(class_):
-        raise errors.UnsupportedClassError(
-            f"'{class_name}' is an unsupported class")
+    class_ = getattr(module, class_name)
+    if not is_model(class_):
+        raise errors.UnsupportedClassError(path=path)
 
     return class_

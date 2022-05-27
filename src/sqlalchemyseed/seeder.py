@@ -191,7 +191,6 @@ class HybridSeeder(AbstractSeeder):
 
     def __init__(self, session: sqlalchemy.orm.Session, ref_prefix: str = '!'):
         self.session = session
-        self._class_registry = class_registry.ClassRegistry()
         self._instances = []
         self.ref_prefix = ref_prefix
         self._walker = JsonWalker()

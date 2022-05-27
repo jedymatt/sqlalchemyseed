@@ -31,7 +31,7 @@ from . import util
 from . import attribute
 
 
-__version__ = "1.0.5"
+__version__ = "1.0.6-dev"
 
 if __name__ == '__main__':
     pass
