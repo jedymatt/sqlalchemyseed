@@ -27,7 +27,7 @@ Exceptions
 .. automodule:: sqlalchemyseed.errors
     :members:
 
-Utility
+Utilities
 ---------
 
 .. automodule:: sqlalchemyseed.util
