@@ -21,7 +21,6 @@ Project Links: `Github`_ | `PyPI`_
     seeding
     relationships
     examples
-    api
 
 Indices and tables
 ==================

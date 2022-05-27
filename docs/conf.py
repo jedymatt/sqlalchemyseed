@@ -60,7 +60,7 @@ extensions.append('autoapi.extension')
 autoapi_type = 'python'
 autoapi_dirs = ['../src']
 autoapi_options = ['members', 'undoc-members', 'show-inheritance']
-autoapi_add_toctree_entry = False
+autoapi_add_toctree_entry = True
 autoapi_generate_api_docs = True
 autoapi_root = 'api'
 autoapi_file_patterns = ['*.py']
