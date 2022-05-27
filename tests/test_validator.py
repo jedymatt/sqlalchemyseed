@@ -14,27 +14,27 @@ class TestSchemaValidator(unittest.TestCase):
         self.assertIsNone(hybrid_validate(ins.PARENT))
 
     def test_parent_invalid(self):
-        self.assertRaises(errors.InvalidTypeError,
-                          lambda: hybrid_validate(ins.PARENT_INVALID))
+        with self.assertRaises(errors.InvalidTypeError):
+            hybrid_validate(ins.PARENT_INVALID)
 
     def test_parent_empty(self):
         self.assertIsNone(hybrid_validate(ins.PARENT_EMPTY))
 
     def test_parent_empty_data_list_invalid(self):
-        self.assertRaises(errors.EmptyDataError,
-                          lambda: hybrid_validate(ins.PARENT_EMPTY_DATA_LIST_INVALID))
+        with self.assertRaises(errors.EmptyDataError):
+            hybrid_validate(ins.PARENT_EMPTY_DATA_LIST_INVALID)
 
     def test_parent_missing_model_invalid(self):
-        self.assertRaises(errors.MissingKeyError,
-                          lambda: hybrid_validate(ins.PARENT_MISSING_MODEL_INVALID))
+        with self.assertRaises(errors.MissingKeyError):
+            hybrid_validate(ins.PARENT_MISSING_MODEL_INVALID)
 
     def test_parent_invalid_model_invalid(self):
-        self.assertRaises(errors.InvalidTypeError,
-                          lambda: hybrid_validate(ins.PARENT_INVALID_MODEL_INVALID))
+        with self.assertRaises(errors.InvalidTypeError):
+            hybrid_validate(ins.PARENT_INVALID_MODEL_INVALID)
 
     def test_parent_with_extra_length_invalid(self):
-        self.assertRaises(errors.MaxLengthExceededError,
-                          lambda: hybrid_validate(ins.PARENT_WITH_EXTRA_LENGTH_INVALID))
+        with self.assertRaises(errors.MaxLengthExceededError):
+            hybrid_validate(ins.PARENT_WITH_EXTRA_LENGTH_INVALID)
 
     def test_parent_with_empty_data(self):
         self.assertIsNone(hybrid_validate(ins.PARENT_WITH_EMPTY_DATA))
@@ -61,13 +61,16 @@ class TestSchemaValidator(unittest.TestCase):
         self.assertIsNone(hybrid_validate(ins.PARENT_TO_CHILDREN))
 
     def test_parent_to_children_without_model(self):
-        self.assertIsNone(hybrid_validate(ins.PARENT_TO_CHILDREN_WITHOUT_MODEL))
+        self.assertIsNone(hybrid_validate(
+            ins.PARENT_TO_CHILDREN_WITHOUT_MODEL))
 
     def test_parent_to_children_with_multi_data(self):
-        self.assertIsNone(hybrid_validate(ins.PARENT_TO_CHILDREN_WITH_MULTI_DATA))
+        self.assertIsNone(hybrid_validate(
+            ins.PARENT_TO_CHILDREN_WITH_MULTI_DATA))
 
     def test_parent_to_children_with_multi_data_without_model(self):
-        self.assertIsNone(hybrid_validate(ins.PARENT_TO_CHILDREN_WITH_MULTI_DATA_WITHOUT_MODEL))
+        self.assertIsNone(hybrid_validate(
+            ins.PARENT_TO_CHILDREN_WITH_MULTI_DATA_WITHOUT_MODEL))
 
 
 class TestKey(unittest.TestCase):

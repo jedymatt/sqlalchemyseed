@@ -1,0 +1,4 @@
+MODEL_KEY = 'model'
+DATA_KEY = 'data'
+FILTER_KEY = 'filter'
+SOURCE_KEYS = [DATA_KEY, FILTER_KEY]
