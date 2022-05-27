@@ -6,11 +6,22 @@
 Welcome to sqlalchemyseed's documentation!
 ==========================================
 
+SQLAlchemy seeder that supports nested relationships with an easy to read text files.
+
+Project Links: `Github`_ | `PyPI`_
+
+.. _Github: https://github.com/jedymatt/sqlalchemyseed
+.. _PyPI: https://pypi.org/project/sqlalchemyseed
+
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-
+    :maxdepth: 2
+    :caption: Contents:
+    
+    intro
+    seeding
+    relationships
+    examples
+    api
 
 Indices and tables
 ==================
