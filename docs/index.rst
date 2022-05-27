@@ -1,5 +1,5 @@
 .. sqlalchemyseed documentation master file, created by
-   sphinx-quickstart on Sat Sep 25 14:41:54 2021.
+   sphinx-quickstart on Fri May 27 23:04:46 2022.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
@@ -15,7 +15,7 @@ Project Links: `Github`_ | `PyPI`_
 
 .. toctree::
     :maxdepth: 2
-    :caption: Contents
+    :caption: Contents:
     
     intro
     seeding
