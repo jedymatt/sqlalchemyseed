@@ -10,7 +10,7 @@ Supported file types :
 - yaml
 - csv
 
-.. _sqlalchemyseed: https://pypi.org/project/sqlalchemyseed/
+.. _sqlalchemyseed: https://github.com/jedymatt/sqlalchemyseed
 
 Installation
 ------------
