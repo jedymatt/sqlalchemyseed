@@ -1,5 +1,4 @@
 from typing import Any, Callable, List, Union
-from dataclasses import dataclass
 
 
 class JsonWalker:
@@ -154,15 +153,6 @@ class JsonWalker:
         Returns true if current json is list
         """
         return isinstance(self._current, list)
-
-
-@dataclass(frozen=True)
-class JsonKey:
-    """
-    JsonKey data class for specifying type of the key its value holds.
-    """
-    key: str
-    type_: Any
 
 
 def sort_json(json: Union[list, dict], reverse=False):
