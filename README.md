@@ -100,3 +100,9 @@ Then run the test:
 ```shell
 pytest tests
 ```
+
+Run test with coverage
+
+```shell
+coverage run -m pytest
+```
