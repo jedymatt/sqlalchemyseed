@@ -31,7 +31,7 @@ from sqlalchemy.orm import object_mapper
 from sqlalchemy.orm.relationships import RelationshipProperty
 from sqlalchemy.sql import schema
 
-from . import class_registry, validator, errors, util
+from . import validator, errors, util
 
 
 class AbstractSeeder(abc.ABC):
@@ -146,7 +146,6 @@ class Seeder(AbstractSeeder):
 
     def __init__(self, session: sqlalchemy.orm.Session = None, ref_prefix="!"):
         self.session = session
-        self._class_registry = class_registry.ClassRegistry()
         self._instances = []
         self.ref_prefix = ref_prefix
 
@@ -156,7 +155,7 @@ class Seeder(AbstractSeeder):
 
     def get_model_class(self, entity, parent: Entity):
         if self.__model_key in entity:
-            return self._class_registry.register_class(entity[self.__model_key])
+            return util.get_model_class(entity[self.__model_key])
         # parent is not None
         return parent.referenced_class
 
@@ -164,7 +163,6 @@ class Seeder(AbstractSeeder):
         validator.validate(entities=entities, ref_prefix=self.ref_prefix)
 
         self._instances.clear()
-        self._class_registry.clear()
 
         self._pre_seed(entities)
 
@@ -231,7 +229,6 @@ class HybridSeeder(AbstractSeeder):
 
     def __init__(self, session: sqlalchemy.orm.Session, ref_prefix: str = '!'):
         self.session = session
-        self._class_registry = class_registry.ClassRegistry()
         self._instances = []
         self.ref_prefix = ref_prefix
 
@@ -245,7 +242,7 @@ class HybridSeeder(AbstractSeeder):
 
         if self.__model_key in entity:
             class_path = entity[self.__model_key]
-            return self._class_registry.register_class(class_path)
+            return util.get_model_class(class_path)
 
         # parent is not None
         return parent.referenced_class
@@ -255,7 +252,6 @@ class HybridSeeder(AbstractSeeder):
             entities=entities, ref_prefix=self.ref_prefix)
 
         self._instances.clear()
-        self._class_registry.clear()
 
         self._pre_seed(entities)
 
