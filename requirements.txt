@@ -1,2 +1,7 @@
-sqlalchemy>=1.4
-pyyaml>=5.4
+SQLAlchemy>=1.4
+dataclasses>=0.8; python_version == "3.6"
+PyYAML>=5.4
+coverage>=6.2
+pytest
+pylint
+autopep8
