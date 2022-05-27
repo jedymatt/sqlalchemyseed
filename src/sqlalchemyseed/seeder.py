@@ -7,11 +7,12 @@ from typing import NamedTuple, Union
 
 import sqlalchemy
 
+
 from . import errors, util, validator
 from .attribute import (attr_is_column, attr_is_relationship, foreign_key_column, instrumented_attribute,
                         referenced_class, set_instance_attribute)
 from .constants import DATA_KEY, MODEL_KEY, SOURCE_KEYS
-from .json import JsonKey, JsonWalker
+from .json import JsonWalker
 
 
 class AbstractSeeder(abc.ABC):
@@ -93,8 +94,8 @@ class Seeder:
         """
         Returns class from class path or referenced class
         """
-        if MODEL_KEY.key in self._walker.json:
-            class_path = self._walker.json[MODEL_KEY.key]
+        if MODEL_KEY in self._walker.json:
+            class_path = self._walker.json[MODEL_KEY]
             return util.get_model_class(class_path)
 
         # Expects parent is not None
@@ -141,7 +142,7 @@ class Seeder:
 
         # moves json.current to json.current[self.__data_key]
         # expected json value is [{'value':...}]
-        self._walker.forward([DATA_KEY.key])
+        self._walker.forward([DATA_KEY])
         # iterate json.current as list
 
         # @lru_cache()
@@ -203,8 +204,8 @@ class HybridSeeder(AbstractSeeder):
         # if self.__model_key in entity and (parent is not None and parent.is_column_attribute()):
         #     raise errors.InvalidKeyError("column attribute does not accept 'model' key")
 
-        if MODEL_KEY.key in entity:
-            class_path = entity[MODEL_KEY.key]
+        if MODEL_KEY in entity:
+            class_path = entity[MODEL_KEY]
             return util.get_model_class(class_path)
 
         # parent is not None
@@ -232,10 +233,10 @@ class HybridSeeder(AbstractSeeder):
         class_ = self.get_model_class(entity, parent)
 
         source_key = next(
-            filter(lambda sk: sk.key in entity, SOURCE_KEYS)
+            filter(lambda sk: sk in entity, SOURCE_KEYS)
         )
 
-        source_data = entity[source_key.key]
+        source_data = entity[source_key]
 
         # source_data is list
         if isinstance(source_data, list):
@@ -255,7 +256,7 @@ class HybridSeeder(AbstractSeeder):
             self._pre_seed(
                 entity=value, parent=InstanceAttributeTuple(instance, attr_name))
 
-    def _setup_instance(self, class_, kwargs: dict, key: JsonKey, parent: InstanceAttributeTuple):
+    def _setup_instance(self, class_, kwargs: dict, key: str, parent: InstanceAttributeTuple):
         filtered_kwargs = filter_kwargs(kwargs, class_, self.ref_prefix)
 
         if key == DATA_KEY:
