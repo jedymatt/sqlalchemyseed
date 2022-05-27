@@ -1,4 +1,4 @@
-from typing import Any, Callable, List, Union
+from typing import Callable, List, Union
 
 
 class JsonWalker:
