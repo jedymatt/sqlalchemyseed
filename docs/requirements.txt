@@ -1,2 +1,10 @@
 sphinx>=4.3
+
+# Themes
 furo
+
+# Extentions
+sphinx-copybutton
+
+# Others
+sphinx-autobuild
