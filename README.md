@@ -106,3 +106,9 @@ Run test with coverage
 ```shell
 coverage run -m pytest
 ```
+
+Autobuild documentation
+
+```shell
+sphinx-autobuild docs docs/_build/html
+```
