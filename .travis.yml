@@ -12,7 +12,7 @@ install:
     - pip install -r requirements.txt
 #     don't use the line below because codecov generates a false 'miss'
 #     - pip install . --use-feature=in-tree-build
-    - pip install -e .[dev]
+    - pip install -e .
 script:
     # - pytest tests
     - coverage run -m pytest tests
