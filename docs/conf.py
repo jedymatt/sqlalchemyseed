@@ -53,3 +53,15 @@ html_theme = 'furo'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+# autoapi.extension configuration
+extensions.append('autoapi.extension')
+
+autoapi_type = 'python'
+autoapi_dirs = ['../src']
+autoapi_options = ['members', 'undoc-members', 'show-inheritance']
+autoapi_add_toctree_entry = False
+autoapi_generate_api_docs = True
+autoapi_root = 'api'
+autoapi_file_patterns = ['*.py']
+autoapi_member_order = 'groupwise'

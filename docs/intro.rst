@@ -31,15 +31,10 @@ execute this command to install necessary dependencies
 Dependencies
 ------------
 
-Required dependencies:
-
-- SQAlchemy>=1.4.0
-
-Optional dependencies:
-
-- yaml
-
-  - PyYAML>=5.4.0
+- Required dependencies:
+    - SQAlchemy>=1.4.0
+- Optional dependencies:
+    - yaml: PyYAML>=5.4.0
 
 Quickstart
 ----------

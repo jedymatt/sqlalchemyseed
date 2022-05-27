@@ -1,35 +1,8 @@
 API Reference
 =============
 
-Seeders
--------
 
-.. automodule:: sqlalchemyseed.seeder
-    :members:
-    :undoc-members:
+.. toctree::
+   :maxdepth: 2
 
-Loaders
--------
-
-.. automodule:: sqlalchemyseed.loader
-    :members:
-
-Validators
-----------
-
-.. automodule:: sqlalchemyseed.validator
-    :members:
-    :undoc-members:    
-
-Exceptions
-----------
-
-.. automodule:: sqlalchemyseed.errors
-    :members:
-
-Utilities
----------
-
-.. automodule:: sqlalchemyseed.util
-    :members:
-    :undoc-members:
+   api/sqlalchemyseed/index

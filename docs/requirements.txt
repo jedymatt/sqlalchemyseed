@@ -5,6 +5,7 @@ furo
 
 # Extentions
 sphinx-copybutton
+sphinx-autoapi
 
 # Others
 sphinx-autobuild
