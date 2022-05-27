@@ -3,12 +3,11 @@ Seeder module
 """
 
 import abc
-from functools import lru_cache
 from typing import NamedTuple, Union
 
 import sqlalchemy
 
-from . import class_registry, errors, util, validator
+from . import errors, util, validator
 from .attribute import (attr_is_column, attr_is_relationship, foreign_key_column, instrumented_attribute,
                         referenced_class, set_instance_attribute)
 from .constants import DATA_KEY, MODEL_KEY, SOURCE_KEYS
@@ -96,7 +95,7 @@ class Seeder:
         """
         if MODEL_KEY.key in self._walker.json:
             class_path = self._walker.json[MODEL_KEY.key]
-            return util.parse_class_path(class_path)
+            return util.get_model_class(class_path)
 
         # Expects parent is not None
         instr_attr = getattr(
@@ -206,7 +205,7 @@ class HybridSeeder(AbstractSeeder):
 
         if MODEL_KEY.key in entity:
             class_path = entity[MODEL_KEY.key]
-            return self._class_registry.register_class(class_path)
+            return util.get_model_class(class_path)
 
         # parent is not None
         return referenced_class(instrumented_attribute(parent.instance, parent.attr_name))
@@ -217,7 +216,6 @@ class HybridSeeder(AbstractSeeder):
         )
 
         self._instances.clear()
-        self._class_registry.clear()
         self._walker.reset(root=entities)
         self._parent = None
 
