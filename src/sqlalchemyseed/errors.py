@@ -41,3 +41,13 @@ class UnsupportedClassError(Exception):
 class NotInModuleError(Exception):
     """Raised when a value is not found in module"""
     pass
+
+
+class InvalidModelPath(Exception):
+    """Raised when an invalid model path is invoked"""
+    pass
+
+
+class UnsupportedClassError(Exception):
+    """Raised when an unsupported class is invoked"""
+    pass
