@@ -82,8 +82,7 @@ First, Clone this [repository](https://github.com/jedymatt/sqlalchemyseed).
 Inside the folder, paste this in the terminal to install necessary dependencies:
 
 ```shell
-pip install -r requirements.txt
-pip install -r doc/requirements.txt
+pip install -r requirements.txt -r doc/requirements.txt
 ```
 
 Note: make sure you have the virtual environment and enabled, or if you are using vs code and docker then you can simply re-open this as container.
