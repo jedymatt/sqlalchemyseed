@@ -67,3 +67,37 @@ data.json
 ## Documentation
 
 <https://sqlalchemyseed.readthedocs.io/>
+
+## Found Bug?
+
+Report here in this link:
+<https://github.com/jedymatt/sqlalchemyseed/issues>
+
+## Want to contribute?
+
+First, Clone this [repository](https://github.com/jedymatt/sqlalchemyseed).
+
+### Install dev dependencies
+
+Inside the folder, paste this in the terminal to install necessary dependencies:
+
+```shell
+pip install -r requirements.txt
+pip install -r doc/requirements.txt
+```
+
+Note: make sure you have the virtual environment and enabled, or if you are using vs code and docker then you can simply re-open this as container.
+
+### Run tests
+
+Before running tests, make sure that the package is installed as editable:
+
+```shell
+python setup.py develop --user
+```
+
+Then run the test:
+
+```shell
+pytest tests
+```
