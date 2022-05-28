@@ -6,3 +6,4 @@ tox
 pytest
 pylint
 autopep8
+jsonschema>=4.0
