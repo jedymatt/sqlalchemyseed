@@ -92,7 +92,7 @@ Note: make sure you have the virtual environment and enabled, or if you are usin
 Before running tests, make sure that the package is installed as editable:
 
 ```shell
-python setup.py develop --user
+python setup.py develop
 ```
 
 Then run the test:
