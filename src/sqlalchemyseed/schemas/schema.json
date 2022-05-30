@@ -17,7 +17,7 @@
                 },
                 {
                     "required": [
-                        "filter"
+                        "where"
                     ]
                 }
             ],
@@ -36,7 +36,7 @@
                         },
                         {
                             "required": [
-                                "filter"
+                                "where"
                             ]
                         }
                     ],
@@ -47,8 +47,8 @@
                         "data": {
                             "$ref": "#/definitions/entity/properties/data"
                         },
-                        "filter": {
-                            "$ref": "#/definitions/entity/properties/filter"
+                        "where": {
+                            "$ref": "#/definitions/entity/properties/where"
                         }
                     }
                 },
@@ -100,7 +100,7 @@
                         }
                     ]
                 },
-                "filter": {
+                "where": {
                     "oneOf": [
                         {
                             "$ref": "#/definitions/entity/definitions/data_container"
@@ -135,7 +135,7 @@
                 },
                 {
                     "required": [
-                        "filter"
+                        "where"
                     ]
                 }
             ],
@@ -146,8 +146,8 @@
                 "data": {
                     "$ref": "#/definitions/entity/properties/data"
                 },
-                "filter": {
-                    "$ref": "#/definitions/entity/properties/filter"
+                "where": {
+                    "$ref": "#/definitions/entity/properties/where"
                 }
             }
         },
