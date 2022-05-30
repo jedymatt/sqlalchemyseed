@@ -1,64 +1,141 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema",
-    "description": "sqlalchemyseed json schema",
+    "$schema": "https://json-schema.org/draft-07/schema",
+    "$id": "http://example.com/example.json",
+    "title": "Root Schema",
     "definitions": {
-        "field": {
-            "type": "object",
-            "additionalProperties": {
-                "allOf": [
-                    {
-                        "if": {
-                            "type": "object"
-                        },
-                        "then": {
-                            "$ref": "#/definitions/entity"
-                        }
-                    },
-                    {
-                        "if": {
-                            "type": "array"
-                        },
-                        "then": {
-                            "items": {
-                                "$ref": "#/definitions/entity"
-                            }
-                        }
-                    }
-                ]
-            }
-        },
-        "fields": {
-            "type": "array",
-            "minItems": 1,
-            "items": {
-                "$ref": "#/definitions/field"
-            }
-        },
-        "args": {
-            "anyOf": [
-                {
-                    "$comment": "Object data type goes here",
-                    "$ref": "#/definitions/field"
-                },
-                {
-                    "$comment": "Array data type goes here",
-                    "$ref": "#/definitions/fields"
-                }
-            ]
-        },
         "entity": {
+            "title": "A Schema",
             "type": "object",
-            "anyOf": [
+            "required": [
+                "model"
+            ],
+            "oneOf": [
                 {
                     "required": [
-                        "model",
                         "data"
                     ]
                 },
                 {
                     "required": [
-                        "model",
-                        "filter"
+                        "where"
+                    ]
+                }
+            ],
+            "definitions": {
+                "child_entity": {
+                    "title": "The child_entity Schema",
+                    "type": "object",
+                    "optional": [
+                        "model"
+                    ],
+                    "oneOf": [
+                        {
+                            "required": [
+                                "data"
+                            ]
+                        },
+                        {
+                            "required": [
+                                "where"
+                            ]
+                        }
+                    ],
+                    "properties": {
+                        "model": {
+                            "type": "string"
+                        },
+                        "data": {
+                            "$ref": "#/definitions/entity/properties/data"
+                        },
+                        "where": {
+                            "$ref": "#/definitions/entity/properties/where"
+                        }
+                    }
+                },
+                "child_group_entity": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity/definitions/child_entity"
+                    }
+                },
+                "data_container": {
+                    "title": "The data Schema",
+                    "type": "object",
+                    "properties": {
+                        "$rel": {
+                            "title": "The $rel Schema",
+                            "type": "object",
+                            "default": {},
+                            "additionalProperties": {
+                                "anyOf": [
+                                    {
+                                        "type": "object",
+                                        "$ref": "#/definitions/entity/definitions/child_entity"
+                                    },
+                                    {
+                                        "type": "array",
+                                        "$ref": "#/definitions/entity/definitions/child_group_entity"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
+            "properties": {
+                "model": {
+                    "title": "The model Schema",
+                    "type": "string"
+                },
+                "data": {
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/entity/definitions/data_container"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity/definitions/data_container"
+                            }
+                        }
+                    ]
+                },
+                "where": {
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/entity/definitions/data_container"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity/definitions/data_container"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "entity_group": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/entity"
+            }
+        },
+        "child_entity": {
+            "title": "A Schema",
+            "type": "object",
+            "optional": [
+                "model"
+            ],
+            "oneOf": [
+                {
+                    "required": [
+                        "data"
+                    ]
+                },
+                {
+                    "required": [
+                        "where"
                     ]
                 }
             ],
@@ -67,27 +144,26 @@
                     "type": "string"
                 },
                 "data": {
-                    "$ref": "#/definitions/args"
+                    "$ref": "#/definitions/entity/properties/data"
                 },
-                "filter": {
-                    "$ref": "#/definitions/args"
+                "where": {
+                    "$ref": "#/definitions/entity/properties/where"
                 }
             }
         },
-        "entities": {
+        "child_entity_group": {
             "type": "array",
-            "minItems": 1,
             "items": {
-                "$ref": "#/definitions/entity"
+                "$ref": "#/definitions/child_entity"
             }
         }
     },
-    "anyOf": [
+    "oneOf": [
         {
             "$ref": "#/definitions/entity"
         },
         {
-            "$ref": "#/definitions/entities"
+            "$ref": "#/definitions/entity_group"
         }
     ]
 }

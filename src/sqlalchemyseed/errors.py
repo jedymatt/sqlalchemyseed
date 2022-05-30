@@ -36,3 +36,7 @@ class NotInModuleError(Exception):
 
 class InvalidModelPath(Exception):
     """Raised when an invalid model path is invoked"""
+
+
+class InvalidJsonFormatError(Exception):
+    """Raised when the json format is invalid"""
