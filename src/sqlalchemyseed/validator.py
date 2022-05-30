@@ -2,6 +2,8 @@
 Validator module.
 """
 
+import json
+import jsonschema
 from . import errors, util
 
 
@@ -141,3 +143,17 @@ def hybrid_validate(entities, ref_prefix='!'):
 
     SchemaValidator(source_keys=[Key.data(), Key.filter()], ref_prefix=ref_prefix) \
         .validate(entities=entities)
+
+
+with open('src/sqlalchemyseed/schemas/schema.json', 'r') as f:
+    schema = json.load(f)
+
+
+_validator = jsonschema.Draft7Validator(schema=schema)
+
+
+def _validate(instance):
+    try:
+        _validator.validate(instance)
+    except jsonschema.ValidationError as e:
+        raise errors.InvalidJsonFormatError(str(e.message))
