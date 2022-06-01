@@ -1,21 +1,37 @@
-import json
+"""
+Seeder module
+"""
+
 from typing import Union
-import sqlalchemy.orm
+
+import sqlalchemy
+from sqlalchemy.orm import Session
+
+from sqlalchemyseed import util
 
 
 class Seeder:
-    def __init__(self, session: sqlalchemy.orm.Session) -> None:
+    """
+    Seeder class
+    """
+
+    def __init__(self, session: Session) -> None:
         self.session = session
 
         self._instances = []
 
-        self._path = []
-
     def reset(self):
+        """
+        Reset seeder.
+        """
         self._instances = []
-        self._path = []
 
     def seed(self, data: Union[dict, list]) -> None:
+        """
+        Seed data into database.
+        """
+        self.reset()
+
         if isinstance(data, dict):
             self._seed_dict(data)
         elif isinstance(data, list):
@@ -23,38 +39,97 @@ class Seeder:
         else:
             raise TypeError("'data' should be 'dict' or 'list'.")
 
-    def _seed_dict(self, data: dict):
-        self._path.append(data)
+    @property
+    def instances(self) -> list:
+        """
+        Instances that are created by seeding.
 
-        self._path.pop()
+        Returns:
+            list: Instances that are created by seeding.
+        """
+        return self._instances
+
+    def commit(self):
+        """
+        Commit seeding data into database.
+        """
+        self.session.commit()
+
+    def _seed_dict(self, data: dict):
+        model: str = data.get('model')
+        data_: Union[dict, list] = data.get('data')
+        where: Union[dict, list] = data.get('where')
+
+        model_class = util.get_model_class(model)
+
+        instances = []
+        if where is not None:
+            instances = self._seed_where(model_class, where)
+        else:  # where is None and data is not None
+            instances = self._seed_data_(model_class, data_)
+
+        self._instances.extend(instances)
 
     def _seed_list(self, data: list):
-        self._path.append(data)
+        for item in data:
+            self._seed_dict(item)
 
-        self._path.pop()
+    def _seed_dict_where(self, model_class: sqlalchemy.orm.mapper, where: dict):
+        kwargs = where.copy()
+        kwargs.pop('$rel', None)
+        return self.session.query(model_class).filter_by(**kwargs).first()
 
+    def _instantiate_model_class(self, model_class: sqlalchemy.orm.mapper, data_: dict):
+        kwargs = data_.copy()
+        kwargs.pop('$rel', None)
+        return model_class(**kwargs)
 
-engine = sqlalchemy.create_engine('sqlite:///:memory:')
-Session = sqlalchemy.orm.sessionmaker(bind=engine)
-session = Session()
+    def _seed_rel(self, rel: dict, instance: sqlalchemy.orm.mapper):
+        for key, value in rel.items():
+            setattr(instance, key, value)
 
-seeder = Seeder(session)
+    def _seed_where(self, model_class: sqlalchemy.orm.mapper, where: dict):
+        instances = []
 
-seeder.seed(
-    [
-        {
-            'model': 'User',
-            'data': {
-                'name': 'John Doe',
-                'email': 'johndoe@email.com',
-            }
-        },
-        {
-            'model': 'User',
-            'data': {
-                'name': 'Jane Doe',
-                'email': 'johndoe@email.com',
-            }
-        },
-    ]
-)
+        if isinstance(where, dict):
+            instance = self._seed_dict_where(model_class, where)
+            instances.append(instance)
+
+            self.session.add(instance)
+
+            if where.get('$rel') is not None:
+                self._seed_rel(where['$rel'], instance)
+        else:
+            for item in where:
+                instance = self._seed_dict_where(model_class, item)
+                instances.append(instance)
+
+                self.session.add_all(instances)
+
+                if item.get('$rel') is not None:
+                    self._seed_rel(item['$rel'], instance)
+
+        return instances
+
+    def _seed_data_(self, model_class: sqlalchemy.orm.mapper, data_: dict) -> list:
+        instances = []
+
+        if isinstance(data_, dict):
+            instance = self._instantiate_model_class(model_class, data_)
+            instances.append(instance)
+
+            self.session.add(instance)
+
+            if data_.get('$rel') is not None:
+                self._seed_rel(data_['$rel'], instance)
+        else:
+            for item in data_:
+                instance = self._instantiate_model_class(model_class, item)
+                instances.append(instance)
+
+                self.session.add_all(instances)
+
+                if item.get('$rel') is not None:
+                    self._seed_rel(item['$rel'], instance)
+
+        return instances
