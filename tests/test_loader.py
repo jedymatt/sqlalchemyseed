@@ -5,6 +5,7 @@ from src.sqlalchemyseed import load_entities_from_json
 from src.sqlalchemyseed import load_entities_from_yaml
 from src.sqlalchemyseed import load_entities_from_csv
 
+
 class TestLoader(unittest.TestCase):
     def test_load_entities_from_json(self):
         entities = load_entities_from_json('tests/res/data.json')
@@ -38,4 +39,3 @@ class TestLoader(unittest.TestCase):
             ModuleNotFoundError,
             lambda: load_entities_from_yaml('tests/res/data.yml')
         )
-        
