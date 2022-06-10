@@ -42,18 +42,38 @@ class TestSeeder(unittest.TestCase):
                     "age": 18,
                     "$rel": {
                         "location": {
-                            "where": {
-                                "name": "Manila"
-                            }
-                        },
-                        "spouse_id": {
                             "data": {
-                                "name": "Juana Dela Cruz"
+                                "name": "Manila"
                             }
                         }
                     }
                 }
             }
+        ))
+
+        self.assertIsNone(self.seeder.seed(
+            [
+                {
+                    "model": "tests.models.Location",
+                    "data": {
+                        "name": "Manila"
+                    }
+                },
+                {
+                    "model": "tests.models.Person",
+                    "data": {
+                        "name": "Juan Dela Cruz",
+                        "age": 18,
+                        "$rel": {
+                            "location": {
+                                "where": {
+                                    "name": "Manila"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
         ))
 
         self.assertIsNone(self.seeder.seed(
@@ -66,6 +86,11 @@ class TestSeeder(unittest.TestCase):
                         "location": {
                             "where": {
                                 "name": "Manila"
+                            }
+                        },
+                        "spouse": {
+                            "data": {
+                                "name": "Juana Dela Cruz"
                             }
                         }
                     }
@@ -92,29 +117,42 @@ class TestSeeder(unittest.TestCase):
         ))
 
         self.assertIsNone(self.seeder.seed(
-            {
-                "model": "tests.models.Person",
-                "data": {
-                    "name": "Juan Dela Cruz",
-                    "age": 18,
-                    "$rel": {
-                        "cars": [
-                            {
-                                "model": "tests.models.Car",
-                                "where": {
-                                    "name": "Toyota"
+            [
+                {
+                    "model": "tests.models.Car",
+                    "data": [
+                        {
+                            "name": "Toyota",
+                        },
+                        {
+                            "name": "Honda",
+                        }
+                    ]
+                },
+                {
+                    "model": "tests.models.Person",
+                    "data": {
+                        "name": "Juan Dela Cruz",
+                        "age": 18,
+                        "$rel": {
+                            "cars": [
+                                {
+                                    "model": "tests.models.Car",
+                                    "where": {
+                                        "name": "Toyota"
+                                    }
+                                },
+                                {
+                                    "model": "tests.models.Car",
+                                    "where": {
+                                        "name": "Honda"
+                                    }
                                 }
-                            },
-                            {
-                                "model": "tests.models.Car",
-                                "where": {
-                                    "name": "Honda"
-                                }
-                            }
-                        ]
+                            ]
+                        }
                     }
                 }
-            }
+            ]
         ))
 
         self.assertIsNone(self.seeder.seed(
