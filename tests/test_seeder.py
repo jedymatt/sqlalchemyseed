@@ -7,7 +7,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from .models import Base, Person
 
-from sqlalchemyseed import Seeder, errors
+from sqlalchemyseed import Seeder
 
 
 class TestSeeder(unittest.TestCase):
@@ -28,113 +28,117 @@ class TestSeeder(unittest.TestCase):
         self.base.metadata.drop_all(self.engine)
         self.base = None
 
-    def test_valid(self):
+    def test_valid_with_relationship(self):
+        """
+        Test valid with relationship
+        """
         self.base.metadata.create_all(self.engine)
-        # self.assertIsNone(self.seeder.seed(
-        #     {
-        #         "model": "tests.models.Person",
-        #         "data": {
-        #             "name": "Juan Dela Cruz",
-        #             "age": "18",
-        #             "$rel": {
-        #                 "location": {
-        #                     "where": {
-        #                         "name": "Manila"
-        #                     }
-        #                 },
-        #                 "spouse_id": {
-        #                     "data": {
-        #                         "name": "Juana Dela Cruz"
-        #                     }
-        #                 }
-        #             }
-        #         }
-        #     }
-        # ))
 
-        # self.assertIsNone(self.seeder.seed(
-        #     {
-        #         "model": "tests.models.Person",
-        #         "data": {
-        #             "name": "Juan Dela Cruz",
-        #             "age": "18",
-        #             "$rel": {
-        #                 "location": {
-        #                     "where": {
-        #                         "name": "Manila"
-        #                     }
-        #                 }
-        #             }
-        #         }
-        #     }
-        # ))
+        self.assertIsNone(self.seeder.seed(
+            {
+                "model": "tests.models.Person",
+                "data": {
+                    "name": "Juan Dela Cruz",
+                    "age": 18,
+                    "$rel": {
+                        "location": {
+                            "where": {
+                                "name": "Manila"
+                            }
+                        },
+                        "spouse_id": {
+                            "data": {
+                                "name": "Juana Dela Cruz"
+                            }
+                        }
+                    }
+                }
+            }
+        ))
 
-        # self.assertIsNone(self.seeder.seed(
-        #     {
-        #         "model": "tests.models.Person",
-        #         "data": {
-        #             "name": "Juan Dela Cruz",
-        #             "age": "18",
-        #             "$rel": {
-        #                 "location": {
-        #                     "model": "tests.models.Location",
-        #                     "where": {
-        #                         "name": "Manila"
-        #                     }
-        #                 }
-        #             }
-        #         }
-        #     }
-        # ))
+        self.assertIsNone(self.seeder.seed(
+            {
+                "model": "tests.models.Person",
+                "data": {
+                    "name": "Juan Dela Cruz",
+                    "age": 18,
+                    "$rel": {
+                        "location": {
+                            "where": {
+                                "name": "Manila"
+                            }
+                        }
+                    }
+                }
+            }
+        ))
 
-        # self.assertIsNone(self.seeder.seed(
-        #     {
-        #         "model": "tests.models.Person",
-        #         "data": {
-        #             "name": "Juan Dela Cruz",
-        #             "age": "18",
-        #             "$rel": {
-        #                 "cars": [
-        #                     {
-        #                         "model": "tests.models.Car",
-        #                         "where": {
-        #                             "name": "Toyota"
-        #                         }
-        #                     },
-        #                     {
-        #                         "model": "tests.models.Car",
-        #                         "where": {
-        #                             "name": "Honda"
-        #                         }
-        #                     }
-        #                 ]
-        #             }
-        #         }
-        #     }
-        # ))
+        self.assertIsNone(self.seeder.seed(
+            {
+                "model": "tests.models.Person",
+                "data": {
+                    "name": "Juan Dela Cruz",
+                    "age": 18,
+                    "$rel": {
+                        "location": {
+                            "model": "tests.models.Location",
+                            "where": {
+                                "name": "Manila"
+                            }
+                        }
+                    }
+                }
+            }
+        ))
 
-        # self.assertIsNone(self.seeder.seed(
-        #     {
-        #         "model": "tests.models.Person",
-        #         "data": {
-        #             "name": "Juan Dela Cruz",
-        #             "age": "18",
-        #             "$rel": {
-        #                 "cars": {
-        #                     "model": "tests.models.Car",
-        #                     "where": [
-        #                         {
-        #                             "name": "Toyota"
-        #                         },
-        #                         {
-        #                             "name": "Honda"
-        #                         }
-        #                     ]
-        #                 }
-        #             }
-        #         }
-        #     }
-        # ))
+        self.assertIsNone(self.seeder.seed(
+            {
+                "model": "tests.models.Person",
+                "data": {
+                    "name": "Juan Dela Cruz",
+                    "age": 18,
+                    "$rel": {
+                        "cars": [
+                            {
+                                "model": "tests.models.Car",
+                                "where": {
+                                    "name": "Toyota"
+                                }
+                            },
+                            {
+                                "model": "tests.models.Car",
+                                "where": {
+                                    "name": "Honda"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ))
+
+        self.assertIsNone(self.seeder.seed(
+            {
+                "model": "tests.models.Person",
+                "data": {
+                    "name": "Juan Dela Cruz",
+                    "age": 18,
+                    "$rel": {
+                        "cars": {
+                            "model": "tests.models.Car",
+                            "where": [
+                                {
+                                    "name": "Toyota"
+                                },
+                                {
+                                    "name": "Honda"
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        ))
 
     def test_valid_data_without_relationship(self):
         """
