@@ -142,7 +142,7 @@ class TestSchemaValidator(unittest.TestCase):
             }
         ))
 
-        self.assertIsNot(validate(
+        self.assertIsNone(validate(
             {
                 "model": "models.User",
                 "data": [
