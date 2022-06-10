@@ -8,6 +8,7 @@ import sqlalchemy
 from sqlalchemy.orm import Session
 
 from sqlalchemyseed import util
+from sqlalchemyseed.attribute import instrumented_attribute, referenced_class
 
 
 class Seeder:
@@ -86,7 +87,28 @@ class Seeder:
 
     def _seed_rel(self, rel: dict, instance: sqlalchemy.orm.mapper):
         for key, value in rel.items():
-            setattr(instance, key, value)
+            if isinstance(value, dict):
+                self._seed_rel_attribute_value(instance, key, value)
+            elif isinstance(value, list):
+                for item in value:
+                    self._seed_rel_attribute_value(instance, key, item)
+
+    def _seed_rel_attribute_value(self, instance: sqlalchemy.orm.mapper, key: str, value: dict):
+        model = value.get('model')
+        data = value.get('data')
+        where = value.get('where')
+
+        if model is not None:
+            model_class = util.get_model_class(model)
+        else:
+            model_class = referenced_class(
+                instrumented_attribute(instance, key)
+            )
+
+        if where is not None:
+            self._seed_where(model_class, where)
+        else:
+            self._seed_data_(model_class, data)
 
     def _seed_where(self, model_class: sqlalchemy.orm.mapper, where: dict):
         instances = []
