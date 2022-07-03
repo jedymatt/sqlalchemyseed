@@ -34,20 +34,20 @@ def attr_is_column(instrumented_attr: InstrumentedAttribute):
     return isinstance(instrumented_attr.property, ColumnProperty)
 
 
-def set_instance_attribute(instance, key, value):
+def set_instance_attribute(instance, attribute_name, value):
     """
     Set attribute value of instance
     """
 
-    instr_attr: InstrumentedAttribute = getattr(instance.__class__, key)
+    instr_attr: InstrumentedAttribute = getattr(instance.__class__, attribute_name)
 
     if attr_is_relationship(instr_attr) and instr_attr.property.uselist:
         if isinstance(value, list):
-            set_attribute(instance, key, value)
+            set_attribute(instance, attribute_name, value)
         else:
-            get_attribute(instance, key).append(value)
+            get_attribute(instance, attribute_name).append(value)
     else:
-        set_attribute(instance, key, value[0])
+        set_attribute(instance, attribute_name, value[0])
 
 
 @lru_cache()
