@@ -42,9 +42,13 @@ def set_instance_attribute(instance, key, value):
     instr_attr: InstrumentedAttribute = getattr(instance.__class__, key)
 
     if attr_is_relationship(instr_attr) and instr_attr.property.uselist:
-        get_attribute(instance, key).append(value)
+        if isinstance(value, list):
+            set_attribute(instance, key, value)
+        else:
+            get_attribute(instance, key).append(value)
     else:
-        set_attribute(instance, key, value)
+        set_attribute(instance, key, value[0])
+
 
 @lru_cache()
 def foreign_key_column(instrumented_attr: InstrumentedAttribute):
@@ -52,6 +56,7 @@ def foreign_key_column(instrumented_attr: InstrumentedAttribute):
     Returns the table name of the first foreignkey.
     """
     return next(iter(instrumented_attr.foreign_keys)).column
+
 
 @lru_cache()
 def referenced_class(instrumented_attr: InstrumentedAttribute):
