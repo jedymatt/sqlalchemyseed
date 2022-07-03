@@ -18,7 +18,7 @@ class TestSeeder(unittest.TestCase):
     def setUp(self) -> None:
         self.engine = create_engine('sqlite:///:memory:')
         Session = sessionmaker(  # pylint: disable=invalid-name
-            bind=self.engine
+            bind=self.engine,
         )
         self.session = Session()
         self.seeder = Seeder(self.session)
@@ -51,6 +51,17 @@ class TestSeeder(unittest.TestCase):
             }
         ))
 
+        self.assertEqual(self.seeder.instances[0].name, "Juan Dela Cruz")
+        self.assertEqual(self.seeder.instances[0].age, 18)
+
+        self.assertEqual(len(self.seeder.instances), 1)
+        self.assertEqual(len(self.session.new), 2)
+
+        self.assertEqual(self.seeder.instances[0], list(self.session.new)[0])
+        self.assertEqual(self.seeder.instances[0].location, list(self.session.new)[1])
+
+        self.session.expunge_all()
+
         self.assertIsNone(self.seeder.seed(
             [
                 {
@@ -75,6 +86,13 @@ class TestSeeder(unittest.TestCase):
                 }
             ]
         ))
+
+        self.assertEqual(len(self.seeder.instances), 2)
+        self.assertEqual(len(self.session.dirty), 2)
+
+        self.assertEqual(self.seeder.instances[0], list(self.session.dirty)[0])
+        self.assertEqual(self.seeder.instances[1].location, list(self.session.dirty)[1].location)
+
 
         self.assertIsNone(self.seeder.seed(
             {
