@@ -8,7 +8,7 @@ import sqlalchemy
 from sqlalchemy.orm import Session
 
 from sqlalchemyseed import util
-from sqlalchemyseed.attribute import instrumented_attribute, referenced_class
+from sqlalchemyseed.attribute import instrumented_attribute, referenced_class, set_instance_attribute
 
 
 class Seeder:
@@ -106,9 +106,11 @@ class Seeder:
             )
 
         if where is not None:
-            self._seed_where(model_class, where)
+            rel_instances = self._seed_where(model_class, where)
         else:
-            self._seed_data_(model_class, data)
+            rel_instances = self._seed_data_(model_class, data)
+
+        set_instance_attribute(instance, key, rel_instances)
 
     def _seed_where(self, model_class: sqlalchemy.orm.mapper, where: dict):
         instances = []
