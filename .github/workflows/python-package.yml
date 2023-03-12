@@ -28,8 +28,25 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install "flake8>=5,<6" pytest
+        
+        python -m pip install pytest
         pip install -r requirements.txt
+
+        if [ "${{ matrix.os }}" == "windows-latest" ]; then
+          FOR /F "tokens=1,2 delims=," %%G IN ('python -c "import sys; print(sys.version_info[0:2])"') DO (
+            IF "%%G"=="3" IF "%%H"=="7" (
+              pip install "flake8>=5,<6"
+            ) ELSE (
+              pip install flake8
+            )
+          )
+        else
+          if [[ $(python -c "import sys; print(sys.version_info[0:2])") == "(3, 7)" ]]; then
+            pip install "flake8>=5,<6"
+          else
+            pip install flake8
+          fi
+        fi
     - name: Install the package locally
       run: pip install -e .
     - name: Lint with flake8
