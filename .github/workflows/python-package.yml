@@ -32,20 +32,16 @@ jobs:
         python -m pip install pytest
         pip install -r requirements.txt
 
-        if [ "${{ matrix.os }}" == "windows-latest" ]; then
-          FOR /F "tokens=1,2 delims=," %%G IN ('python -c "import sys; print(sys.version_info[0:2])"') DO (
-            IF "%%G"=="3" IF "%%H"=="7" (
-              pip install "flake8>=5,<6"
-            ) ELSE (
-              pip install flake8
-            )
-          )
+        if [ "$RUNNER_OS" == "Windows" ]; then
+          set PY_VERSION=%PYTHON_VERSION:~-3%
         else
-          if [[ $(python -c "import sys; print(sys.version_info[0:2])") == "(3, 7)" ]]; then
-            pip install "flake8>=5,<6"
-          else
-            pip install flake8
-          fi
+          PY_VERSION=$(python -c "import platform; print(platform.python_version()[:3])")
+        fi
+
+        if [[ "$PY_VERSION" == "3.7" ]]; then
+          pip install "flake8>=5,<6"
+        else
+          pip install flake8
         fi
     - name: Install the package locally
       run: pip install -e .
