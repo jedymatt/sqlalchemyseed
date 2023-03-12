@@ -1,11 +1,9 @@
 from sqlalchemy import Column, ForeignKey, Integer, String
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, declarative_base
 from sqlalchemyseed.util import generate_repr
 
 Base = declarative_base()
 AnotherBase = declarative_base()
-
 
 class Company(Base):
     __tablename__ = 'companies'
