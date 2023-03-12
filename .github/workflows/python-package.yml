@@ -28,15 +28,8 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        
-        python -m pip install pytest
+        python -m pip install "flake8>=5,<6" pytest
         pip install -r requirements.txt
-
-        if [[ $(python -c "import sys; print(sys.version_info[0:2])") == "(3, 7)" ]]; then
-          pip install "flake8>=5,<6"
-        else
-          pip install flake8
-        fi
     - name: Install the package locally
       run: pip install -e .
     - name: Lint with flake8
