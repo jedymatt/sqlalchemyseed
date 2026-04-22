@@ -1,6 +1,6 @@
 SQLAlchemy>=2.0
 PyYAML>=5.4
-coverage>=6.2
+coverage>=7.13.5
 tox
 pytest
 pylint
