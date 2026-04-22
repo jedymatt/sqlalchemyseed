@@ -1,4 +1,4 @@
-sphinx>=4.3
+sphinx>=9.1.0
 
 # Themes
 furo
