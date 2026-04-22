@@ -1,5 +1,5 @@
 SQLAlchemy>=2.0
-PyYAML>=5.4
+PyYAML>=6.0.3
 coverage>=6.2
 tox
 pytest
