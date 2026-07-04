@@ -98,6 +98,46 @@ The same command is available as a module:
 python -m sqlalchemyseed data.json --url sqlite:///app.db
 ```
 
+## Testing with pytest
+
+Installing `sqlalchemyseed` alongside `pytest` registers a plugin that loads
+fixture files into a transactionally-isolated session. Provide one `engine`
+fixture in your `conftest.py`; the plugin supplies `sqlalchemyseed_session`
+(rolled back after every test) and a `seed` factory.
+
+```python
+# conftest.py
+import pytest
+from sqlalchemy import create_engine
+
+from myapp.models import Base
+
+
+@pytest.fixture(scope="session")
+def engine():
+    engine = create_engine("sqlite:///:memory:")
+    Base.metadata.create_all(engine)
+    return engine
+```
+
+```python
+# test_people.py
+from myapp.models import Person
+
+
+def test_people_are_seeded(seed, sqlalchemyseed_session):
+    seeder = seed("tests/data/people.yaml")
+    assert sqlalchemyseed_session.query(Person).count() == 2
+    assert seeder.instances[0].name == "Alice"
+```
+
+`seed()` accepts the same inputs as the library: `.json`, `.yaml`/`.yml`, and
+`.csv` files. CSV is not self-describing, so pass the model:
+`seed("people.csv", model="myapp.models.Person")`. Use `seeder="hybrid"` for the
+`HybridSeeder`, and `ref_prefix=...` to override the relationship reference
+prefix. Every test runs inside a transaction that is rolled back afterward, so
+tests never see each other's rows.
+
 ## Documentation
 
 <https://sqlalchemyseed.readthedocs.io/>
