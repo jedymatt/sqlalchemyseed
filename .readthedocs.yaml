@@ -5,6 +5,12 @@
 # Required
 version: 2
 
+# Set the build environment (required by the current Read the Docs schema)
+build:
+    os: ubuntu-24.04
+    tools:
+        python: "3.12"
+
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
     configuration: docs/conf.py
@@ -14,8 +20,7 @@ sphinx:
 # Optionally build your docs in additional formats such as PDF
 formats: all
 
-# Optionally set the version of Python and requirements required to build your docs
+# Install the requirements required to build the docs
 python:
-    version: "3.8"
     install:
         - requirements: docs/requirements.txt
