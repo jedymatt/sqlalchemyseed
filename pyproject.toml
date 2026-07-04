@@ -25,6 +25,11 @@ dynamic = ["version"]
 yaml = [
     "PyYAML>=6.0",
 ]
+async = [
+    # Pulls greenlet, which backs AsyncSession.run_sync. You still need an
+    # async driver of your own (e.g. aiosqlite, asyncpg).
+    "SQLAlchemy[asyncio]>=2.0",
+]
 
 [project.scripts]
 sqlalchemyseed = "sqlalchemyseed.cli:main"
@@ -45,6 +50,10 @@ dev = [
     "pytest>=9.0.3",
     "coverage>=6.2",
     "PyYAML>=6.0",
+    # Async seeder tests: aiosqlite provides an async SQLite driver, greenlet
+    # backs SQLAlchemy's AsyncSession.run_sync bridge.
+    "aiosqlite>=0.19",
+    "greenlet>=3.0",
 ]
 
 [build-system]

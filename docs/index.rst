@@ -20,6 +20,7 @@ Project Links: `Github`_ | `PyPI`_
     intro
     seeding
     relationships
+    async
     examples
     cli
     pytest

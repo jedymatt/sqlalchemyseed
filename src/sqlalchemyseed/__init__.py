@@ -10,6 +10,13 @@ from .loader import load_entities_from_csv
 from . import util
 from . import attribute
 
+try:
+    # Requires SQLAlchemy's async extra (greenlet); optional for sync-only users.
+    from .aio import AsyncHybridSeeder
+    from .aio import AsyncSeeder
+except ImportError:
+    pass
+
 
 __version__ = "2.4.0"
 
