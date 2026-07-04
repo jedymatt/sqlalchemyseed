@@ -61,9 +61,12 @@ class TestLoader(unittest.TestCase):
             'tests/res/companies.csv', "tests.models.Company"))
 
     def test_loader_yaml_not_installed(self):
-        loader.sys.modules.pop('yaml')
-        self.assertRaises(
-            ModuleNotFoundError,
-            lambda: load_entities_from_yaml('tests/res/data.yml')
-        )
+        yaml_module = loader.sys.modules.pop('yaml')
+        try:
+            self.assertRaises(
+                ModuleNotFoundError,
+                lambda: load_entities_from_yaml('tests/res/data.yml')
+            )
+        finally:
+            loader.sys.modules['yaml'] = yaml_module
         
