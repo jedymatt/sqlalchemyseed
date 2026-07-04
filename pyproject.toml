@@ -1,6 +1,54 @@
-[build-system]
-requires = [
-    "setuptools>=42",
-    "wheel"
+[project]
+name = "sqlalchemyseed"
+description = "SQLAlchemy Seeder"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+    { name = "Jedy Matt Tabasco", email = "hello@jedymatt.dev" },
 ]
+keywords = ["sqlalchemy", "orm", "seed", "seeder", "json", "yaml"]
+classifiers = [
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+dependencies = [
+    "SQLAlchemy>=2.0",
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+yaml = [
+    "PyYAML>=6.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/jedymatt/sqlalchemyseed"
+Documentation = "https://sqlalchemyseed.readthedocs.io/"
+Source = "https://github.com/jedymatt/sqlalchemyseed"
+Tracker = "https://github.com/jedymatt/sqlalchemyseed/issues"
+
+[dependency-groups]
+dev = [
+    "pytest>=7.0",
+    "coverage>=6.2",
+    "PyYAML>=6.0",
+]
+
+[build-system]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools.dynamic]
+version = { attr = "sqlalchemyseed.__version__" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.uv]
+default-groups = ["dev"]

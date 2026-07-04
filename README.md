@@ -77,34 +77,38 @@ Report here in this link:
 
 First, Clone this [repository](https://github.com/jedymatt/sqlalchemyseed).
 
+This project uses [uv](https://docs.astral.sh/uv/) for dependency management and running tasks.
+
 ### Install dev dependencies
 
-Inside the folder, paste this in the terminal to install necessary dependencies:
+Inside the folder, sync the environment (uv creates the virtualenv and installs the project plus dev dependencies):
 
 ```shell
-pip install -r requirements.txt -r docs/requirements.txt
+uv sync
 ```
-
-Note: make sure you have the virtual environment and enabled, or if you are using vs code and docker then you can simply re-open this as container.
 
 ### Run tests
 
-Before running tests, make sure that the package is installed as editable:
-
 ```shell
-python setup.py develop --user
+uv run pytest
 ```
 
-Then run the test:
+Run the tests against a specific Python version (uv downloads it if needed):
 
 ```shell
-pytest tests
+uv run --python 3.14 pytest
 ```
 
-Run test with coverage
+Run the tests against the lowest supported dependencies (e.g. SQLAlchemy 2.0):
 
 ```shell
-coverage run -m pytest
+uv run --resolution lowest-direct pytest
+```
+
+Run tests with coverage:
+
+```shell
+uv run coverage run -m pytest
 ```
 
 Autobuild documentation
