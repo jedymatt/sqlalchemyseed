@@ -11,13 +11,6 @@ from sqlalchemy.orm import Session
 from . import loader
 from .seeder import HybridSeeder, Seeder
 
-_JSON_EXTENSIONS = {".json"}
-_YAML_EXTENSIONS = {".yaml", ".yml"}
-_CSV_EXTENSIONS = {".csv"}
-# Only self-describing formats are auto-discovered inside a directory. CSV
-# needs an explicit --model, so a CSV must be named as an individual file.
-_DISCOVERABLE_EXTENSIONS = _JSON_EXTENSIONS | _YAML_EXTENSIONS
-
 
 def build_parser() -> argparse.ArgumentParser:
     """Build the argument parser for the ``sqlalchemyseed`` command."""
@@ -79,32 +72,13 @@ def _discover_directory(directory: Path) -> list:
     """Return the JSON/YAML files inside a directory, sorted by name."""
     discovered = sorted(
         child for child in directory.iterdir()
-        if child.suffix.lower() in _DISCOVERABLE_EXTENSIONS
+        if child.suffix.lower() in loader.DISCOVERABLE_EXTENSIONS
     )
     if not discovered:
         raise FileNotFoundError(
             f"no JSON or YAML seed files found in directory: {directory}"
         )
     return discovered
-
-
-def load_file(path: Path, model=None) -> dict:
-    """Load entities from a single data file, dispatching on its extension."""
-    suffix = path.suffix.lower()
-    if suffix in _JSON_EXTENSIONS:
-        return loader.load_entities_from_json(str(path))
-    if suffix in _YAML_EXTENSIONS:
-        return loader.load_entities_from_yaml(str(path))
-    if suffix in _CSV_EXTENSIONS:
-        return _load_csv(path, model)
-    raise ValueError(f"unsupported file type: {path}")
-
-
-def _load_csv(path: Path, model) -> dict:
-    """Load entities from a CSV file, which requires an explicit model."""
-    if model is None:
-        raise ValueError(f"CSV input requires --model to name the target class: {path}")
-    return loader.load_entities_from_csv(str(path), model)
 
 
 def _make_seeder(name, session, ref_prefix):
@@ -118,7 +92,7 @@ def _seed_all(seeder, files, model) -> int:
     """Seed every file through the seeder and return the entity count."""
     seeded = 0
     for path in files:
-        seeder.seed(load_file(path, model))
+        seeder.seed(loader.load_path(path, model))
         seeded += len(seeder.instances)
     return seeded
 
