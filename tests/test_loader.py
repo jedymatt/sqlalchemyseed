@@ -14,6 +14,12 @@ def test_load_path_reads_json(tmp_path):
     assert loader.load_path(data_file) == {"model": "m.M", "data": []}
 
 
+def test_load_path_reads_yaml(tmp_path):
+    data_file = tmp_path / "d.yml"
+    data_file.write_text("model: m.M\ndata: []\n", encoding="utf-8")
+    assert loader.load_path(data_file) == {"model": "m.M", "data": []}
+
+
 def test_load_path_rejects_unknown_extension(tmp_path):
     bad = tmp_path / "d.txt"
     bad.write_text("nope", encoding="utf-8")

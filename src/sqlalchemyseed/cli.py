@@ -48,6 +48,11 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="seed within a transaction but roll back instead of committing",
     )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="re-raise errors with a full traceback instead of a one-line message",
+    )
     return parser
 
 
@@ -115,17 +120,17 @@ def main(argv=None) -> int:
     except FileNotFoundError as error:
         parser.error(str(error))
 
-    engine = sqlalchemy.create_engine(url)
-    with Session(engine) as session:
-        seeder = _make_seeder(args.seeder, session, args.ref_prefix)
-        try:
+    try:
+        engine = sqlalchemy.create_engine(url)
+        with Session(engine) as session:
+            seeder = _make_seeder(args.seeder, session, args.ref_prefix)
             seeded = _seed_all(seeder, files, args.model)
-        except Exception as error:  # noqa: BLE001 - report any seeding failure as a clean exit
-            session.rollback()
-            print(f"error: {error}", file=sys.stderr)
-            return 1
-
-        return _finish(session, seeded, len(files), args.dry_run)
+            return _finish(session, seeded, len(files), args.dry_run)
+    except Exception as error:  # noqa: BLE001 - top-level boundary: report any failure as exit code 1
+        if args.debug:
+            raise
+        print(f"error: {type(error).__name__}: {error}", file=sys.stderr)
+        return 1
 
 
 def _finish(session, seeded, file_count, dry_run) -> int:

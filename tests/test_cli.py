@@ -131,3 +131,19 @@ def test_unsupported_file_type(tmp_path, db_url):
     bad_file.write_text("nope", encoding="utf-8")
 
     assert cli.main([str(bad_file), "--url", db_url]) == 1
+
+
+def test_error_message_includes_exception_type(tmp_path, db_url, capsys):
+    bad_file = tmp_path / "people.txt"
+    bad_file.write_text("nope", encoding="utf-8")
+
+    assert cli.main([str(bad_file), "--url", db_url]) == 1
+    assert "ValueError" in capsys.readouterr().err
+
+
+def test_debug_flag_reraises_with_traceback(tmp_path, db_url):
+    bad_file = tmp_path / "people.txt"
+    bad_file.write_text("nope", encoding="utf-8")
+
+    with pytest.raises(ValueError):
+        cli.main([str(bad_file), "--url", db_url, "--debug"])

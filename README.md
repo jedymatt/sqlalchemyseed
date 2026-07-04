@@ -108,7 +108,7 @@ fixture in your `conftest.py`; the plugin supplies `sqlalchemyseed_session`
 ```python
 # conftest.py
 import pytest
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.pool import StaticPool
 
 from myapp.models import Base
@@ -124,6 +124,20 @@ def engine():
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
+
+    # SQLite only: hand transaction control to SQLAlchemy so an explicit
+    # commit() inside a test lands on a savepoint and is rolled back with the
+    # outer transaction. Left to itself the pysqlite driver commits straight to
+    # the database and the per-test rollback cannot undo it. Other databases
+    # (PostgreSQL, MySQL) need neither listener.
+    @event.listens_for(engine, "connect")
+    def _sqlite_no_driver_begin(dbapi_connection, connection_record):
+        dbapi_connection.isolation_level = None
+
+    @event.listens_for(engine, "begin")
+    def _sqlite_emit_begin(connection):
+        connection.exec_driver_sql("BEGIN")
+
     Base.metadata.create_all(engine)
     return engine
 ```

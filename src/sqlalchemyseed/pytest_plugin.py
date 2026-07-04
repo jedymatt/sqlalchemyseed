@@ -17,9 +17,11 @@ _MISSING_ENGINE_MESSAGE = (
     "e.g.:\n\n"
     "    @pytest.fixture(scope='session')\n"
     "    def engine():\n"
-    "        engine = create_engine('sqlite://')\n"
+    "        engine = create_engine('sqlite:///test.db')\n"
     "        Base.metadata.create_all(engine)\n"
-    "        return engine\n"
+    "        return engine\n\n"
+    "For an in-memory SQLite database, and to have an explicit commit() rolled "
+    "back per test, see the docs for the full engine setup.\n"
 )
 
 
@@ -38,9 +40,16 @@ def sqlalchemyseed_session(engine):
     try:
         yield session
     finally:
-        session.close()
-        transaction.rollback()
-        connection.close()
+        # Nested so connection.close() always runs even if an earlier step
+        # raises — a leaked connection would otherwise exhaust the pool and
+        # surface as a failure in an unrelated later test.
+        try:
+            session.close()
+        finally:
+            try:
+                transaction.rollback()
+            finally:
+                connection.close()
 
 
 @pytest.fixture

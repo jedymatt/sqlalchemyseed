@@ -17,11 +17,8 @@ def load_entities_from_json(json_filepath) -> dict:
     """
     Get entities from json
     """
-    try:
-        with open(json_filepath, 'r', encoding='utf-8') as file:
-            entities = json.loads(file.read())
-    except FileNotFoundError as error:
-        raise FileNotFoundError from error
+    with open(json_filepath, 'r', encoding='utf-8') as file:
+        entities = json.loads(file.read())
 
     return entities
 
@@ -36,11 +33,8 @@ def load_entities_from_yaml(yaml_filepath):
             'To use this function, py -m pip install "sqlalchemyseed[yaml]"'
         )
 
-    try:
-        with open(yaml_filepath, 'r', encoding='utf-8') as file:
-            entities = yaml.load(file.read(), Loader=yaml.SafeLoader)
-    except FileNotFoundError as error:
-        raise FileNotFoundError from error
+    with open(yaml_filepath, 'r', encoding='utf-8') as file:
+        entities = yaml.load(file.read(), Loader=yaml.SafeLoader)
 
     return entities
 

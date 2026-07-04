@@ -22,7 +22,7 @@ Define one ``engine`` fixture in your ``conftest.py`` that returns a SQLAlchemy
 
     # conftest.py
     import pytest
-    from sqlalchemy import create_engine
+    from sqlalchemy import create_engine, event
     from sqlalchemy.pool import StaticPool
 
     from myapp.models import Base
@@ -38,6 +38,20 @@ Define one ``engine`` fixture in your ``conftest.py`` that returns a SQLAlchemy
             connect_args={"check_same_thread": False},
             poolclass=StaticPool,
         )
+
+        # SQLite only: hand transaction control to SQLAlchemy so an explicit
+        # commit() inside a test lands on a savepoint and is rolled back with
+        # the outer transaction. Left to itself the pysqlite driver commits
+        # straight to the database and the per-test rollback cannot undo it.
+        # Other databases (PostgreSQL, MySQL) need neither listener.
+        @event.listens_for(engine, "connect")
+        def _sqlite_no_driver_begin(dbapi_connection, connection_record):
+            dbapi_connection.isolation_level = None
+
+        @event.listens_for(engine, "begin")
+        def _sqlite_emit_begin(connection):
+            connection.exec_driver_sql("BEGIN")
+
         Base.metadata.create_all(engine)
         return engine
 
@@ -100,6 +114,13 @@ commit issued during the test lands on a savepoint inside that transaction, and
 the transaction is rolled back when the test finishes. Nothing is written to the
 database permanently, and there is no per-test schema teardown, so the tests
 stay fast and leave the database pristine.
+
+For an explicit ``commit()`` to be caught by the savepoint, SQLAlchemy must
+control the transaction boundaries. On SQLite the ``pysqlite`` driver manages
+``BEGIN`` itself by default, so the ``connect``/``begin`` event listeners in the
+``engine`` fixture above are required — without them a committed row escapes the
+rollback. Seeded data (which is flushed, never committed) rolls back regardless.
+Other databases such as PostgreSQL and MySQL need no such listeners.
 
 .. note::
 
