@@ -1,10 +1,7 @@
-# This workflow will upload a Python Package using Twine when a release is created
-# For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
-
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
+# Build and publish the package to PyPI when a GitHub release is published.
+# Uses PyPI Trusted Publishing (OIDC) — no API token/secret required.
+# See: https://docs.astral.sh/uv/guides/integration/github/#publishing
+#      https://docs.pypi.org/trusted-publishers/
 
 name: Upload Python Package
 
@@ -14,8 +11,12 @@ on:
 
 jobs:
   deploy:
-
     runs-on: ubuntu-latest
+    permissions:
+      # Required for Trusted Publishing: lets the job mint a short-lived OIDC
+      # token that PyPI exchanges for an upload token. No stored secret.
+      id-token: write
+      contents: read
 
     steps:
     - uses: actions/checkout@v5
@@ -23,10 +24,6 @@ jobs:
       uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
     - name: Build package
       run: uv build
-    # NOTE: Trusted Publishing (OIDC) is the recommended follow-up; it removes
-    # the need for the PYPI_API_TOKEN secret. Keeping the token flow for now.
     - name: Publish package
-      uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
-      with:
-        user: __token__
-        password: ${{ secrets.PYPI_API_TOKEN }}
+      # uv auto-detects the GitHub Actions OIDC credentials (trusted publishing).
+      run: uv publish
