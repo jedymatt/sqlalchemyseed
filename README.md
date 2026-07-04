@@ -165,6 +165,35 @@ tests never see each other's rows.
 > if you already use those names for something else, your definitions take
 > precedence (pytest resolves conftest fixtures over plugin fixtures).
 
+## Async usage
+
+If your application only has an `AsyncSession`, use `AsyncSeeder` and
+`AsyncHybridSeeder`. They accept the same entities as their sync counterparts
+and run the seeding through `AsyncSession.run_sync`, so `filter`-key queries
+execute against your async driver.
+
+Install with the `async` extra (pulls in greenlet); you also need an async
+driver such as `aiosqlite` or `asyncpg`:
+
+```shell
+pip install "sqlalchemyseed[async]" aiosqlite
+```
+
+```python
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemyseed import AsyncSeeder
+
+engine = create_async_engine("sqlite+aiosqlite:///app.db")
+
+async with AsyncSession(engine) as session:
+    seeder = AsyncSeeder(session)
+    await seeder.seed(entities)
+    await session.commit()
+```
+
+Use `AsyncHybridSeeder` when the entities contain a `filter` key, exactly as
+you would reach for `HybridSeeder` in synchronous code.
+
 ## Documentation
 
 <https://sqlalchemyseed.readthedocs.io/>
