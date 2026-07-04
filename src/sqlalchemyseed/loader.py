@@ -89,5 +89,5 @@ def load_path(path, model=None) -> dict:
 def _load_csv(path, model) -> dict:
     """Load entities from a CSV file, which requires an explicit model."""
     if model is None:
-        raise ValueError(f"CSV input requires --model to name the target class: {path}")
+        raise ValueError(f"CSV input requires a model to name the target class: {path}")
     return load_entities_from_csv(str(path), model)

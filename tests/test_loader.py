@@ -3,10 +3,9 @@ import unittest
 import pytest
 
 from sqlalchemyseed import loader
-
-from src.sqlalchemyseed import load_entities_from_json
-from src.sqlalchemyseed import load_entities_from_yaml
-from src.sqlalchemyseed import load_entities_from_csv
+from sqlalchemyseed import load_entities_from_json
+from sqlalchemyseed import load_entities_from_yaml
+from sqlalchemyseed import load_entities_from_csv
 
 
 def test_load_path_reads_json(tmp_path):

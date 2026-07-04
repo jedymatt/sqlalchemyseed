@@ -68,7 +68,7 @@ def test_csv_without_model_fails(tmp_path, db_url, capsys):
     csv_file.write_text("name\nDave\n", encoding="utf-8")
 
     assert cli.main([str(csv_file), "--url", db_url]) == 1
-    assert "requires --model" in capsys.readouterr().err
+    assert "requires a model" in capsys.readouterr().err
     assert count_persons(db_url) == 0
 
 
