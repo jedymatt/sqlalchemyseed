@@ -2,7 +2,7 @@
 name = "sqlalchemyseed"
 description = "SQLAlchemy Seeder"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = "MIT"
 license-files = ["LICENSE"]
 authors = [
@@ -10,7 +10,6 @@ authors = [
 ]
 keywords = ["sqlalchemy", "orm", "seed", "seeder", "json", "yaml"]
 classifiers = [
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -41,7 +40,9 @@ Tracker = "https://github.com/jedymatt/sqlalchemyseed/issues"
 
 [dependency-groups]
 dev = [
-    "pytest>=7.0",
+    # 9.0.3 fixes GHSA-6w46-j5rx-g56g (tmpdir handling); it needs Python >=3.10,
+    # which is now the floor.
+    "pytest>=9.0.3",
     "coverage>=6.2",
     "PyYAML>=6.0",
 ]
