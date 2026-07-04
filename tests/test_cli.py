@@ -68,7 +68,7 @@ def test_csv_without_model_fails(tmp_path, db_url, capsys):
     csv_file.write_text("name\nDave\n", encoding="utf-8")
 
     assert cli.main([str(csv_file), "--url", db_url]) == 1
-    assert "requires --model" in capsys.readouterr().err
+    assert "requires a model" in capsys.readouterr().err
     assert count_persons(db_url) == 0
 
 
@@ -131,3 +131,19 @@ def test_unsupported_file_type(tmp_path, db_url):
     bad_file.write_text("nope", encoding="utf-8")
 
     assert cli.main([str(bad_file), "--url", db_url]) == 1
+
+
+def test_error_message_includes_exception_type(tmp_path, db_url, capsys):
+    bad_file = tmp_path / "people.txt"
+    bad_file.write_text("nope", encoding="utf-8")
+
+    assert cli.main([str(bad_file), "--url", db_url]) == 1
+    assert "ValueError" in capsys.readouterr().err
+
+
+def test_debug_flag_reraises_with_traceback(tmp_path, db_url):
+    bad_file = tmp_path / "people.txt"
+    bad_file.write_text("nope", encoding="utf-8")
+
+    with pytest.raises(ValueError):
+        cli.main([str(bad_file), "--url", db_url, "--debug"])

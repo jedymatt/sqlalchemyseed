@@ -32,9 +32,9 @@ Dependencies
 ------------
 
 - Required dependencies:
-    - SQAlchemy>=1.4.0
+    - SQLAlchemy>=2.0
 - Optional dependencies:
-    - yaml: PyYAML>=5.4.0
+    - yaml: PyYAML>=6.0
 
 Quickstart
 ----------
