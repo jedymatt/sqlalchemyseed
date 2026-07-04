@@ -30,6 +30,9 @@ yaml = [
 [project.scripts]
 sqlalchemyseed = "sqlalchemyseed.cli:main"
 
+[project.entry-points.pytest11]
+sqlalchemyseed = "sqlalchemyseed.pytest_plugin"
+
 [project.urls]
 Homepage = "https://github.com/jedymatt/sqlalchemyseed"
 Documentation = "https://sqlalchemyseed.readthedocs.io/"
