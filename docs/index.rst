@@ -21,6 +21,8 @@ Project Links: `Github`_ | `PyPI`_
     seeding
     relationships
     examples
+    cli
+    pytest
 
 Indices and tables
 ==================
