@@ -27,6 +27,9 @@ yaml = [
     "PyYAML>=6.0",
 ]
 
+[project.scripts]
+sqlalchemyseed = "sqlalchemyseed.cli:main"
+
 [project.urls]
 Homepage = "https://github.com/jedymatt/sqlalchemyseed"
 Documentation = "https://sqlalchemyseed.readthedocs.io/"
