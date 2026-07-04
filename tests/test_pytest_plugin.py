@@ -187,3 +187,19 @@ def test_user_can_override_session(pytester):
     )
     result = pytester.runpytest()
     result.assert_outcomes(passed=1)
+
+
+def test_unsupported_file_type_fails_loudly(pytester):
+    _scaffold(pytester)
+    pytester.makefile(".txt", data="nope")
+    pytester.makepyfile(
+        test_unsupported='''
+        import pytest
+
+        def test_it(seed):
+            with pytest.raises(ValueError):
+                seed("data.txt")
+        '''
+    )
+    result = pytester.runpytest()
+    result.assert_outcomes(passed=1)

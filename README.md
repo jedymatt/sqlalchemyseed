@@ -109,13 +109,21 @@ fixture in your `conftest.py`; the plugin supplies `sqlalchemyseed_session`
 # conftest.py
 import pytest
 from sqlalchemy import create_engine
+from sqlalchemy.pool import StaticPool
 
 from myapp.models import Base
 
 
 @pytest.fixture(scope="session")
 def engine():
-    engine = create_engine("sqlite:///:memory:")
+    # StaticPool keeps a single in-memory connection alive so the schema you
+    # create is visible to the test session. A file-based or server database
+    # needs no such tweak — just return your usual engine.
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
     Base.metadata.create_all(engine)
     return engine
 ```
@@ -137,6 +145,11 @@ def test_people_are_seeded(seed, sqlalchemyseed_session):
 `HybridSeeder`, and `ref_prefix=...` to override the relationship reference
 prefix. Every test runs inside a transaction that is rolled back afterward, so
 tests never see each other's rows.
+
+> **Note:** the plugin registers fixtures named `engine`, `sqlalchemyseed_session`,
+> and `seed`. Defining your own `engine` fixture is how you plug in your database;
+> if you already use those names for something else, your definitions take
+> precedence (pytest resolves conftest fixtures over plugin fixtures).
 
 ## Documentation
 
