@@ -66,5 +66,8 @@ version = { attr = "sqlalchemyseed.__version__" }
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+sqlalchemyseed = ["res/*.json"]
+
 [tool.uv]
 default-groups = ["dev"]

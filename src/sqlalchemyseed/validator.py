@@ -50,23 +50,28 @@ def check_model_key(entity: dict, entity_is_parent: bool):
         raise errors.InvalidTypeError("'model' data should be 'string'.")
 
 
-def check_max_length(entity: dict):
-    if len(entity) > 2:
-        raise errors.MaxLengthExceededError("Length should not exceed by 2.")
+def check_keys(entity: dict, source_keys: list):
+    allowed = {Key.model().name, *(key.name for key in source_keys)}
+    unknown = [key for key in entity if key not in allowed]
+    if unknown:
+        raise errors.InvalidKeyError(
+            f"Unexpected key(s): {', '.join(map(str, unknown))}. "
+            f"Allowed keys: {', '.join(sorted(allowed))}.")
 
 
 def check_source_key(entity: dict, source_keys: list) -> Key:
-    source_key: Key = next(
-        (sk for sk in source_keys if sk in entity),
-        None
-    )
+    present = [key for key in source_keys if key in entity]
 
-    # check if current keys has at least, data or filter key
-    if source_key is None:
+    if len(present) == 0:
         raise errors.MissingKeyError(
             f"Missing {', '.join(map(str, source_keys))} key(s).")
 
-    return source_key
+    if len(present) > 1:
+        raise errors.InvalidKeyError(
+            f"Expected exactly one of {', '.join(map(str, source_keys))}, "
+            f"but found: {', '.join(map(str, present))}.")
+
+    return present[0]
 
 
 def check_source_data(source_data, source_key: Key):
@@ -98,8 +103,9 @@ class SchemaValidator:
         if not isinstance(entities, dict) and not isinstance(entities, list):
             raise errors.InvalidTypeError(
                 "Invalid type, should be list or dict")
-        if len(entities) == 0:
-            return
+        # An empty dict is a malformed entity (missing 'model'/source key), so it
+        # must fall through to _validate. An empty list is simply "seed nothing"
+        # and iterates to a no-op below.
         if isinstance(entities, dict):
             return self._validate(entities, entity_is_parent)
         # iterate list
@@ -107,7 +113,7 @@ class SchemaValidator:
             self._pre_validate(entity, entity_is_parent)
 
     def _validate(self, entity: dict, entity_is_parent=True):
-        check_max_length(entity)
+        check_keys(entity, self._source_keys)
         check_model_key(entity, entity_is_parent)
 
         # get source key, either data or filter key

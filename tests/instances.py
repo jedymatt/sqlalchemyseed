@@ -37,6 +37,50 @@ PARENT_WITH_EMPTY_DATA = {
     'data': {}
 }
 
+PARENT_EMPTY_DICT_INVALID = {}
+
+PARENT_WITH_UNKNOWN_KEY_INVALID = {
+    'model': 'tests.models.Company',
+    'data': {
+        'name': 'My Company'
+    },
+    'flter': {}  # typo of 'filter', within the 2-key budget after dropping 'data'
+}
+
+PARENT_WITH_DATA_AND_FILTER_INVALID = {
+    'model': 'tests.models.Company',
+    'data': {},
+    'filter': {}
+}
+
+PARENT_TO_CHILD_EMPTY_INVALID = {
+    'model': 'tests.models.Employee',
+    'data': {
+        'name': 'Juan Dela Cruz',
+        '!company': {}
+    }
+}
+
+PARENT_TO_CHILD_UNKNOWN_KEY_INVALID = {
+    'model': 'tests.models.Employee',
+    'data': {
+        'name': 'Juan Dela Cruz',
+        '!company': {
+            'data': {
+                'name': 'Juan Company'
+            },
+            'flter': {}  # unknown key on a child, within the 2-key budget
+        }
+    }
+}
+
+BASIC_PARENT_WITH_FILTER_INVALID = {
+    'model': 'tests.models.Company',
+    'filter': {
+        'name': 'My Company'
+    }
+}
+
 PARENT_WITHOUT_DATA_INVALID = {
     'model': 'tests.models.Company'
 }

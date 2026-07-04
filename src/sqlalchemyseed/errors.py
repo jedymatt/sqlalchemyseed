@@ -6,10 +6,6 @@ class MissingKeyError(Exception):
     """Raised when a required key is missing"""
 
 
-class MaxLengthExceededError(Exception):
-    """Raised when maximum length of data exceeded"""
-
-
 class InvalidTypeError(Exception):
     """Raised when a type of data is not accepted"""
 
