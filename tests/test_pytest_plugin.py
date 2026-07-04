@@ -160,6 +160,8 @@ def test_user_can_override_session(pytester):
         people='{"model": "models.Person", "data": [{"name": "Zoe"}]}',
     )
     # Override the plugin's session fixture; seed must use the override.
+    # A minimal session suffices here — this test proves override precedence,
+    # not the production fixture's transaction handling.
     pytester.makepyfile(
         test_override='''
         import pytest
@@ -168,16 +170,10 @@ def test_user_can_override_session(pytester):
 
         @pytest.fixture
         def sqlalchemyseed_session(engine):
-            connection = engine.connect()
-            transaction = connection.begin()
-            session = Session(bind=connection, join_transaction_mode="create_savepoint")
+            session = Session(bind=engine)
             session.info["overridden"] = True
-            try:
-                yield session
-            finally:
-                session.close()
-                transaction.rollback()
-                connection.close()
+            yield session
+            session.close()
 
         def test_it(seed, sqlalchemyseed_session):
             seed("people.json")
