@@ -70,13 +70,13 @@ A JSON Schema for seed files ships with the package and lives in the repo at
 [`src/sqlalchemyseed/res/schema.json`](src/sqlalchemyseed/res/schema.json). Point
 your editor at it to get autocomplete and inline validation as you write fixtures.
 
-In the URLs below, replace `v2.4.0` with the version of sqlalchemyseed you have
+In the URLs below, replace `v2.5.0` with the version of sqlalchemyseed you have
 installed, so the editor validates against the same rules as your runtime.
 
 For YAML files, add a modeline as the first line:
 
 ```yaml
-# yaml-language-server: $schema=https://raw.githubusercontent.com/jedymatt/sqlalchemyseed/v2.4.0/src/sqlalchemyseed/res/schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/jedymatt/sqlalchemyseed/v2.5.0/src/sqlalchemyseed/res/schema.json
 - model: models.Person
   data:
     name: John March
@@ -89,12 +89,12 @@ your editor settings, e.g. VS Code `.vscode/settings.json`:
 ```json
 {
     "yaml.schemas": {
-        "https://raw.githubusercontent.com/jedymatt/sqlalchemyseed/v2.4.0/src/sqlalchemyseed/res/schema.json": "seeds/**/*.yaml"
+        "https://raw.githubusercontent.com/jedymatt/sqlalchemyseed/v2.5.0/src/sqlalchemyseed/res/schema.json": "seeds/**/*.yaml"
     },
     "json.schemas": [
         {
             "fileMatch": ["seeds/**/*.json"],
-            "url": "https://raw.githubusercontent.com/jedymatt/sqlalchemyseed/v2.4.0/src/sqlalchemyseed/res/schema.json"
+            "url": "https://raw.githubusercontent.com/jedymatt/sqlalchemyseed/v2.5.0/src/sqlalchemyseed/res/schema.json"
         }
     ]
 }

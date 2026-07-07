@@ -18,7 +18,7 @@ except ImportError:
     pass
 
 
-__version__ = "2.4.0"
+__version__ = "2.5.0"
 
 if __name__ == '__main__':
     pass
