@@ -36,8 +36,11 @@ Two rough edges found:
    SQLModel session get warning noise from inside this library. Fixed by this
    design (see below).
 2. **Unknown attribute error shape.** A bad attribute name in a seed file
-   raises a raw `AttributeError: <name>` on SQLModel models (plain declarative
-   models raise a clearer `TypeError`). Cosmetic; documented, not changed.
+   raises a raw `AttributeError` — for SQLModel and plain declarative models
+   alike (the seeder's `filter_kwargs` does `getattr(class_, key)` before any
+   constructor runs; *corrected during execution — the original claim that
+   declarative models raise `TypeError` was wrong*). Cosmetic; documented,
+   not changed.
 
 ## Runtime change: modernize `HybridSeeder` filter queries
 
@@ -121,8 +124,8 @@ New Sphinx page `docs/fastapi.rst` — “FastAPI & SQLModel” — added to the
 4. **Testing FastAPI apps:** the bundled pytest plugin with a SQLModel
    `engine` fixture (`SQLModel.metadata.create_all`), per-test rollback.
 5. **CLI:** model paths pointing at SQLModel classes work as-is; one example.
-6. **Troubleshooting:** unknown attribute → raw `AttributeError` (SQLModel
-   quirk); forgetting `table=True` → `UnsupportedClassError`.
+6. **Troubleshooting:** unknown attribute → raw `AttributeError` (both model
+   flavors); forgetting `table=True` → `UnsupportedClassError`.
 
 README gets a compact “Works with SQLModel & FastAPI” section — a minimal
 copy-paste example (SQLModel model + seed file + three lines of seeding) —
