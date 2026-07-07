@@ -18,14 +18,15 @@ from .seeder import HybridSeeder, Seeder
 class AsyncSeeder:
     """Async counterpart of :class:`~sqlalchemyseed.seeder.Seeder`."""
 
-    def __init__(self, session: AsyncSession, ref_prefix: str = "!"):
+    def __init__(self, session: AsyncSession, ref_prefix: str = "!", strict: bool = False):
         self.session = session
         self.ref_prefix = ref_prefix
+        self.strict = strict
         self._seeder: Seeder = None
 
     async def seed(self, entities: Union[list, dict], add_to_session: bool = True):
         def _run(sync_session):
-            seeder = Seeder(sync_session, ref_prefix=self.ref_prefix)
+            seeder = Seeder(sync_session, ref_prefix=self.ref_prefix, strict=self.strict)
             seeder.seed(entities, add_to_session=add_to_session)
             return seeder
 
@@ -44,14 +45,15 @@ class AsyncHybridSeeder:
     a real sync ``Session`` whose queries are proxied to the async driver.
     """
 
-    def __init__(self, session: AsyncSession, ref_prefix: str = "!"):
+    def __init__(self, session: AsyncSession, ref_prefix: str = "!", strict: bool = False):
         self.session = session
         self.ref_prefix = ref_prefix
+        self.strict = strict
         self._seeder: HybridSeeder = None
 
     async def seed(self, entities: Union[list, dict]):
         def _run(sync_session):
-            seeder = HybridSeeder(sync_session, ref_prefix=self.ref_prefix)
+            seeder = HybridSeeder(sync_session, ref_prefix=self.ref_prefix, strict=self.strict)
             seeder.seed(entities)
             return seeder
 
