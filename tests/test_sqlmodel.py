@@ -129,3 +129,25 @@ def test_csv_seeding_with_sqlmodel_model(tmp_path, session):
     session.commit()
 
     assert session.scalars(select(Company)).one().name == "CsvCo"
+
+
+def test_hybrid_filter_is_warning_free_on_sqlmodel_session(session):
+    # sqlmodel.Session deprecates .query(); the seeder must not call it, or
+    # every FastAPI user's test run fills with DeprecationWarnings from
+    # inside this library.
+    HybridSeeder(session).seed(
+        {"model": "tests.sqlmodel_models.Company", "data": {"name": "WarnFree"}}
+    )
+    session.commit()
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", DeprecationWarning)
+        HybridSeeder(session).seed(
+            {
+                "model": "tests.sqlmodel_models.Employee",
+                "data": {
+                    "name": "Quiet",
+                    "!company": {"filter": {"name": "WarnFree"}},
+                },
+            }
+        )
