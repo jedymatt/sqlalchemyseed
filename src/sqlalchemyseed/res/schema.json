@@ -92,6 +92,11 @@
             "items": {
                 "$ref": "#/definitions/parent_entity"
             }
+        },
+        {
+            "type": "object",
+            "maxProperties": 0,
+            "$comment": "Empty object = seed nothing (backward compat, parent level only)."
         }
     ]
 }

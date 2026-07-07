@@ -54,6 +54,7 @@ dev = [
     # backs SQLAlchemy's AsyncSession.run_sync bridge.
     "aiosqlite>=0.19",
     "greenlet>=3.0",
+    "jsonschema>=4.26.0",
 ]
 
 [build-system]
