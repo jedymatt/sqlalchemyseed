@@ -284,7 +284,6 @@ class HybridSeeder(AbstractSeeder):
             instance = self._setup_data_instance(
                 class_, filtered_kwargs, parent)
         else:  # key == key.filter()
-            # instance = self.session.query(class_).filter_by(**filtered_kwargs)
             instance = self._setup_filter_instance(
                 class_, filtered_kwargs, parent
             )
@@ -318,14 +317,23 @@ class HybridSeeder(AbstractSeeder):
 
         if instr_attr is not None and attr_is_column(instr_attr):
             column = foreign_key_column(instr_attr)
-            return self.session.query(column).filter_by(**filtered_kwargs).one()[0]
+            # select() of a raw Core column is not ORM-executed and skips the
+            # autoflush that legacy Query performed; flush pending rows so the
+            # filter can see them, honoring the session's autoflush setting.
+            if self.session.autoflush:
+                self.session.flush()
+            return self.session.execute(
+                sqlalchemy.select(column).filter_by(**filtered_kwargs)
+            ).one()[0]
 
         if instr_attr is not None and attr_is_relationship(instr_attr):
-            return self.session.query(referenced_class(instr_attr)).filter_by(
-                **filtered_kwargs
-            ).one()
+            return self.session.execute(
+                sqlalchemy.select(referenced_class(instr_attr)).filter_by(**filtered_kwargs)
+            ).scalar_one()
 
-        return self.session.query(class_).filter_by(**filtered_kwargs).one()
+        return self.session.execute(
+            sqlalchemy.select(class_).filter_by(**filtered_kwargs)
+        ).scalar_one()
 
 
 class DynamicSeeder:

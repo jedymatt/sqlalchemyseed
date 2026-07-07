@@ -8,7 +8,7 @@ license-files = ["LICENSE"]
 authors = [
     { name = "Jedy Matt Tabasco", email = "hello@jedymatt.dev" },
 ]
-keywords = ["sqlalchemy", "orm", "seed", "seeder", "json", "yaml"]
+keywords = ["sqlalchemy", "sqlmodel", "fastapi", "orm", "seed", "seeder", "json", "yaml"]
 classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -56,6 +56,14 @@ dev = [
     "greenlet>=3.0",
     "jsonschema>=4.26.0",
 ]
+# Kept out of `dev` so the min-deps CI job can exclude it: resolving sqlmodel
+# under --resolution lowest-direct drags SQLAlchemy above 2.0.0 and the job
+# would silently stop testing the declared floor. 0.0.22 is the oldest release
+# that works at all against SQLAlchemy 2.0.x (0.0.14 imports TryCast, which
+# SQLAlchemy 2.0.0 lacks).
+sqlmodel = [
+    "sqlmodel>=0.0.22",
+]
 
 [build-system]
 requires = ["setuptools>=77"]
@@ -71,4 +79,4 @@ where = ["src"]
 sqlalchemyseed = ["res/*.json"]
 
 [tool.uv]
-default-groups = ["dev"]
+default-groups = ["dev", "sqlmodel"]

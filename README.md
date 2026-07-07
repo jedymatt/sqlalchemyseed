@@ -64,19 +64,56 @@ data.json
 }
 ```
 
+## Works with SQLModel & FastAPI
+
+A [SQLModel](https://sqlmodel.tiangolo.com/) `table=True` class **is** a
+SQLAlchemy model, so sqlalchemyseed works with SQLModel and FastAPI out of the
+box — same seed files, same seeders, verified in CI:
+
+```python
+# app/models.py
+from typing import Optional
+
+from sqlmodel import Field, SQLModel
+
+
+class Hero(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    name: str
+```
+
+```python
+# seed.py
+from sqlmodel import Session, SQLModel, create_engine
+
+from app.models import Hero  # registers the table on SQLModel.metadata
+from sqlalchemyseed import Seeder
+
+engine = create_engine("sqlite:///database.db")
+SQLModel.metadata.create_all(engine)
+
+with Session(engine) as session:
+    seeder = Seeder(session)
+    seeder.seed({"model": "app.models.Hero", "data": [{"name": "Deadpond"}]})
+    session.commit()
+```
+
+Seed at app startup, in tests via the bundled pytest plugin, or from the CLI —
+see the [FastAPI & SQLModel docs](https://sqlalchemyseed.readthedocs.io/en/latest/fastapi.html).
+
 ## Editor validation (JSON Schema)
 
 A JSON Schema for seed files ships with the package and lives in the repo at
 [`src/sqlalchemyseed/res/schema.json`](src/sqlalchemyseed/res/schema.json). Point
 your editor at it to get autocomplete and inline validation as you write fixtures.
 
-In the URLs below, replace `v2.5.0` with the version of sqlalchemyseed you have
+In the URLs below, replace `v2.6.0` with the version of sqlalchemyseed you have
 installed, so the editor validates against the same rules as your runtime.
 
 For YAML files, add a modeline as the first line:
 
 ```yaml
-# yaml-language-server: $schema=https://raw.githubusercontent.com/jedymatt/sqlalchemyseed/v2.5.0/src/sqlalchemyseed/res/schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/jedymatt/sqlalchemyseed/v2.6.0/src/sqlalchemyseed/res/schema.json
 - model: models.Person
   data:
     name: John March
@@ -89,12 +126,12 @@ your editor settings, e.g. VS Code `.vscode/settings.json`:
 ```json
 {
     "yaml.schemas": {
-        "https://raw.githubusercontent.com/jedymatt/sqlalchemyseed/v2.5.0/src/sqlalchemyseed/res/schema.json": "seeds/**/*.yaml"
+        "https://raw.githubusercontent.com/jedymatt/sqlalchemyseed/v2.6.0/src/sqlalchemyseed/res/schema.json": "seeds/**/*.yaml"
     },
     "json.schemas": [
         {
             "fileMatch": ["seeds/**/*.json"],
-            "url": "https://raw.githubusercontent.com/jedymatt/sqlalchemyseed/v2.5.0/src/sqlalchemyseed/res/schema.json"
+            "url": "https://raw.githubusercontent.com/jedymatt/sqlalchemyseed/v2.6.0/src/sqlalchemyseed/res/schema.json"
         }
     ]
 }
@@ -183,12 +220,15 @@ def engine():
 
 ```python
 # test_people.py
+from sqlalchemy import select
+
 from myapp.models import Person
 
 
 def test_people_are_seeded(seed, sqlalchemyseed_session):
     seeder = seed("tests/data/people.yaml")
-    assert sqlalchemyseed_session.query(Person).count() == 2
+    people = sqlalchemyseed_session.scalars(select(Person)).all()
+    assert len(people) == 2
     assert seeder.instances[0].name == "Alice"
 ```
 
