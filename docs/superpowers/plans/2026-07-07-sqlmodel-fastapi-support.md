@@ -16,7 +16,7 @@
 - `sqlmodel>=0.0.22`, **test dependency only** — never in `[project.dependencies]`, never as an extra.
 - No new runtime API; seed-file format, CLI, and pytest plugin behavior unchanged.
 - `HybridSeeder` filter semantics contract: zero matches → `NoResultFound`, multiple → `MultipleResultsFound` (`.one()`/`.scalar_one()` both satisfy this — verified empirically).
-- `select(column).filter_by(**kw)` resolves attribute names against the column's table — verified empirically on SQLAlchemy 2.0.x; no `.where()` fallback needed.
+- `select(column).filter_by(**kw)` resolves attribute names against the column's table — verified empirically on SQLAlchemy 2.0.x; no `.where()` fallback needed. *Correction during execution:* a `select()` of a raw Core column executed via `session.execute()` is a Core statement and **skips ORM autoflush** (legacy `Query` always autoflushed), so the FK-column branch additionally needs an autoflush-gated `session.flush()` before executing — see the amended Task 3 code.
 - Existing 99 tests must stay green after every task.
 - All work on branch `worktree-sqlmodel-fastapi-support` in this worktree; run everything with `uv run`.
 
@@ -397,6 +397,11 @@ Replace the three query lines with 2.0-style equivalents (the module already has
 
         if instr_attr is not None and attr_is_column(instr_attr):
             column = foreign_key_column(instr_attr)
+            # select() of a raw Core column is not ORM-executed and skips the
+            # autoflush that legacy Query performed; flush pending rows so the
+            # filter can see them, honoring the session's autoflush setting.
+            if self.session.autoflush:
+                self.session.flush()
             return self.session.execute(
                 sqlalchemy.select(column).filter_by(**filtered_kwargs)
             ).one()[0]
@@ -410,6 +415,11 @@ Replace the three query lines with 2.0-style equivalents (the module already has
             sqlalchemy.select(class_).filter_by(**filtered_kwargs)
         ).scalar_one()
 ```
+
+*(The gated flush in the column branch was added during execution: without it, four
+pre-existing FK-column-filter tests fail with `NoResultFound` because the Core-column
+select bypasses the ORM autoflush legacy `Query` performed. The entity branches are
+ORM statements and autoflush normally.)*
 
 Also delete the stale commented-out line in `_setup_instance` (`seeder.py:266`):
 
