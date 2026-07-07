@@ -151,3 +151,97 @@ def test_hybrid_filter_is_warning_free_on_sqlmodel_session(session):
                 },
             }
         )
+
+
+import unittest
+
+
+class AsyncSQLModelTestCase(unittest.IsolatedAsyncioTestCase):
+    """AsyncSeeder against SQLModel's own AsyncSession subclass."""
+
+    async def test_async_seeder_with_sqlmodel_models(self):
+        from sqlalchemy.ext.asyncio import create_async_engine
+        from sqlmodel.ext.asyncio.session import AsyncSession
+
+        from sqlalchemyseed.aio import AsyncSeeder
+
+        engine = create_async_engine("sqlite+aiosqlite:///:memory:")
+        async with engine.begin() as conn:
+            await conn.run_sync(SQLModel.metadata.create_all)
+        session = AsyncSession(engine)
+        try:
+            seeder = AsyncSeeder(session)
+            await seeder.seed(
+                {
+                    "model": "tests.sqlmodel_models.Company",
+                    "data": {
+                        "name": "AsyncCo",
+                        "!employees": [{"data": {"name": "Async Alice"}}],
+                    },
+                }
+            )
+            await session.commit()
+
+            company = (await session.execute(select(Company))).scalar_one()
+            employee = (await session.execute(select(Employee))).scalar_one()
+            self.assertEqual(company.name, "AsyncCo")
+            self.assertEqual(employee.name, "Async Alice")
+        finally:
+            await session.close()
+            await engine.dispose()
+
+
+SQLMODEL_PLUGIN_CONFTEST = '''
+import pytest
+from sqlalchemy.pool import StaticPool
+from sqlmodel import SQLModel, create_engine
+
+import models  # registers the tables on SQLModel.metadata
+
+
+@pytest.fixture(scope="session")
+def engine():
+    eng = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    SQLModel.metadata.create_all(eng)
+    return eng
+'''
+
+SQLMODEL_PLUGIN_MODELS = '''
+from typing import Optional
+
+from sqlmodel import Field, SQLModel
+
+
+class Person(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    name: str
+'''
+
+
+def test_pytest_plugin_with_sqlmodel_engine(pytester):
+    pytester.makeconftest(SQLMODEL_PLUGIN_CONFTEST)
+    pytester.makepyfile(models=SQLMODEL_PLUGIN_MODELS)
+    pytester.makefile(
+        ".json",
+        people='{"model": "models.Person", "data": [{"name": "Alice"}]}',
+    )
+    pytester.makepyfile(
+        test_inner='''
+        from sqlalchemy import select
+        from models import Person
+
+        def test_it(seed, sqlalchemyseed_session):
+            seeder = seed("people.json")
+            people = sqlalchemyseed_session.scalars(select(Person)).all()
+            assert [p.name for p in people] == ["Alice"]
+            assert seeder.instances[0].name == "Alice"
+        '''
+    )
+    # Subprocess: keeps the inner models module and SQLModel's global
+    # metadata out of this process.
+    result = pytester.runpytest_subprocess()
+    result.assert_outcomes(passed=1)
