@@ -10,8 +10,9 @@ import sqlalchemy
 
 
 from . import errors, util, validator
-from .attribute import (attr_is_column, attr_is_relationship, foreign_key_column, instrumented_attribute,
-                        referenced_class, set_instance_attribute)
+from .attribute import (attr_is_column, attr_is_relationship, check_scalar_cardinality,
+                        foreign_key_column, instrumented_attribute, referenced_class,
+                        set_instance_attribute)
 from .constants import DATA_KEY, MODEL_KEY, SOURCE_KEYS
 from .json import JsonWalker
 
@@ -193,6 +194,8 @@ class Seeder:
             key = self._walker.current_key
             if key.startswith(self.ref_prefix):
                 attr_name = key[len(self.ref_prefix):]
+                check_scalar_cardinality(
+                    instance, attr_name, self._walker.json, self.strict)
                 self._current_parent = InstanceAttributeTuple(
                     instance, attr_name)
                 self._pre_seed()
@@ -270,6 +273,7 @@ class HybridSeeder(AbstractSeeder):
 
     def _seed_children(self, instance, kwargs):
         for attr_name, value in util.iter_ref_kwargs(kwargs, self.ref_prefix):
+            check_scalar_cardinality(instance, attr_name, value, self.strict)
             self._pre_seed(
                 entity=value, parent=InstanceAttributeTuple(instance, attr_name))
 
