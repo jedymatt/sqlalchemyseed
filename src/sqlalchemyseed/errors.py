@@ -6,10 +6,6 @@ class MissingKeyError(Exception):
     """Raised when a required key is missing"""
 
 
-class MaxLengthExceededError(Exception):
-    """Raised when maximum length of data exceeded"""
-
-
 class InvalidTypeError(Exception):
     """Raised when a type of data is not accepted"""
 
@@ -20,6 +16,12 @@ class EmptyDataError(Exception):
 
 class InvalidKeyError(Exception):
     """Raised when an invalid key is invoked"""
+
+
+# Deprecated alias: sqlalchemyseed<=2.4.0 raised MaxLengthExceededError for
+# entities with too many keys; those cases now raise InvalidKeyError. Kept so
+# existing imports and except clauses keep working.
+MaxLengthExceededError = InvalidKeyError
 
 
 class ParseError(Exception):

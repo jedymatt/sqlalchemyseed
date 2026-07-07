@@ -64,6 +64,45 @@ data.json
 }
 ```
 
+## Editor validation (JSON Schema)
+
+A JSON Schema for seed files ships with the package and lives in the repo at
+[`src/sqlalchemyseed/res/schema.json`](src/sqlalchemyseed/res/schema.json). Point
+your editor at it to get autocomplete and inline validation as you write fixtures.
+
+In the URLs below, replace `v2.4.0` with the version of sqlalchemyseed you have
+installed, so the editor validates against the same rules as your runtime.
+
+For YAML files, add a modeline as the first line:
+
+```yaml
+# yaml-language-server: $schema=https://raw.githubusercontent.com/jedymatt/sqlalchemyseed/v2.4.0/src/sqlalchemyseed/res/schema.json
+- model: models.Person
+  data:
+    name: John March
+    age: 23
+```
+
+For JSON files (which can't carry a modeline), associate the schema by glob in
+your editor settings, e.g. VS Code `.vscode/settings.json`:
+
+```json
+{
+    "yaml.schemas": {
+        "https://raw.githubusercontent.com/jedymatt/sqlalchemyseed/v2.4.0/src/sqlalchemyseed/res/schema.json": "seeds/**/*.yaml"
+    },
+    "json.schemas": [
+        {
+            "fileMatch": ["seeds/**/*.json"],
+            "url": "https://raw.githubusercontent.com/jedymatt/sqlalchemyseed/v2.4.0/src/sqlalchemyseed/res/schema.json"
+        }
+    ]
+}
+```
+
+The schema covers the full format including the `!` relationship prefix; the
+`filter` key it allows is only honored by `HybridSeeder`.
+
 ## Command-line usage
 
 Seed a database directly from data files without writing Python:

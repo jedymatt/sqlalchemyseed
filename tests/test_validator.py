@@ -2,7 +2,7 @@ import unittest
 from sqlalchemyseed import validator
 
 from src.sqlalchemyseed import errors
-from src.sqlalchemyseed.validator import SchemaValidator, Key, hybrid_validate
+from src.sqlalchemyseed.validator import SchemaValidator, Key, hybrid_validate, validate
 from tests import instances as ins
 
 
@@ -32,9 +32,32 @@ class TestSchemaValidator(unittest.TestCase):
         with self.assertRaises(errors.InvalidTypeError):
             hybrid_validate(ins.PARENT_INVALID_MODEL_INVALID)
 
-    def test_parent_with_extra_length_invalid(self):
-        with self.assertRaises(errors.MaxLengthExceededError):
-            hybrid_validate(ins.PARENT_WITH_EXTRA_LENGTH_INVALID)
+    def test_parent_with_unknown_key_invalid(self):
+        with self.assertRaises(errors.InvalidKeyError):
+            hybrid_validate(ins.PARENT_WITH_UNKNOWN_KEY_INVALID)
+
+    def test_parent_empty_dict(self):
+        self.assertIsNone(hybrid_validate(ins.PARENT_EMPTY_DICT))
+
+    def test_parent_with_non_string_attribute_invalid(self):
+        with self.assertRaises(errors.InvalidTypeError):
+            hybrid_validate(ins.PARENT_WITH_NON_STRING_ATTRIBUTE_INVALID)
+
+    def test_parent_with_data_and_filter_invalid(self):
+        with self.assertRaises(errors.InvalidKeyError):
+            hybrid_validate(ins.PARENT_WITH_DATA_AND_FILTER_INVALID)
+
+    def test_child_empty_dict_invalid(self):
+        with self.assertRaises(errors.MissingKeyError):
+            hybrid_validate(ins.PARENT_TO_CHILD_EMPTY_INVALID)
+
+    def test_child_with_unknown_key_invalid(self):
+        with self.assertRaises(errors.InvalidKeyError):
+            hybrid_validate(ins.PARENT_TO_CHILD_UNKNOWN_KEY_INVALID)
+
+    def test_basic_validate_rejects_filter_key(self):
+        with self.assertRaises(errors.InvalidKeyError):
+            validate(ins.BASIC_PARENT_WITH_FILTER_INVALID)
 
     def test_parent_with_empty_data(self):
         self.assertIsNone(hybrid_validate(ins.PARENT_WITH_EMPTY_DATA))

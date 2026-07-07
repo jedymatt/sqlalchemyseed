@@ -24,17 +24,60 @@ PARENT_INVALID_MODEL_INVALID = {
     'model': 9_999
 }
 
-PARENT_WITH_EXTRA_LENGTH_INVALID = {
+PARENT_WITH_EMPTY_DATA = {
+    'model': 'tests.models.Company',
+    'data': {}
+}
+
+PARENT_EMPTY_DICT = {}
+
+PARENT_WITH_UNKNOWN_KEY_INVALID = {
     'model': 'tests.models.Company',
     'data': {
         'name': 'My Company'
     },
-    'extra': 'extra value'
+    'flter': {}  # typo of 'filter' — an unknown key
 }
 
-PARENT_WITH_EMPTY_DATA = {
+PARENT_WITH_NON_STRING_ATTRIBUTE_INVALID = {
     'model': 'tests.models.Company',
-    'data': {}
+    'data': {
+        1: 'My Company'  # e.g. an unquoted numeric key in YAML
+    }
+}
+
+PARENT_WITH_DATA_AND_FILTER_INVALID = {
+    'model': 'tests.models.Company',
+    'data': {},
+    'filter': {}
+}
+
+PARENT_TO_CHILD_EMPTY_INVALID = {
+    'model': 'tests.models.Employee',
+    'data': {
+        'name': 'Juan Dela Cruz',
+        '!company': {}
+    }
+}
+
+PARENT_TO_CHILD_UNKNOWN_KEY_INVALID = {
+    'model': 'tests.models.Employee',
+    'data': {
+        'name': 'Juan Dela Cruz',
+        '!company': {
+            'data': {
+                'name': 'Juan Company'
+            },
+            'flter': {}  # unknown key on a child, within the 2-key budget
+        }
+    }
+}
+
+BASIC_PARENT_WITH_FILTER_INVALID = {
+    'model': 'tests.models.Company',
+    'filter': {
+        'name': 'My Company'
+    }
 }
 
 PARENT_WITHOUT_DATA_INVALID = {
