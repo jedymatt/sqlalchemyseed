@@ -16,7 +16,7 @@ Project Links: `Github`_ | `PyPI`_
 .. toctree::
     :maxdepth: 2
     :caption: Contents:
-    
+
     intro
     seeding
     relationships
@@ -24,6 +24,7 @@ Project Links: `Github`_ | `PyPI`_
     examples
     cli
     pytest
+    fastapi
 
 Indices and tables
 ==================

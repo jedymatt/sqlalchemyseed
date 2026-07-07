@@ -183,12 +183,15 @@ def engine():
 
 ```python
 # test_people.py
+from sqlalchemy import select
+
 from myapp.models import Person
 
 
 def test_people_are_seeded(seed, sqlalchemyseed_session):
     seeder = seed("tests/data/people.yaml")
-    assert sqlalchemyseed_session.query(Person).count() == 2
+    people = sqlalchemyseed_session.scalars(select(Person)).all()
+    assert len(people) == 2
     assert seeder.instances[0].name == "Alice"
 ```
 
