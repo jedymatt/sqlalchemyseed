@@ -294,10 +294,13 @@ class HybridSeeder(AbstractSeeder):
         else:
             instr_attr = None
 
-        self.session.flush()
-
         if instr_attr is not None and attr_is_column(instr_attr):
             column = foreign_key_column(instr_attr)
+            # select() of a raw Core column is not ORM-executed and skips the
+            # autoflush that legacy Query performed; flush pending rows so the
+            # filter can see them, honoring the session's autoflush setting.
+            if self.session.autoflush:
+                self.session.flush()
             return self.session.execute(
                 sqlalchemy.select(column).filter_by(**filtered_kwargs)
             ).one()[0]
