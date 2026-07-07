@@ -45,6 +45,9 @@ jobs:
           python-version: "3.10"
           enable-cache: true
       # --resolution lowest-direct pins every direct dependency to its lowest
-      # allowed version, which exercises the SQLAlchemy>=2.0 floor.
+      # allowed version, which exercises the SQLAlchemy>=2.0 floor. The
+      # sqlmodel group is excluded because sqlmodel's own SQLAlchemy pin would
+      # lift the resolved SQLAlchemy above 2.0.0, defeating the floor check;
+      # the sqlmodel compat tests skip themselves when sqlmodel is absent.
       - name: Run tests (lowest supported dependencies)
-        run: uv run --resolution lowest-direct pytest
+        run: uv run --resolution lowest-direct --no-group sqlmodel pytest
