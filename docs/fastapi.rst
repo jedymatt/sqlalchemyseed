@@ -170,9 +170,9 @@ Troubleshooting
 ---------------
 
 **Unknown attribute raises** ``AttributeError`` — a seed file naming an
-attribute the model does not have raises SQLModel's raw
-``AttributeError: <name>`` (plain declarative models raise ``TypeError``).
-Either way the fix is the same: correct the attribute name in the seed file.
+attribute the model does not have raises ``AttributeError`` for SQLModel
+and plain declarative models alike. The fix is the same either way:
+correct the attribute name in the seed file.
 
 **Forgot** ``table=True`` — a SQLModel class without ``table=True`` is not a
 mapped class; using it as a ``model`` raises ``UnsupportedClassError``. Add
