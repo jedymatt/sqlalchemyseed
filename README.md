@@ -64,6 +64,37 @@ data.json
 }
 ```
 
+## Works with SQLModel & FastAPI
+
+A [SQLModel](https://sqlmodel.tiangolo.com/) `table=True` class **is** a
+SQLAlchemy model, so sqlalchemyseed works with SQLModel and FastAPI out of the
+box — same seed files, same seeders, verified in CI:
+
+```python
+from typing import Optional
+
+from sqlmodel import Field, Session, SQLModel, create_engine
+
+from sqlalchemyseed import Seeder
+
+
+class Hero(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    name: str
+
+
+engine = create_engine("sqlite:///database.db")
+SQLModel.metadata.create_all(engine)
+
+with Session(engine) as session:
+    seeder = Seeder(session)
+    seeder.seed({"model": "app.models.Hero", "data": [{"name": "Deadpond"}]})
+    session.commit()
+```
+
+Seed at app startup, in tests via the bundled pytest plugin, or from the CLI —
+see the [FastAPI & SQLModel docs](https://sqlalchemyseed.readthedocs.io/en/latest/fastapi.html).
+
 ## Editor validation (JSON Schema)
 
 A JSON Schema for seed files ships with the package and lives in the repo at

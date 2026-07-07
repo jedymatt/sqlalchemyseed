@@ -8,7 +8,7 @@ license-files = ["LICENSE"]
 authors = [
     { name = "Jedy Matt Tabasco", email = "hello@jedymatt.dev" },
 ]
-keywords = ["sqlalchemy", "orm", "seed", "seeder", "json", "yaml"]
+keywords = ["sqlalchemy", "sqlmodel", "fastapi", "orm", "seed", "seeder", "json", "yaml"]
 classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
