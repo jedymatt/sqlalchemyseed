@@ -58,6 +58,11 @@ def check_scalar_cardinality(instance, attr_name, value, strict=False):
     element via repeated assignment — silent data loss. When ``value`` is a
     list of more than one item, this raises if ``strict`` else warns. A
     single-element list is left alone (assigning one element is correct).
+
+    This guard only inspects the child ``value`` itself: it does not detect
+    the equivalent last-wins case expressed as a nested ``data`` list (e.g.
+    ``{"!company": {"data": [{...}, {...}]}}``), which remains out of scope
+    for gap #4.
     """
     instr_attr = instrumented_attribute(instance, attr_name)
     if not attr_is_relationship(instr_attr):
@@ -72,7 +77,7 @@ def check_scalar_cardinality(instance, attr_name, value, strict=False):
     )
     if strict:
         raise errors.InvalidTypeError(message)
-    warnings.warn(message)
+    warnings.warn(message, stacklevel=2)
 
 
 @lru_cache()

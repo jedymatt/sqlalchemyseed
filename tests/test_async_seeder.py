@@ -102,6 +102,22 @@ class AsyncSeederTestCase(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(errors.InvalidTypeError):
             await seeder.seed(entities)
 
+    async def test_async_hybrid_strict_raises_on_scalar_list(self):
+        import sqlalchemyseed.errors as errors
+        entities = {
+            "model": "tests.models.Employee",
+            "data": {
+                "name": "Bob",
+                "!company": [
+                    {"model": "tests.models.Company", "data": {"name": "C0"}},
+                    {"model": "tests.models.Company", "data": {"name": "C1"}},
+                ],
+            },
+        }
+        seeder = AsyncHybridSeeder(self.session, strict=True)
+        with self.assertRaises(errors.InvalidTypeError):
+            await seeder.seed(entities)
+
 
 if __name__ == "__main__":
     unittest.main()

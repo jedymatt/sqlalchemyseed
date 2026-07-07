@@ -16,7 +16,10 @@ from .seeder import HybridSeeder, Seeder
 
 
 class AsyncSeeder:
-    """Async counterpart of :class:`~sqlalchemyseed.seeder.Seeder`."""
+    """Async counterpart of :class:`~sqlalchemyseed.seeder.Seeder`.
+
+    ``strict`` is forwarded as-is to the wrapped sync :class:`Seeder`.
+    """
 
     def __init__(self, session: AsyncSession, ref_prefix: str = "!", strict: bool = False):
         self.session = session
@@ -43,6 +46,8 @@ class AsyncHybridSeeder:
     The hybrid seeder issues queries (``filter`` keys) *during* the seed
     traversal, so it genuinely needs a live connection; ``run_sync`` supplies
     a real sync ``Session`` whose queries are proxied to the async driver.
+
+    ``strict`` is forwarded as-is to the wrapped sync :class:`HybridSeeder`.
     """
 
     def __init__(self, session: AsyncSession, ref_prefix: str = "!", strict: bool = False):

@@ -4,7 +4,7 @@ import warnings
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from sqlalchemyseed import Seeder, errors
+from sqlalchemyseed import HybridSeeder, Seeder, errors
 from tests.models import Base
 
 
@@ -61,6 +61,16 @@ class TestForgottenPrefixGuard(unittest.TestCase):
             seeder.seed(entity)
         company = seeder.instances[0]
         self.assertEqual({e.name for e in company.employees}, {"Bob"})
+
+    def test_hybrid_seeder_strict_true_raises(self):
+        seeder = HybridSeeder(self.Session(), strict=True)
+        with self.assertRaises(errors.InvalidKeyError):
+            seeder.seed(self._entity())
+
+    def test_hybrid_seeder_strict_false_warns(self):
+        seeder = HybridSeeder(self.Session(), strict=False)
+        with self.assertWarns(UserWarning):
+            seeder.seed(self._entity())
 
 
 class TestScalarCardinalityGuard(unittest.TestCase):

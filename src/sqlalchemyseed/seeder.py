@@ -80,7 +80,7 @@ def filter_kwargs(kwargs: dict, class_, ref_prefix, strict=False):
             )
             if strict:
                 raise errors.InvalidKeyError(message)
-            warnings.warn(message)
+            warnings.warn(message, stacklevel=2)
             continue
         result[k] = v
     return result
