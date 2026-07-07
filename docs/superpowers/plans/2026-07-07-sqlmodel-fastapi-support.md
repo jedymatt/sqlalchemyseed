@@ -12,7 +12,7 @@
 
 ## Global Constraints
 
-- Python floor: `>=3.10`. SQLAlchemy floor: `>=2.0`, and the min-deps CI job MUST keep resolving SQLAlchemy to 2.0.0 (verify in Task 1).
+- Python floor: `>=3.10`. SQLAlchemy floor: `>=2.0`. The min-deps CI job MUST NOT have its resolved SQLAlchemy lifted by the sqlmodel group (verify in Task 1). *Correction during execution:* the pre-existing baseline (measured at the plan commit, no sqlmodel anywhere) already resolves SQLAlchemy to **2.0.14** under `lowest-direct` on py3.10 — not 2.0.0 as originally written. The binding requirement is "same as baseline: 2.0.14", and that pre-existing 2.0.0→2.0.14 drift is repo debt outside this branch's scope.
 - `sqlmodel>=0.0.22`, **test dependency only** — never in `[project.dependencies]`, never as an extra.
 - No new runtime API; seed-file format, CLI, and pytest plugin behavior unchanged.
 - `HybridSeeder` filter semantics contract: zero matches → `NoResultFound`, multiple → `MultipleResultsFound` (`.one()`/`.scalar_one()` both satisfy this — verified empirically).
@@ -97,7 +97,7 @@ Run: `uv run pytest -q`
 Expected: `99 passed` (sqlmodel present, no compat tests yet).
 
 Run: `uv run --python 3.10 --resolution lowest-direct --no-group sqlmodel python -c "import sqlalchemy; print(sqlalchemy.__version__)"`
-Expected: `2.0.0` — the floor guarantee is intact.
+Expected: `2.0.14` — same as the pre-change baseline (measured at the plan commit with no sqlmodel group at all), i.e. the sqlmodel group causes no lift.
 
 Run: `uv run --python 3.10 --resolution lowest-direct --no-group sqlmodel pytest -q`
 Expected: `99 passed`.
