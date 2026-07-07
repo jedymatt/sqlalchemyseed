@@ -1,0 +1,3 @@
+# Placeholder so Sphinx html_static_path does not warn about a missing
+# directory. Drop custom CSS/JS/images here and they will be copied into the
+# built site.

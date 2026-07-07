@@ -2,8 +2,9 @@
 Async wrappers around the synchronous seeders.
 
 These bridge the existing sync-only seeder logic onto an ``AsyncSession``
-using :meth:`AsyncSession.run_sync`, which runs the sync code inside a
-greenlet where the driver's blocking I/O is translated into ``await`` calls.
+using :meth:`~sqlalchemy.ext.asyncio.AsyncSession.run_sync`, which runs the
+sync code inside a greenlet where the driver's blocking I/O is translated
+into ``await`` calls.
 No parallel async reimplementation of the traversal is needed.
 """
 
