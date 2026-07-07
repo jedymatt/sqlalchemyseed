@@ -158,7 +158,7 @@ see :doc:`async`:
 
     from sqlmodel.ext.asyncio.session import AsyncSession
 
-    from sqlalchemyseed import AsyncSeeder
+    from sqlalchemyseed import AsyncSeeder, load_entities_from_yaml
 
     async def seed_db(engine):
         async with AsyncSession(engine) as session:

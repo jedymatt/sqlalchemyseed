@@ -958,7 +958,11 @@ __version__ = "2.6.0"
 - [ ] **Step 5: Final full verification**
 
 Run: `uv sync && uv run pytest -q`
-Expected: `108 passed`.
+Expected: `108 passed`. *(Corrected during execution: an authorized out-of-plan
+bugfix in Task 2 — `util.get_model_class` raised its errors with kwargs that
+bare `Exception` subclasses reject — added `tests/test_util.py` (+2 tests), so
+the real totals are **110 passed** here and **101 passed, 1 skipped** for the
+min-deps run below.)*
 
 Run: `uv run --python 3.10 --resolution lowest-direct --no-group sqlmodel pytest -q`
 Expected: `99 passed, 1 skipped` — `pytest.importorskip` skips `tests/test_sqlmodel.py` at collection (one skip for the whole module). The requirement is 0 failed, 0 errors, with the sqlmodel tests skipping rather than failing.
