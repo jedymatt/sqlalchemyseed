@@ -105,10 +105,10 @@ def get_model_class(path: str):
         module_name, class_name = path.rsplit(".", 1)
         module = importlib.import_module(module_name)
     except (ImportError, AttributeError) as e:
-        raise errors.InvalidModelPath(path=path, error=e)
+        raise errors.InvalidModelPath(f"Invalid model path '{path}': {e}") from e
 
     class_ = getattr(module, class_name)
     if not is_model(class_):
-        raise errors.UnsupportedClassError(path=path)
+        raise errors.UnsupportedClassError(f"'{path}' is not a mapped SQLAlchemy class")
 
     return class_
