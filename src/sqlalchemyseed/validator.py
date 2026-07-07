@@ -103,10 +103,13 @@ class SchemaValidator:
         if not isinstance(entities, dict) and not isinstance(entities, list):
             raise errors.InvalidTypeError(
                 "Invalid type, should be list or dict")
-        # An empty dict is a malformed entity (missing 'model'/source key), so it
-        # must fall through to _validate. An empty list is simply "seed nothing"
-        # and iterates to a no-op below.
+        # An empty parent dict (or list) means "seed nothing" and stays valid
+        # for backward compatibility with placeholder seed files. An empty
+        # child dict is a malformed reference (missing 'model'/source key), so
+        # it falls through to _validate.
         if isinstance(entities, dict):
+            if len(entities) == 0 and entity_is_parent:
+                return
             return self._validate(entities, entity_is_parent)
         # iterate list
         for entity in entities:
@@ -133,6 +136,11 @@ class SchemaValidator:
             self.check_attributes(source_data)
 
     def check_attributes(self, source_data: dict):
+        for attr_name in source_data:
+            if not isinstance(attr_name, str):
+                raise errors.InvalidTypeError(
+                    f"Invalid attribute name {attr_name!r}, "
+                    "attribute names should be 'string'.")
         for _, value in util.iter_ref_kwargs(source_data, self._ref_prefix):
             self._pre_validate(value, entity_is_parent=False)
 

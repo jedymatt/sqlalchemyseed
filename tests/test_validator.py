@@ -36,9 +36,12 @@ class TestSchemaValidator(unittest.TestCase):
         with self.assertRaises(errors.InvalidKeyError):
             hybrid_validate(ins.PARENT_WITH_UNKNOWN_KEY_INVALID)
 
-    def test_parent_empty_dict_invalid(self):
-        with self.assertRaises(errors.MissingKeyError):
-            hybrid_validate(ins.PARENT_EMPTY_DICT_INVALID)
+    def test_parent_empty_dict(self):
+        self.assertIsNone(hybrid_validate(ins.PARENT_EMPTY_DICT))
+
+    def test_parent_with_non_string_attribute_invalid(self):
+        with self.assertRaises(errors.InvalidTypeError):
+            hybrid_validate(ins.PARENT_WITH_NON_STRING_ATTRIBUTE_INVALID)
 
     def test_parent_with_data_and_filter_invalid(self):
         with self.assertRaises(errors.InvalidKeyError):

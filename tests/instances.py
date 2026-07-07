@@ -24,27 +24,26 @@ PARENT_INVALID_MODEL_INVALID = {
     'model': 9_999
 }
 
-PARENT_WITH_EXTRA_LENGTH_INVALID = {
-    'model': 'tests.models.Company',
-    'data': {
-        'name': 'My Company'
-    },
-    'extra': 'extra value'
-}
-
 PARENT_WITH_EMPTY_DATA = {
     'model': 'tests.models.Company',
     'data': {}
 }
 
-PARENT_EMPTY_DICT_INVALID = {}
+PARENT_EMPTY_DICT = {}
 
 PARENT_WITH_UNKNOWN_KEY_INVALID = {
     'model': 'tests.models.Company',
     'data': {
         'name': 'My Company'
     },
-    'flter': {}  # typo of 'filter', within the 2-key budget after dropping 'data'
+    'flter': {}  # typo of 'filter' — an unknown key
+}
+
+PARENT_WITH_NON_STRING_ATTRIBUTE_INVALID = {
+    'model': 'tests.models.Company',
+    'data': {
+        1: 'My Company'  # e.g. an unquoted numeric key in YAML
+    }
 }
 
 PARENT_WITH_DATA_AND_FILTER_INVALID = {
