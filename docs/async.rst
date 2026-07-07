@@ -3,12 +3,13 @@ Async usage
 
 If your application uses an :class:`~sqlalchemy.ext.asyncio.AsyncSession`
 instead of a synchronous ``Session``, use the async seeders. ``AsyncSeeder``
-and ``AsyncHybridSeeder`` mirror :class:`~sqlalchemyseed.Seeder` and
-:class:`~sqlalchemyseed.HybridSeeder`: they accept the same entities and expose
-the same ``instances`` property, but their ``seed`` method is awaitable.
+and ``AsyncHybridSeeder`` mirror :class:`~sqlalchemyseed.seeder.Seeder` and
+:class:`~sqlalchemyseed.seeder.HybridSeeder`: they accept the same entities and
+expose the same ``instances`` property, but their ``seed`` method is awaitable.
 
 Under the hood they run the existing synchronous seeding logic through
-:meth:`AsyncSession.run_sync`, so a ``filter`` key still issues a real query --
+:meth:`~sqlalchemy.ext.asyncio.AsyncSession.run_sync`, so a ``filter`` key still
+issues a real query --
 executed against your async driver -- during the seed traversal.
 
 Installation
@@ -52,7 +53,8 @@ AsyncHybridSeeder
 -----------------
 
 Use ``AsyncHybridSeeder`` when the entities contain a ``filter`` key, just as
-you would reach for :class:`~sqlalchemyseed.HybridSeeder` in synchronous code.
+you would reach for :class:`~sqlalchemyseed.seeder.HybridSeeder` in synchronous
+code.
 
 .. code-block:: python
 
