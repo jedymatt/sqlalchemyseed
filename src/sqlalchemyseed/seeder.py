@@ -3,14 +3,16 @@ Seeder module
 """
 
 import abc
+import warnings
 from typing import NamedTuple, Union
 
 import sqlalchemy
 
 
 from . import errors, util, validator
-from .attribute import (attr_is_column, attr_is_relationship, foreign_key_column, instrumented_attribute,
-                        referenced_class, set_instance_attribute)
+from .attribute import (attr_is_column, attr_is_relationship, check_scalar_cardinality,
+                        foreign_key_column, instrumented_attribute, referenced_class,
+                        set_instance_attribute)
 from .constants import DATA_KEY, MODEL_KEY, SOURCE_KEYS
 from .json import JsonWalker
 
@@ -60,14 +62,28 @@ class InstanceAttributeTuple(NamedTuple):
     attr_name: str
 
 
-def filter_kwargs(kwargs: dict, class_, ref_prefix):
+def filter_kwargs(kwargs: dict, class_, ref_prefix, strict=False):
     """
-    Filters kwargs
+    Filters kwargs, dropping keys that name a relationship attribute.
+
+    A non-prefixed key that resolves to a relationship is a forgotten
+    ``ref_prefix`` (gap #3): such a key is silently ignored by the model
+    constructor. When ``strict`` is True this raises; otherwise it warns and
+    drops the key (preserving historical behavior).
     """
-    return {
-        k: v for k, v in util.iter_non_ref_kwargs(kwargs, ref_prefix)
-        if not attr_is_relationship(instrumented_attribute(class_, str(k)))
-    }
+    result = {}
+    for k, v in util.iter_non_ref_kwargs(kwargs, ref_prefix):
+        if attr_is_relationship(instrumented_attribute(class_, str(k))):
+            message = (
+                f"{str(k)!r} is a relationship attribute; "
+                f"did you mean {ref_prefix}{k}?"
+            )
+            if strict:
+                raise errors.InvalidKeyError(message)
+            warnings.warn(message, stacklevel=2)
+            continue
+        result[k] = v
+    return result
 
 
 class Seeder:
@@ -75,9 +91,10 @@ class Seeder:
     Basic Seeder class
     """
 
-    def __init__(self, session: sqlalchemy.orm.Session = None, ref_prefix="!"):
+    def __init__(self, session: sqlalchemy.orm.Session = None, ref_prefix="!", strict=False):
         self.session = session
         self.ref_prefix = ref_prefix
+        self.strict = strict
 
         self._instances: list = []
         self._walker: JsonWalker = JsonWalker()
@@ -148,7 +165,7 @@ class Seeder:
         # @lru_cache()
         def init_item():
             kwargs = self._walker.json
-            filtered_kwargs = filter_kwargs(kwargs, class_, self.ref_prefix)
+            filtered_kwargs = filter_kwargs(kwargs, class_, self.ref_prefix, self.strict)
             instance = class_(**filtered_kwargs)
 
             if self._current_parent is not None:
@@ -177,6 +194,8 @@ class Seeder:
             key = self._walker.current_key
             if key.startswith(self.ref_prefix):
                 attr_name = key[len(self.ref_prefix):]
+                check_scalar_cardinality(
+                    instance, attr_name, self._walker.json, self.strict)
                 self._current_parent = InstanceAttributeTuple(
                     instance, attr_name)
                 self._pre_seed()
@@ -189,10 +208,11 @@ class HybridSeeder(AbstractSeeder):
     HybridSeeder class. Accepts 'filter' key for referencing children.
     """
 
-    def __init__(self, session: sqlalchemy.orm.Session, ref_prefix: str = '!'):
+    def __init__(self, session: sqlalchemy.orm.Session, ref_prefix: str = '!', strict: bool = False):
         self.session = session
         self._instances = []
         self.ref_prefix = ref_prefix
+        self.strict = strict
         self._walker = JsonWalker()
         self._parent = None
 
@@ -253,11 +273,12 @@ class HybridSeeder(AbstractSeeder):
 
     def _seed_children(self, instance, kwargs):
         for attr_name, value in util.iter_ref_kwargs(kwargs, self.ref_prefix):
+            check_scalar_cardinality(instance, attr_name, value, self.strict)
             self._pre_seed(
                 entity=value, parent=InstanceAttributeTuple(instance, attr_name))
 
     def _setup_instance(self, class_, kwargs: dict, key: str, parent: InstanceAttributeTuple):
-        filtered_kwargs = filter_kwargs(kwargs, class_, self.ref_prefix)
+        filtered_kwargs = filter_kwargs(kwargs, class_, self.ref_prefix, self.strict)
 
         if key == DATA_KEY:
             instance = self._setup_data_instance(

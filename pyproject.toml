@@ -54,6 +54,7 @@ dev = [
     # backs SQLAlchemy's AsyncSession.run_sync bridge.
     "aiosqlite>=0.19",
     "greenlet>=3.0",
+    "jsonschema>=4.26.0",
 ]
 # Kept out of `dev` so the min-deps CI job can exclude it: resolving sqlmodel
 # under --resolution lowest-direct drags SQLAlchemy above 2.0.0 and the job
