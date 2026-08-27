@@ -9,12 +9,25 @@ authors = [
     { name = "Jedy Matt Tabasco", email = "hello@jedymatt.dev" },
 ]
 keywords = ["sqlalchemy", "sqlmodel", "fastapi", "orm", "seed", "seeder", "json", "yaml"]
+# No "License ::" classifier here on purpose: PEP 639 replaced it with the
+# SPDX `license` field above, and setuptools>=77 errors out if both are set.
 classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Framework :: AsyncIO",
+    "Framework :: FastAPI",
+    "Framework :: Pytest",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Topic :: Database",
+    "Topic :: Database :: Front-Ends",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Testing",
 ]
 dependencies = [
     "SQLAlchemy>=2.0",
