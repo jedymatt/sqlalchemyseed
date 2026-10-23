@@ -1,7 +1,7 @@
 # Documentation build dependencies.
 # See .readthedocs.yaml for how these are installed on Read the Docs.
 
-sphinx>=8.0
+sphinx>=8.1.3
 
 # Theme
 furo
